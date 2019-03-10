@@ -1,0 +1,83 @@
+version: "3.4"
+services:
+  web:
+    container_name: exemple-ecommerce-api
+    image: exemple-ecommerce-api
+    depends_on:
+    - cassandra
+    - zookeeper
+    networks:
+    - db
+    environment:
+    - CATALINA_OPTS="-Dlogback.configurationFile=file:/usr/local/tomcat/etc/logback.groovy"
+    - "JAVA_OPTS=-Xms256m -Xmx512m -XX:MetaspaceSize=128m"
+    ports:
+    - 8080:8080
+    - 5705:5705
+    volumes:
+    - ./conf/api:/usr/local/tomcat/etc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-H", "accept:application/json", "http://localhost:8080/ExempleEcommerce/ws/health"]
+      interval: 30s
+      start_period: 30s
+  authorization:
+    container_name: exemple-ecommerce-authorization
+    image: exemple-ecommerce-authorization
+    depends_on:
+    - cassandra
+    - zookeeper
+    networks:
+    - db
+    environment:
+    - CATALINA_OPTS="-Dlogging.config=file:/usr/local/tomcat/etc/logback.groovy"
+    - "JAVA_OPTS=-Xms256m -Xmx512m -XX:MetaspaceSize=128m"
+    ports:
+    - 8084:8080
+    volumes:
+    - ./conf/authorization:/usr/local/tomcat/etc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-H", "accept:application/json", "http://localhost:8080/ExempleAuthorization/actuator/health"]
+      interval: 30s
+      start_period: 30s
+  cassandra:
+    container_name: exemple-ecommerce-db
+    image: exemple-ecommerce-db
+    networks:
+    - db
+    environment:
+    - HEAP_NEWSIZE=1M
+    - MAX_HEAP_SIZE=512m
+    ports:
+    - 9042:9042
+    volumes:
+    - ./exemple-ecommerce-api-integration/src/test/resources/cassandra:/usr/local/tmp/cassandra
+    - ./conf/cassandra:/usr/local/etc/cassandra
+    healthcheck:
+      test: ["CMD", "sh", "/usr/local/etc/cassandra/healthcheck_cassandra.sh"]
+      interval: 30s
+      start_period: 30s
+  zookeeper:
+    container_name: exemple-ecommerce-zookeeper
+    image: zookeeper:3.5.4-beta
+    restart: always
+    networks:
+    - db
+    ports:
+    - 10024:2181
+    hostname: zookeeper
+  kafka:
+    container_name: exemple-ecommerce-kafka
+    image: wurstmeister/kafka:2.12-2.1.0
+    networks:
+    - db
+    ports:
+    - 10025:9092
+    depends_on:
+    - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:10024
+      KAFKA_ADVERTISED_PORT: 9092
+networks:
+  db:
+    driver: bridge

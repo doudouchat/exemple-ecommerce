@@ -1,0 +1,22 @@
+resource:
+   cassandra:
+      addresses: ${cassandra.host}
+      port: ${cassandra.nativeTransportPort}
+   hazelcast:
+      port: ${hazelcast.port}
+      member: 127.0.0.1:${hazelcast.port}
+authorization:
+   hazelcast:
+      port: ${hazelcast.port}
+      member: 127.0.0.1:${hazelcast.port}
+   zookeeper:
+      host: 127.0.0.1:${zmp.clientPort}
+store:
+   zookeeper:
+      host: 127.0.0.1:${zmp.clientPort}
+application:
+   zookeeper:
+      host: 127.0.0.1:${zmp.clientPort}
+api:
+   authorization:
+      path: ${authorization.host}:${application.port}/${authorization.contextpath}

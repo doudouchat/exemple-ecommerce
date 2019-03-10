@@ -1,0 +1,16 @@
+resource:
+   cassandra:
+      addresses: 172.17.0.1
+      port: 9042
+   hazelcast:
+      port: 5705
+      member: 172.17.0.1:5705
+authorization:
+   hazelcast:
+      port: 5075
+      member: 172.17.0.1:5075
+   zookeeper:
+      host: 172.17.0.1:10024
+application:
+   zookeeper:
+      host: 172.17.0.1:10024

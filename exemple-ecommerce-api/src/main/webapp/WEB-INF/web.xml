@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	      http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+
+	<display-name>web services ecommerce</display-name>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>web services ecommerce</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+	</security-constraint>
+
+	<context-param>
+		<param-name>spring.profiles.default</param-name>
+		<param-value>production</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>contextClass</param-name>
+		<param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>com.exemple.ecommerce.api.core.ApiConfiguration com.exemple.ecommerce.event.core.EventConfiguration com.exemple.ecommerce.schema.core.SchemaConfiguration com.exemple.ecommerce.application.core.ApplicationConfiguration com.exemple.ecommerce.customer.core.CustomerConfiguration com.exemple.ecommerce.store.core.StoreConfiguration com.exemple.ecommerce.resource.core.ResourceConfiguration</param-value>
+	</context-param>
+
+	<!-- SPRING SECURITY -->
+
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- SERVLET -->
+
+	<servlet>
+		<servlet-name>dispatcher</servlet-name>
+		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+		<init-param>
+			<param-name>jersey.config.server.provider.packages</param-name>
+			<param-value>com.exemple.ecommerce.api.core.actuate</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.application.name</param-name>
+			<param-value>JSP ecommerce</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.provider.classnames</param-name>
+			<param-value>org.glassfish.jersey.server.mvc.jsp.JspMvcFeature,org.glassfish.jersey.logging.LoggingFeature</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.logging.logger.level</param-name>
+			<param-value>FINE</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.logging.verbosity</param-name>
+			<param-value>PAYLOAD_ANY</param-value>
+		</init-param>
+		<init-param>
+			<param-name>jersey.config.server.mvc.templateBasePath.jsp</param-name>
+			<param-value>/WEB-INF/pages</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>dispatcher</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<!-- ENCODAGE -->
+
+	<filter>
+		<filter-name>characterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>characterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+</web-app>

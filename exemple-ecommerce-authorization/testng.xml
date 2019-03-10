@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="authorization" parallel="false">
+	<test name="ut core">
+		<packages>
+			<package name="com.exemple.ecommerce.authorization.core.cors" />
+			<package name="com.exemple.ecommerce.authorization.core.swagger" />
+		</packages>
+		<classes>
+			<class name="com.exemple.ecommerce.authorization.core.AuthorizationServerApplicationTest" />
+		</classes>
+	</test>
+	<test name="oauth2 code grant">
+		<classes>
+			<class name="com.exemple.ecommerce.authorization.core.AuthorizationCodeTest" />
+		</classes>
+	</test>
+	<test name="oauth2 implicit">
+		<classes>
+			<class name="com.exemple.ecommerce.authorization.core.AuthorizationImplicitTest" />
+		</classes>
+	</test>
+	<test name="oauth2 credentials">
+		<classes>
+			<class name="com.exemple.ecommerce.authorization.core.AuthorizationCredentialsTest" />
+		</classes>
+	</test>
+	<test name="oauth2 password">
+		<classes>
+			<class name="com.exemple.ecommerce.authorization.core.AuthorizationPasswordTest" />
+		</classes>
+	</test>
+</suite>

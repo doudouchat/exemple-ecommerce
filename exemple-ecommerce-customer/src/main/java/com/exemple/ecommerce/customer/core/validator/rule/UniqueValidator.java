@@ -1,0 +1,43 @@
+package com.exemple.ecommerce.customer.core.validator.rule;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.exemple.ecommerce.customer.login.LoginService;
+import com.exemple.ecommerce.schema.common.exception.ValidationException;
+import com.exemple.ecommerce.schema.common.exception.ValidationException.ValidationExceptionModel;
+import com.exemple.ecommerce.schema.core.validator.ValidatorService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+
+@Component
+public class UniqueValidator implements ValidatorService {
+
+    @Autowired
+    private LoginService loginService;
+
+    @Override
+    public void validate(String path, JsonNode form, JsonNode old, ValidationException validationException) {
+
+        JsonNode unique = form.at(path);
+
+        if (JsonNodeType.STRING == unique.getNodeType() && !validationException.contains(path)) {
+
+            JsonNode oldUnique = null;
+            if (old != null) {
+                oldUnique = old.at(path);
+            }
+
+            if ((oldUnique == null || !unique.equals(oldUnique)) && loginService.exist(unique.textValue())) {
+
+                ValidationExceptionModel exception = new ValidationExceptionModel(path, "unique",
+                        "[".concat(unique.textValue()).concat("] already exists"));
+
+                validationException.add(exception);
+
+            }
+        }
+
+    }
+
+}

@@ -1,0 +1,875 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>exemple</groupId>
+	<artifactId>exemple-ecommerce</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<organization>
+		<name>EXEMPLE</name>
+	</organization>
+
+	<modules>
+		<module>exemple-ecommerce-resource</module>
+		<module>exemple-ecommerce-schema</module>
+		<module>exemple-ecommerce-event</module>
+		<module>exemple-ecommerce-application</module>
+		<module>exemple-ecommerce-customer</module>
+		<module>exemple-ecommerce-store</module>
+		<module>exemple-ecommerce-authorization</module>
+		<module>exemple-ecommerce-api</module>
+		<module>exemple-ecommerce-api-integration</module>
+	</modules>
+
+	<properties>
+
+		<!-- TIME FORMAT -->
+
+		<maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
+
+		<!-- VERSION -->
+
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<java-version>1.8</java-version>
+		<org.springframework-version>5.1.5.RELEASE</org.springframework-version>
+		<org.springframework.security-version>5.1.4.RELEASE</org.springframework.security-version>
+		<org.springframework.batch-version>4.0.1.RELEASE</org.springframework.batch-version>
+		<org.slf4j-version>1.7.26</org.slf4j-version>
+		<groovy-version>2.5.6</groovy-version>
+		<zookeeper-version>3.5.4-beta</zookeeper-version>
+		<!-- SONAR -->
+
+		<!-- force sonar to use jacoco -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<!-- property checked by sonar to locate jacoco UT/IT reports -->
+		<sonar.jacoco.reportPaths>${project.build.directory}/reports/jacoco-ut.exec</sonar.jacoco.reportPaths>
+		<sonar.jacoco.itReportPath>${project.build.directory}/../../target/reports/exemple-ecommerce.exec</sonar.jacoco.itReportPath>
+
+		<project.scm.id>
+			scm-server
+		</project.scm.id>
+
+	</properties>
+
+	<dependencyManagement>
+
+		<dependencies>
+
+			<!-- SPRING FRAMEWORK -->
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${org.springframework-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-web</artifactId>
+				<version>${org.springframework-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${org.springframework-version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- SPRING SECURITY -->
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-web</artifactId>
+				<version>${org.springframework.security-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-config</artifactId>
+				<version>${org.springframework.security-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-taglibs</artifactId>
+				<version>${org.springframework.security-version}</version>
+			</dependency>
+
+			<!-- SPRING OAUTH 2 -->
+
+			<dependency>
+				<groupId>org.springframework.security.oauth</groupId>
+				<artifactId>spring-security-oauth2</artifactId>
+				<version>2.3.5.RELEASE</version>
+			</dependency>
+
+			<!-- SPRING JWT -->
+
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-jwt</artifactId>
+				<version>1.0.10.RELEASE</version>
+			</dependency>
+
+			<!-- SPRING KAFKA -->
+			<!-- https://spring.io/projects/spring-kafka -->
+
+			<dependency>
+				<groupId>org.springframework.kafka</groupId>
+				<artifactId>spring-kafka</artifactId>
+				<version>2.2.4.RELEASE</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.kafka</groupId>
+				<artifactId>spring-kafka-test</artifactId>
+				<version>2.2.4.RELEASE</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- JWT TOKEN -->
+			<!-- https://github.com/auth0/java-jwt -->
+
+			<dependency>
+				<groupId>com.auth0</groupId>
+				<artifactId>java-jwt</artifactId>
+				<version>3.7.0</version>
+			</dependency>
+
+			<!-- BCRYPT -->
+
+			<!-- https://www.mindrot.org/projects/jBCrypt/ -->
+			<dependency>
+				<groupId>org.mindrot</groupId>
+				<artifactId>jbcrypt</artifactId>
+				<version>0.4</version>
+			</dependency>
+
+			<!-- JERSEY -->
+
+			<dependency>
+				<groupId>org.glassfish.jersey</groupId>
+				<artifactId>jersey-bom</artifactId>
+				<version>2.28</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- SERVLET -->
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>jstl</groupId>
+				<artifactId>jstl</artifactId>
+				<version>1.2</version>
+			</dependency>
+
+			<!-- JSR303 -->
+
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.hibernate.validator</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>6.0.15.Final</version>
+			</dependency>
+
+			<!-- JAVAX EL -->
+
+			<dependency>
+				<groupId>javax.el</groupId>
+				<artifactId>javax.el-api</artifactId>
+				<version>3.0.1-b06</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.el</artifactId>
+				<version>3.0.1-b11</version>
+			</dependency>
+
+			<!-- DATASTAX -->
+
+			<dependency>
+				<groupId>com.datastax.cassandra</groupId>
+				<artifactId>cassandra-driver-core</artifactId>
+				<version>3.7.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.datastax.cassandra</groupId>
+				<artifactId>cassandra-driver-extras</artifactId>
+				<version>3.7.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.datastax.cassandra</groupId>
+				<artifactId>cassandra-driver-mapping</artifactId>
+				<version>3.7.1</version>
+			</dependency>
+
+			<!-- HAZELCAST -->
+
+			<dependency>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast</artifactId>
+				<version>3.11.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast-client</artifactId>
+				<version>3.11.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.hazelcast</groupId>
+				<artifactId>hazelcast-spring</artifactId>
+				<version>3.11.2</version>
+			</dependency>
+
+			<!-- ZOOKEEPER -->
+
+			<!-- https://zookeeper.apache.org/doc/current/index.html -->
+			<dependency>
+				<groupId>org.apache.zookeeper</groupId>
+				<artifactId>zookeeper</artifactId>
+				<version>${zookeeper-version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>log4j</groupId>
+						<artifactId>log4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- CURATOR -->
+
+			<!-- https://curator.apache.org -->
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-recipes</artifactId>
+				<version>4.2.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.zookeeper</groupId>
+						<artifactId>zookeeper</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.curator</groupId>
+				<artifactId>curator-test</artifactId>
+				<version>4.2.0</version>
+				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.zookeeper</groupId>
+						<artifactId>zookeeper</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- JSON PATCH -->
+
+			<!-- https://github.com/flipkart-incubator/zjsonpatch -->
+			<dependency>
+				<groupId>com.flipkart.zjsonpatch</groupId>
+				<artifactId>zjsonpatch</artifactId>
+				<version>0.4.7</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.fasterxml.jackson.core</groupId>
+						<artifactId>jackson-core</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- JSON SCHEMA -->
+
+			<dependency>
+				<groupId>com.github.everit-org.json-schema</groupId>
+				<artifactId>org.everit.json.schema</artifactId>
+				<version>1.11.0</version>
+			</dependency>
+
+			<!-- JSON FILTER -->
+
+			<!-- https://github.com/bohnman/squiggly-java -->
+			<dependency>
+				<groupId>com.github.bohnman</groupId>
+				<artifactId>squiggly-filter-jackson</artifactId>
+				<version>1.3.16</version>
+			</dependency>
+
+			<!-- COMMONS APACHE -->
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.8.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-text</artifactId>
+				<version>1.6</version>
+			</dependency>
+
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.6</version>
+			</dependency>
+
+			<!-- GOOGLE GUAVA -->
+
+			<!-- https://github.com/google/guava -->
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>27.0.1-jre</version>
+			</dependency>
+
+			<!-- JSOUP -->
+
+			<!-- https://jsoup.org/ -->
+			<dependency>
+				<groupId>org.jsoup</groupId>
+				<artifactId>jsoup</artifactId>
+				<version>1.11.3</version>
+			</dependency>
+
+			<!-- FASTER JACKSON -->
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.9.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.jaxrs</groupId>
+				<artifactId>jackson-jaxrs-json-provider</artifactId>
+				<version>2.9.8</version>
+			</dependency>
+
+			<!-- ASPECTJ -->
+
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjrt</artifactId>
+				<version>1.9.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>1.9.2</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<!-- YAML -->
+
+			<!-- http://www.snakeyaml.org -->
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>1.24</version>
+			</dependency>
+
+			<!-- JCABI -->
+
+			<dependency>
+				<groupId>com.jcabi</groupId>
+				<artifactId>jcabi-manifests</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<!-- SWAGGER -->
+
+			<!-- https://github.com/swagger-api/swagger-core/wiki/Swagger-2.X -->
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2</artifactId>
+				<version>2.0.7</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>2.0.7</version>
+			</dependency>
+
+			<!-- MOCKITO -->
+
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>2.25.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- ACHILLE -->
+
+			<dependency>
+				<groupId>info.archinnov</groupId>
+				<artifactId>achilles-embedded</artifactId>
+				<version>6.0.1</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- LOGGING -->
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${org.slf4j-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${org.slf4j-version}</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+				<version>${org.slf4j-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-classic</artifactId>
+				<version>1.2.3</version>
+				<scope>runtime</scope>
+			</dependency>
+
+			<!-- TESTNG -->
+
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.14.3</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- HAMCREST -->
+
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-all</artifactId>
+				<version>1.3</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- https://github.com/FDMediagroep/hamcrest-jackson -->
+			<dependency>
+				<groupId>nl.fd</groupId>
+				<artifactId>hamcrest-jackson</artifactId>
+				<version>1.0.5</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- REST ASSURED -->
+
+			<!-- http://rest-assured.io/ -->
+			<dependency>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>3.3.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- JSON PATH -->
+
+			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path</artifactId>
+				<version>2.4.0</version>
+			</dependency>
+
+			<!-- GROOVY -->
+
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy</artifactId>
+				<version>${groovy-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-json</artifactId>
+				<version>${groovy-version}</version>
+			</dependency>
+
+			<!-- ASSERTJ -->
+
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>3.12.1</version>
+				<scope>test</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+
+		<!-- LOGGING -->
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jul-to-slf4j</artifactId>
+		</dependency>
+
+		<!-- LOGBACK -->
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+		</dependency>
+
+		<!-- YAML -->
+
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+		</dependency>
+
+		<!-- TESTNG -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!-- COMPILATION -->
+				<!-- http://maven.apache.org/plugins/maven-compiler-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.0</version>
+					<configuration>
+						<source>${java-version}</source>
+						<target>${java-version}</target>
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+				</plugin>
+
+				<!-- RESSOURCES -->
+				<!-- http://maven.apache.org/plugins/maven-resources-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.1.0</version>
+					<configuration>
+						<encoding>${project.build.sourceEncoding}</encoding>
+					</configuration>
+				</plugin>
+
+				<!-- WAR -->
+				<!-- http://maven.apache.org/plugins/maven-war-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.2.2</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-By>${project.organization.name}</Built-By>
+								<Build-Time>${maven.build.timestamp}</Build-Time>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<!-- JAR -->
+				<!-- http://maven.apache.org/plugins/maven-jar-plugin/index.html -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.1.0</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<manifestEntries>
+								<Built-By>${project.organization.name}</Built-By>
+								<Build-Time>${maven.build.timestamp}</Build-Time>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+
+				<!-- TEST UNITAIRE -->
+				<!-- http://maven.apache.org/plugins/maven-surefire-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.0.0-M2</version>
+					<configuration>
+						<suiteXmlFiles>
+							<suiteXmlFile>testng.xml</suiteXmlFile>
+						</suiteXmlFiles>
+						<argLine>${jacoco.test.agent.argLine}</argLine>
+					</configuration>
+				</plugin>
+
+				<!-- VERSION -->
+				<!-- https://www.mojohaus.org/versions-maven-plugin/index.html -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>versions-maven-plugin</artifactId>
+					<version>2.7</version>
+					<configuration>
+						<outputFile>${project.build.directory}/outdated-dependencies.txt</outputFile>
+					</configuration>
+				</plugin>
+
+				<!-- JACOCO -->
+				<!-- http://www.eclemma.org/jacoco/trunk/doc/maven.html -->
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.8.2</version>
+					<executions>
+						<execution>
+							<id>prepare-jacoco-ut-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+							<phase>process-test-classes</phase>
+							<configuration>
+								<propertyName>jacoco.test.agent.argLine</propertyName>
+								<destFile>${sonar.jacoco.reportPaths}</destFile>
+							</configuration>
+						</execution>
+						<execution>
+							<id>prepare-jacoco-integration-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+							<phase>pre-integration-test</phase>
+							<configuration>
+								<propertyName>jacoco.it.agent.argLine</propertyName>
+								<destFile>${sonar.jacoco.itReportPath}</destFile>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- MAVEN ASSEMBLY -->
+				<!-- http://maven.apache.org/plugins/maven-assembly-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+
+				<!-- RELEASE -->
+				<!-- http://maven.apache.org/maven-release/maven-release-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5.3</version>
+				</plugin>
+
+				<!-- CLEAN FILE -->
+				<!-- http://maven.apache.org/plugins/maven-clean-plugin/ -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+
+				<!-- CASSANDRA -->
+				<!-- http://www.mojohaus.org/cassandra-maven-plugin/index.html -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cassandra-maven-plugin</artifactId>
+					<version>3.6</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.cassandra</groupId>
+							<artifactId>cassandra-all</artifactId>
+							<version>3.11.4</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+				<!-- ZOOKEEPER -->
+				<!-- https://code.revelc.net/zookeeper-maven-plugin/index.html -->
+				<plugin>
+					<groupId>net.revelc.code</groupId>
+					<artifactId>zookeeper-maven-plugin</artifactId>
+					<version>1.1.0</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.zookeeper</groupId>
+							<artifactId>zookeeper</artifactId>
+							<version>${zookeeper-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+				<!-- GROOVY -->
+				<!-- http://groovy.github.io/GMavenPlus/index.html -->
+				<plugin>
+					<groupId>org.codehaus.gmavenplus</groupId>
+					<artifactId>gmavenplus-plugin</artifactId>
+					<version>1.6.2</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.codehaus.groovy</groupId>
+							<artifactId>groovy</artifactId>
+							<version>${groovy-version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
+				<!-- HELPER -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
+
+				<!-- ENFORCER -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.0.0-M2</version>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<!-- COMPILATION -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+
+			<!-- RESSOURCES -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+			</plugin>
+
+			<!-- TEST UNITAIRE -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+			</plugin>
+
+			<!-- JACOCO -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>com.exemple.ecommerce.*</include>
+					</includes>
+				</configuration>
+			</plugin>
+
+			<!-- HELPER -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+			</plugin>
+
+			<!-- RELEASE -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+			</plugin>
+
+			<!-- JAR -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+
+			<!-- ENFORCER -->
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>3.5.4</version>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+
+
+</project>

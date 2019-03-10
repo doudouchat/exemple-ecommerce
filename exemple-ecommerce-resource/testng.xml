@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="resource" parallel="false">
+	<test name="ut">
+		<packages>
+			<package name="com.exemple.ecommerce.resource.common" />
+			<package name="com.exemple.ecommerce.resource.account" />
+			<package name="com.exemple.ecommerce.resource.login" />
+			<package name="com.exemple.ecommerce.resource.schema" />
+			<package name="com.exemple.ecommerce.resource.stock" />
+		</packages>
+	</test>
+</suite>

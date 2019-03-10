@@ -1,0 +1,19 @@
+resource:
+   cassandra:
+      addresses: 172.17.0.1
+      port: 9042
+   hazelcast:
+      port: 5705
+      member: 127.0.0.1:5705
+store:
+   zookeeper:
+      host: 172.17.0.1:10024
+application:
+   zookeeper:
+      host: 172.17.0.1:10024
+api:
+   authorization:
+      path: http://172.17.0.1:8084/ExempleAuthorization
+   swagger:
+      authorization:
+         path: http://localhost:8084/ExempleAuthorization
