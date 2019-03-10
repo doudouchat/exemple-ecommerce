@@ -1,1 +1,14 @@
-# exemple-ecommerce
+docker build -t exemple-ecommerce-api exemple-ecommerce-api
+docker build -t exemple-ecommerce-authorization exemple-ecommerce-authorization
+docker build -t exemple-ecommerce-db exemple-ecommerce-api-integration
+
+docker-compose up -d zookeeper
+docker-compose up -d kafka
+docker-compose up -d cassandra
+docker-compose up -d web
+docker-compose up -d authorization
+
+docker-compose exec cassandra cqlsh --debug -f /usr/local/tmp/cassandra/schema.cql
+docker-compose exec cassandra cqlsh --debug -f /usr/local/tmp/cassandra/exec.cql
+
+docker-compose exec web cat logs/localhost.2018-08-24.log
