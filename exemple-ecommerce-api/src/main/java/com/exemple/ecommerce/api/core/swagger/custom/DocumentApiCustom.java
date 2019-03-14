@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
@@ -52,24 +53,25 @@ public class DocumentApiCustom extends AbstractSpecFilter {
 
         if (mediaType != null) {
 
-            String name = mediaType.getSchema().get$ref().substring("#/components/schemas/".length());
-            List<String> versions = headers.get(DocumentApiResource.RESOURCE + name.toLowerCase(Locale.getDefault()));
-            if (versions != null) {
+            String name = StringUtils.substring(mediaType.getSchema().get$ref(), "#/components/schemas/".length());
+            headers.entrySet().stream()
 
-                ComposedSchema composedSchema = new ComposedSchema();
+                    .filter((Map.Entry<String, List<String>> header) -> StringUtils.equalsAnyIgnoreCase(header.getKey(),
+                            DocumentApiResource.RESOURCE + name))
+                    .forEach((Map.Entry<String, List<String>> header) -> {
 
-                versions.forEach((String version) -> {
+                        ComposedSchema composedSchema = new ComposedSchema();
 
-                    Schema<?> schema = new Schema<>();
-                    schema.$ref("#/components/schemas/".concat(name + '.' + version));
-                    composedSchema.addOneOfItem(schema);
+                        header.getValue().forEach((String version) -> {
 
-                });
+                            Schema<?> schema = new Schema<>();
+                            schema.$ref("#/components/schemas/".concat(name + '.' + version));
+                            composedSchema.addOneOfItem(schema);
 
-                mediaType.schema(composedSchema);
+                        });
 
-            }
-
+                        mediaType.schema(composedSchema);
+                    });
         }
 
     }
@@ -117,27 +119,27 @@ public class DocumentApiCustom extends AbstractSpecFilter {
 
         String host = headers.get(DocumentApiResource.APP_HOST).stream().findFirst().orElseThrow(IllegalArgumentException::new);
 
-        headers.forEach((String resource, List<String> versions) -> {
+        headers.entrySet().stream()
 
-            if (resource.startsWith(DocumentApiResource.RESOURCE)) {
+                .filter((Map.Entry<String, List<String>> header) -> StringUtils.startsWith(header.getKey(), DocumentApiResource.RESOURCE))
+                .forEach((Map.Entry<String, List<String>> header) -> {
 
-                String name = resource.substring(DocumentApiResource.RESOURCE.length());
+                    String name = header.getKey().substring(DocumentApiResource.RESOURCE.length());
 
-                versions.forEach((String version) -> {
+                    header.getValue().forEach((String version) -> {
 
-                    Map<String, Object> extensions = new HashMap<>();
-                    extensions.put(X_VERSION, version);
+                        Map<String, Object> extensions = new HashMap<>();
+                        extensions.put(X_VERSION, version);
 
-                    Schema<?> schema = new Schema<>();
-                    schema.setName(name);
-                    schema.setExtensions(extensions);
+                        Schema<?> schema = new Schema<>();
+                        schema.setName(name);
+                        schema.setExtensions(extensions);
 
-                    openAPI.getComponents().addSchemas(WordUtils.capitalize(name) + '.' + version, schema);
+                        openAPI.getComponents().addSchemas(WordUtils.capitalize(name) + '.' + version, schema);
+
+                    });
 
                 });
-
-            }
-        });
 
         openAPI.getServers().stream().findFirst().ifPresent((Server server) -> {
 
