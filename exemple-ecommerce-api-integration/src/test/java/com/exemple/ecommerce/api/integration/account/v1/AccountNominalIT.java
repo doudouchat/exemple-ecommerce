@@ -3,7 +3,6 @@ package com.exemple.ecommerce.api.integration.account.v1;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,12 +104,9 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
                 .body(accountBody).post(ACCOUNT_URL);
 
-        assertThat(response.jsonPath().getString("civility"), is(accountBody.get("civility")));
-        assertThat(response.jsonPath().getString("lastname"), is(accountBody.get("lastname")));
-        assertThat(response.jsonPath().getString("firstname"), is(accountBody.get("firstname")));
-        assertThat(response.jsonPath().getString("email"), is(accountBody.get("email")));
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED.value()));
 
-        ID = UUID.fromString(response.jsonPath().getString("id"));
+        ID = UUID.fromString(response.getHeader("Location").substring(response.getHeader("Location").lastIndexOf('/') + 1));
 
     }
 
@@ -231,9 +227,7 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
                 .header("Authorization", "Bearer " + ACCESS_TOKEN).body(patchs).patch(ACCOUNT_URL + "/{id}", ID);
 
-        assertThat(response.jsonPath().getString("lastname"), is(patch0.get("value")));
-        assertThat(response.jsonPath().getString("firstname"), is(patch1.get("value")));
-        assertThat(response.jsonPath().getString("civility"), is(nullValue()));
+        assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT.value()));
 
         Response responseGet = JsonRestTemplate.given()
 

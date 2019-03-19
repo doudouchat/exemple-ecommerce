@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -119,8 +120,7 @@ public class AccountApiTest extends JerseySpringSupport {
         Mockito.verify(service).save(Mockito.eq(id), Mockito.any(JsonNode.class));
         Mockito.verify(service).get(Mockito.eq(id));
 
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.getEntity(), is(notNullValue()));
+        assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
 
     }
 
@@ -152,7 +152,9 @@ public class AccountApiTest extends JerseySpringSupport {
     @Test
     public void create() throws Exception {
 
-        Mockito.when(service.save(Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.init("id"));
+        UUID id = UUID.randomUUID();
+
+        Mockito.when(service.save(Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.create(Collections.singletonMap("id", id)));
 
         Response response = target(URL).request(MediaType.APPLICATION_JSON)
 
@@ -162,8 +164,9 @@ public class AccountApiTest extends JerseySpringSupport {
 
         Mockito.verify(service).save(Mockito.any(JsonNode.class));
 
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.getEntity(), is(notNullValue()));
+        assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
+        URI baseUri = target(URL).getUri();
+        assertThat(response.getLocation(), is(URI.create(baseUri + "/" + id)));
 
     }
 

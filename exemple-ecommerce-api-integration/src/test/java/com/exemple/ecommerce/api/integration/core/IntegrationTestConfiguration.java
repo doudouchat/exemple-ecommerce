@@ -65,6 +65,7 @@ public class IntegrationTestConfiguration {
         detail.setCompany("test_company");
 
         Set<String> filter = new HashSet<>();
+        filter.add("id");
         filter.add("lastname");
         filter.add("firstname");
         filter.add("email");

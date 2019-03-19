@@ -1,5 +1,6 @@
 package com.exemple.ecommerce.api.account;
 
+import java.net.URI;
 import java.util.UUID;
 
 import javax.annotation.security.RolesAllowed;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -34,6 +36,7 @@ import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
+import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -84,27 +87,27 @@ public class AccountApi {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
-    @ApiResponse(content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA)))
     @RolesAllowed("account:create")
-    public JsonNode create(@NotNull @Parameter(schema = @Schema(ref = ACCOUNT_SCHEMA)) JsonNode account,
-            @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws AccountServiceException {
+    public Response create(@NotNull @Parameter(schema = @Schema(ref = ACCOUNT_SCHEMA)) JsonNode account,
+            @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam, @Context UriInfo uriInfo)
+            throws AccountServiceException {
 
-        return service.save(account);
+        JsonNode source = service.save(account);
+
+        return Response.status(Status.CREATED).location(URI.create(uriInfo.getAbsolutePath() + "/" + source.get(AccountStatement.ID).textValue()))
+                .build();
 
     }
 
     @PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
-    @ApiResponse(content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA)))
     @RolesAllowed("account:update")
-    public JsonNode update(@NotNull @PathParam("id") UUID id, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
+    public Response update(@NotNull @PathParam("id") UUID id, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws AccountServiceException {
 
         checkAuthorization(id);
@@ -115,7 +118,9 @@ public class AccountApi {
         JsonNode account = PatchUtils.diff(patch, source);
         LOG.debug("account update {}", account);
 
-        return service.save(id, account);
+        service.save(id, account);
+
+        return Response.status(Status.NO_CONTENT).build();
 
     }
 

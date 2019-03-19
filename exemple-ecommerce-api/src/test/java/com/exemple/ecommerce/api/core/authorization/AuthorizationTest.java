@@ -194,7 +194,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.verify(service).save(Mockito.any(JsonNode.class));
         Mockito.verify(authorizationService).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
 
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
 
         assertThat(testFilter.context.getUserPrincipal().getName(), is("test"));
         assertThat(testFilter.context.isUserInRole("ROLE_APP"), is(true));
