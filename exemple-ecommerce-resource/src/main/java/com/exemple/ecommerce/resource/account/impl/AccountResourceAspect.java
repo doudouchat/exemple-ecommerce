@@ -14,6 +14,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
+import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,7 +29,7 @@ public class AccountResourceAspect {
             + "&& args(id, source)")
     public void beforeSave(UUID id, JsonNode source) {
 
-        JsonNodeUtils.filter(source);
+        JsonNodeFilterUtils.clean(source);
     }
 
     @Before("execution(public com.fasterxml.jackson.databind.JsonNode com.exemple.ecommerce.resource.account.AccountResource.update(*, *)) "
@@ -40,7 +41,7 @@ public class AccountResourceAspect {
 
     private static void filter(JsonNode source) {
 
-        JsonNodeUtils.filter(source, (Map.Entry<String, JsonNode> e) -> {
+        JsonNodeFilterUtils.filter(source, (Map.Entry<String, JsonNode> e) -> {
 
             if (JsonNodeType.ARRAY == e.getValue().getNodeType()) {
 
@@ -62,7 +63,7 @@ public class AccountResourceAspect {
             + "com.exemple.ecommerce.resource.account.AccountResource.*(..))", returning = "source")
     public void afterReturning(JsonNode source) {
 
-        JsonNodeUtils.filter(source);
+        JsonNodeFilterUtils.clean(source);
 
     }
 
@@ -70,7 +71,7 @@ public class AccountResourceAspect {
             + "com.exemple.ecommerce.resource.account.AccountResource.*(..))", returning = "source")
     public void afterReturning(Optional<JsonNode> source) {
 
-        source.ifPresent(JsonNodeUtils::filter);
+        source.ifPresent(JsonNodeFilterUtils::clean);
 
     }
 

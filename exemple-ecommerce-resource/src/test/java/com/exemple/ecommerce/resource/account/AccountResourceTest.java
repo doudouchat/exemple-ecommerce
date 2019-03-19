@@ -3,7 +3,6 @@ package com.exemple.ecommerce.resource.account;
 import static com.exemple.ecommerce.resource.core.statement.AccountStatement.ID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -20,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -39,12 +39,14 @@ import com.exemple.ecommerce.resource.account.model.Account;
 import com.exemple.ecommerce.resource.account.model.Address;
 import com.exemple.ecommerce.resource.account.model.Cgu;
 import com.exemple.ecommerce.resource.account.model.Child;
+import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 @ContextConfiguration(classes = { ResourceTestConfiguration.class })
@@ -215,29 +217,24 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    @DataProvider(name = "accounts")
-    public static Object[][] accounts() {
+    @Test(dependsOnMethods = "get")
+    public void update() {
 
-        return new Object[][] { { JsonNodeUtils.create(account1) } };
-
-    }
-
-    @Test(dependsOnMethods = "get", dataProvider = "accounts")
-    public void update(JsonNode model) {
+        JsonNode model = JsonNodeUtils.create(account1);
 
         OffsetDateTime now = OffsetDateTime.now();
         ResourceExecutionContext.get().setDate(now);
 
         JsonNode account = resource.update(id, JsonNodeUtils.clone(model));
 
-        JsonNodeUtils.filter(model);
+        JsonNodeFilterUtils.clean(model);
 
         assertThat(account.get("email"), is(model.get("email")));
         assertThat(account.get("lastname"), is(model.get("lastname")));
         assertThat(account.get("birthday"), is(model.get("birthday")));
         assertThat(account.get("addresses"), is(model.get("addresses")));
         assertThat(account.get("children"), is(model.get("children")));
-        assertThat(account.get("cgus"), is(model.get("cgus")));
+        assertThat(account.get("cgus"), is(((ArrayNode) model.get("cgus")).addAll((ArrayNode) JsonNodeUtils.create(this.account.get("cgus")))));
         assertThat(account.get("profiles"), is(model.get("profiles")));
         assertThat(account.get("phones"), is(model.get("phones")));
         assertThat(account.get("notes"), is(model.get("notes")));
@@ -249,7 +246,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
         account = accountStatement.get(id);
 
-        JsonNodeUtils.filter(account);
+        JsonNodeFilterUtils.clean(account);
 
         assertThat(account.get("email"), is(model.get("email")));
         assertThat(account.get("lastname"), is(model.get("lastname")));
@@ -287,24 +284,54 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(histories, is(hasSize(10)));
     }
 
-    @Test(dependsOnMethods = "update")
-    public void updateIdentique() {
+    @DataProvider(name = "accounts")
+    public static Object[][] accounts() {
+
+        Map<String, Object> account2 = new HashMap<>();
+        account2.put("phones2", Collections.singletonMap("home", "061213"));
+
+        Map<String, Object> account3 = new HashMap<>();
+        account3.put("phones2", Collections.singletonMap("home", null));
+
+        Map<String, Object> account4 = new HashMap<>();
+        account4.put("cgus2", Collections.singleton(UUID.randomUUID()));
+
+        return new Object[][] {
+
+                { JsonNodeUtils.create(account1), 0 },
+
+                { JsonNodeUtils.create(account2), 1 },
+
+                { JsonNodeUtils.create(account3), 1 },
+
+                { JsonNodeUtils.create(account4), 1 }
+
+        };
+
+    }
+
+    @Test(dependsOnMethods = "update", dataProvider = "accounts")
+    public void patch(JsonNode model, int expectedHistories) {
 
         OffsetDateTime now = OffsetDateTime.now();
         ResourceExecutionContext.get().setDate(now);
 
-        JsonNode account = resource.update(id, JsonNodeUtils.clone(JsonNodeUtils.create(account1)));
+        JsonNode account = resource.update(id, model);
+        JsonNode origin = resource.get(id).get();
 
-        assertThat(account, is(JsonNodeUtils.init()));
+        account.fields().forEachRemaining((Map.Entry<String, JsonNode> node) -> {
+
+            assertThat(node.getKey() + " no match", node.getValue(), is(origin.get(node.getKey())));
+        });
 
         List<JsonNode> histories = JsonNodeUtils
                 .stream(accountHistoryStatement.getByIndex("histories", AccountHistoryStatement.ID, id).get("histories").elements())
                 .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
 
-        assertThat(histories, is(empty()));
+        assertThat(histories, hasSize(expectedHistories));
     }
 
-    @Test(dependsOnMethods = "updateIdentique")
+    @Test(dependsOnMethods = "patch")
     public void updateOther() {
 
         OffsetDateTime now = OffsetDateTime.now();
@@ -313,7 +340,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         resource.update(id, JsonNodeUtils.init("addresses"));
 
         account = accountStatement.get(id);
-        JsonNodeUtils.filter(account);
+        JsonNodeFilterUtils.clean(account);
 
         assertThat(account.path("addresses").getNodeType(), is(JsonNodeType.MISSING));
 

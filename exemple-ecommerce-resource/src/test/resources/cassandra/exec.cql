@@ -11,7 +11,10 @@ INSERT INTO parameter (app, histories, logins) VALUES (
   		'cgus' : true,
   		'profils' : true,
   		'addresses' : true,
-  		'phones' : true },
+  		'phones' : true,
+  		'phones2' : true,
+  		'cgus2' : true 
+  	},
 	{ 	'email', 'lastname', 'fid' }
 );
 

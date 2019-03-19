@@ -65,7 +65,7 @@ public class AccountServiceImpl implements AccountService {
         EventData eventData = new EventData(account, ACCOUNT, EventType.CREATE, app, version, ResourceExecutionContext.get().getDate().toString());
         applicationEventPublisher.publishEvent(eventData);
 
-        return account;
+        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
     }
 
     @Override
@@ -90,15 +90,15 @@ public class AccountServiceImpl implements AccountService {
         EventData eventData = new EventData(account, ACCOUNT, EventType.UPDATE, app, version, ResourceExecutionContext.get().getDate().toString());
         applicationEventPublisher.publishEvent(eventData);
 
-        return source;
+        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
     }
 
     @Override
     public JsonNode get(UUID id) throws AccountServiceNotFoundException {
 
-        JsonNode form = accountResource.get(id).orElseThrow(AccountServiceNotFoundException::new);
+        JsonNode account = accountResource.get(id).orElseThrow(AccountServiceNotFoundException::new);
         CustomerExecutionContext context = CustomerExecutionContext.get();
 
-        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, form);
+        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
     }
 }

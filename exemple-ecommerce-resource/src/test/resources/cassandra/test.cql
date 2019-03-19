@@ -34,7 +34,9 @@ CREATE TABLE account (
 	age int,
 	subscription_1 boolean,
 	creation_date timestamp,
-	preferences list<frozen<tuple<text, text, int, timestamp>>>
+	preferences list<frozen<tuple<text, text, int, timestamp>>>,
+	phones2 map<text, text>,
+	cgus2 set<text>
 );
 
 CREATE TABLE login (

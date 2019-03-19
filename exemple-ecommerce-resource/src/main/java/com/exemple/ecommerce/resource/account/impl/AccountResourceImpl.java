@@ -139,7 +139,9 @@ public class AccountResourceImpl implements AccountResource {
         }
         session.execute(batch);
 
-        return account;
+        OperationHelper.merge(source, origin, accountStatement.getTableMetadata());
+
+        return origin;
     }
 
     @Override

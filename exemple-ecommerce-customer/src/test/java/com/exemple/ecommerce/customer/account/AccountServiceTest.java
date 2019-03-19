@@ -78,6 +78,9 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
         model.setCivility("Mr");
 
         Mockito.when(resource.save(Mockito.any(UUID.class), Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.create(model));
+        Mockito.when(
+                schemaFilter.filter(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(JsonNode.class)))
+                .thenReturn(JsonNodeUtils.create(model));
 
         JsonNode account = service.save(JsonNodeUtils.create(model));
         assertThat(account, is(notNullValue()));
@@ -114,6 +117,9 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
 
         Mockito.when(resource.get(Mockito.eq(id))).thenReturn(Optional.of(JsonNodeUtils.create(model)));
         Mockito.when(resource.update(Mockito.eq(id), Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.create(model));
+        Mockito.when(
+                schemaFilter.filter(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(JsonNode.class)))
+                .thenReturn(JsonNodeUtils.create(model));
 
         JsonNode account = service.save(id, JsonNodeUtils.create(model));
 
