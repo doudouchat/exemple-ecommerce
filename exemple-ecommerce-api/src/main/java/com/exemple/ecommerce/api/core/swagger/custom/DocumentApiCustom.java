@@ -49,7 +49,7 @@ public class DocumentApiCustom extends AbstractSpecFilter {
 
     private static void buildVersioningSchema(Map<String, MediaType> content, Map<String, List<String>> headers) {
 
-        MediaType mediaType = content.get(javax.ws.rs.core.MediaType.APPLICATION_JSON);
+        MediaType mediaType = MapUtils.emptyIfNull(content).get(javax.ws.rs.core.MediaType.APPLICATION_JSON);
 
         if (mediaType != null) {
 

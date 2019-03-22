@@ -45,9 +45,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -74,7 +76,13 @@ public class AccountApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
-    @ApiResponse(content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA)))
+    @ApiResponses({
+
+            @ApiResponse(responseCode = "200", description = "Account Data", content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA))),
+            @ApiResponse(responseCode = "404", description = "Account is not found"),
+            @ApiResponse(responseCode = "403", description = "Account is not found accessible")
+
+    })
     @RolesAllowed("account:read")
     public JsonNode get(@NotNull @PathParam("id") UUID id, @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam)
             throws AccountServiceException {
@@ -89,6 +97,12 @@ public class AccountApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
+    @ApiResponses({
+
+            @ApiResponse(responseCode = "201", description = "Account is created", headers = {
+                    @Header(name = "Location", description = "Links to Account Data", schema = @Schema(type = "string")) }),
+
+    })
     @RolesAllowed("account:create")
     public Response create(@NotNull @Parameter(schema = @Schema(ref = ACCOUNT_SCHEMA)) JsonNode account,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam, @Context UriInfo uriInfo)
@@ -106,6 +120,13 @@ public class AccountApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
+    @ApiResponses({
+
+            @ApiResponse(responseCode = "204", description = "Account is updated"),
+            @ApiResponse(responseCode = "404", description = "Account is not found"),
+            @ApiResponse(responseCode = "403", description = "Account is not found accessible")
+
+    })
     @RolesAllowed("account:update")
     public Response update(@NotNull @PathParam("id") UUID id, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws AccountServiceException {
