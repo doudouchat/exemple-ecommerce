@@ -11,6 +11,10 @@ authorization:
       member: 172.17.0.1:5075
    zookeeper:
       host: 172.17.0.1:10024
+   certificat:
+      location: file:/usr/local/tomcat/etc/mytest.jks
+      alias: mytest
+      password: mypass
 application:
    zookeeper:
       host: 172.17.0.1:10024

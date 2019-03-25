@@ -12,7 +12,7 @@ authorization:
    zookeeper:
       host: 127.0.0.1:${zmp.clientPort}
    certificat:
-      location: classpath:mytest.jks
+      location: file:${project.parent.basedir}/conf/authorization/mytest.jks
       alias: mytest
       password: mypass
 store:

@@ -12,6 +12,6 @@ authorization:
       ttlMs:
          product: 30000
    certificat:
-      location: classpath:mytest.jks
+      location: file:${project.parent.basedir}/conf/authorization/mytest.jks
       alias: mytest
       password: mypass
