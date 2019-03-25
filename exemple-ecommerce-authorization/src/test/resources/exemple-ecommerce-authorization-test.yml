@@ -11,3 +11,7 @@ authorization:
       sleepMsBetweenRetries: 1000
       ttlMs:
          product: 30000
+   certificat:
+      location: classpath:mytest.jks
+      alias: mytest
+      password: mypass

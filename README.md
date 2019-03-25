@@ -12,3 +12,5 @@ docker-compose exec cassandra cqlsh --debug -f /usr/local/tmp/cassandra/schema.c
 docker-compose exec cassandra cqlsh --debug -f /usr/local/tmp/cassandra/exec.cql
 
 docker-compose exec web cat logs/localhost.2018-08-24.log
+
+keytool -genkeypair -alias mytest -keyalg RSA -keypass mypass -keystore mytest.jks -storepass mypass

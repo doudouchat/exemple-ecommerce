@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -18,12 +20,28 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
 import com.exemple.ecommerce.authorization.common.model.AccountUser;
 import com.exemple.ecommerce.authorization.common.model.BackUser;
 
 @Configuration
 public class AuthorizationTokenConfiguration {
+
+    @Value("${authorization.certificat.location}")
+    private String location;
+
+    @Value("${authorization.certificat.alias}")
+    private String alias;
+
+    @Value("${authorization.certificat.password}")
+    private String password;
+
+    private final ResourceLoader resourceLoader;
+
+    public AuthorizationTokenConfiguration(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
     @Bean
     public TokenStore tokenStore() {
@@ -33,7 +51,8 @@ public class AuthorizationTokenConfiguration {
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey("123");
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(resourceLoader.getResource(location), password.toCharArray());
+        converter.setKeyPair(keyStoreKeyFactory.getKeyPair(alias));
         converter.setAccessTokenConverter(new CustomAccessTokenConverter());
         return converter;
     }

@@ -11,6 +11,10 @@ authorization:
       member: 127.0.0.1:${hazelcast.port}
    zookeeper:
       host: 127.0.0.1:${zmp.clientPort}
+   certificat:
+      location: classpath:mytest.jks
+      alias: mytest
+      password: mypass
 store:
    zookeeper:
       host: 127.0.0.1:${zmp.clientPort}
