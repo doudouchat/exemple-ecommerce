@@ -76,11 +76,11 @@ public class AccountApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
-    @ApiResponses({
+    @ApiResponses(value = {
 
-            @ApiResponse(responseCode = "200", description = "Account Data", content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA))),
-            @ApiResponse(responseCode = "404", description = "Account is not found"),
-            @ApiResponse(responseCode = "403", description = "Account is not found accessible")
+            @ApiResponse(description = "Account Data", responseCode = "200", content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA))),
+            @ApiResponse(description = "Account is not found", responseCode = "404"),
+            @ApiResponse(description = "Account is not found accessible", responseCode = "403")
 
     })
     @RolesAllowed("account:read")
@@ -97,10 +97,10 @@ public class AccountApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
-    @ApiResponses({
+    @ApiResponses(value = {
 
-            @ApiResponse(responseCode = "201", description = "Account is created", headers = {
-                    @Header(name = "Location", description = "Links to Account Data", schema = @Schema(type = "string")) }),
+            @ApiResponse(description = "Account is created", responseCode = "201", headers = {
+                    @Header(name = "Location", description = "Links to Account Data", schema = @Schema(type = "string")) })
 
     })
     @RolesAllowed("account:create")
@@ -120,11 +120,11 @@ public class AccountApi {
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
-    @ApiResponses({
+    @ApiResponses(value = {
 
-            @ApiResponse(responseCode = "204", description = "Account is updated"),
-            @ApiResponse(responseCode = "404", description = "Account is not found"),
-            @ApiResponse(responseCode = "403", description = "Account is not found accessible")
+            @ApiResponse(description = "Account is updated", responseCode = "204"),
+            @ApiResponse(description = "Account is not found", responseCode = "404"),
+            @ApiResponse(description = "Account is not found accessible", responseCode = "403")
 
     })
     @RolesAllowed("account:update")
