@@ -15,9 +15,9 @@ import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
-public class AccountHistoryStatement extends StatementResource {
+public class AccountLastHistoryStatement extends StatementResource {
 
-    public static final String TABLE = "account_history";
+    public static final String TABLE = "account_last_history";
 
     public static final String ID = "id";
 
@@ -29,7 +29,7 @@ public class AccountHistoryStatement extends StatementResource {
     private Session session;
 
     @Autowired
-    public AccountHistoryStatement(Cluster cluster) {
+    public AccountLastHistoryStatement(Cluster cluster) {
         super(cluster, TABLE);
     }
 

@@ -1,6 +1,7 @@
 package com.exemple.ecommerce.resource.account.impl;
 
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import com.exemple.ecommerce.resource.common.StringHelper;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.helper.OperationHelper;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
+import com.exemple.ecommerce.resource.core.statement.AccountLastHistoryStatement;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.core.statement.ParameterStatement;
@@ -44,13 +47,16 @@ public class AccountResourceImpl implements AccountResource {
 
     private AccountHistoryStatement accountHistoryStatement;
 
+    private AccountLastHistoryStatement accountLastHistoryStatement;
+
     private ParameterStatement parameterStatement;
 
     public AccountResourceImpl(Session session, AccountStatement accountStatement, AccountHistoryStatement accountHistoryStatement,
-            ParameterStatement parameterStatement) {
+            AccountLastHistoryStatement accountLastHistoryStatement, ParameterStatement parameterStatement) {
         this.session = session;
         this.accountStatement = accountStatement;
         this.accountHistoryStatement = accountHistoryStatement;
+        this.accountLastHistoryStatement = accountLastHistoryStatement;
         this.parameterStatement = parameterStatement;
     }
 
@@ -67,7 +73,7 @@ public class AccountResourceImpl implements AccountResource {
 
         BatchStatement batch = new BatchStatement();
         batch.add(account);
-        this.createHistories(id, accountNode, now).stream().forEach(batch::add);
+        this.createHistories(id, accountNode, now).forEach(batch::add);
         session.execute(batch);
 
         return accountNode;
@@ -80,43 +86,59 @@ public class AccountResourceImpl implements AccountResource {
 
         Map<String, Boolean> historyFields = parameterStatement.getHistories();
 
-        return JsonNodeUtils.stream(source.fields()).filter(e -> historyFields.containsKey(e.getKey())).flatMap((Map.Entry<String, JsonNode> e) -> {
+        Map<String, OffsetDateTime> lastHistories = accountLastHistoryStatement.findById(id).stream()
+                .collect(Collectors.toMap((JsonNode h) -> h.get(AccountLastHistoryStatement.FIELD).textValue(), (JsonNode h) -> OffsetDateTime
+                        .parse(h.get(AccountLastHistoryStatement.DATE).textValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSX"))));
 
-            if (historyFields.get(e.getKey())) {
+        return JsonNodeUtils.stream(source.fields())
 
-                if (JsonNodeType.OBJECT == e.getValue().getNodeType()) {
+                .filter(e -> historyFields.containsKey(e.getKey()))
 
-                    return JsonNodeUtils.stream(e.getValue().fields()).map(node -> Collections
-                            .singletonMap(e.getKey().concat("/").concat(node.getKey()), node.getValue()).entrySet().iterator().next());
-                }
+                .filter(e -> now.isAfter(lastHistories.getOrDefault(e.getKey(), now.minusNanos(1))))
 
-                if (JsonNodeType.ARRAY == e.getValue().getNodeType()) {
+                .flatMap((Map.Entry<String, JsonNode> e) -> {
 
-                    return JsonNodeUtils.stream(e.getValue().elements()).map((JsonNode node) -> {
+                    if (historyFields.get(e.getKey())) {
 
-                        String key = JsonNodeType.OBJECT == node.getNodeType()
-                                ? JsonNodeUtils.stream(node.elements()).reduce("", (root, n) -> StringHelper.join(root, n.asText(), '.'), function)
-                                : node.asText();
+                        if (JsonNodeType.OBJECT == e.getValue().getNodeType()) {
 
-                        return Collections.singletonMap(e.getKey().concat("/").concat(key), node).entrySet().iterator().next();
-                    });
-                }
+                            return JsonNodeUtils.stream(e.getValue().fields()).map(node -> Collections
+                                    .singletonMap(e.getKey().concat("/").concat(node.getKey()), node.getValue()).entrySet().iterator().next());
+                        }
 
-            }
+                        if (JsonNodeType.ARRAY == e.getValue().getNodeType()) {
 
-            return Collections.singleton(e).stream();
+                            return JsonNodeUtils.stream(e.getValue().elements()).map((JsonNode node) -> {
 
-        }).map((Map.Entry<String, JsonNode> e) -> {
+                                String key = JsonNodeType.OBJECT == node.getNodeType() ? JsonNodeUtils.stream(node.elements())
 
-            LOG.debug("save history account {} {}", id, e.getKey());
+                                        .reduce("", (root, n) -> StringHelper.join(root, n.asText(), '.'), function) : node.asText();
 
-            JsonNode history = JsonNodeUtils.init();
-            JsonNodeUtils.set(history, id, AccountHistoryStatement.ID);
-            JsonNodeUtils.set(history, e.getKey(), AccountHistoryStatement.FIELD);
-            JsonNodeUtils.set(history, now.toString(), AccountHistoryStatement.DATE);
+                                return Collections.singletonMap(e.getKey().concat("/").concat(key), node).entrySet().iterator().next();
+                            });
+                        }
 
-            return accountHistoryStatement.insert(history);
-        }).collect(Collectors.toList());
+                    }
+
+                    return Stream.of(e);
+
+                })
+
+                .map((Map.Entry<String, JsonNode> e) -> {
+
+                    LOG.debug("save history account {} {}", id, e.getKey());
+
+                    JsonNode history = JsonNodeUtils.init();
+                    JsonNodeUtils.set(history, id, AccountHistoryStatement.ID);
+                    JsonNodeUtils.set(history, e.getKey(), AccountHistoryStatement.FIELD);
+                    JsonNodeUtils.set(history, now.toString(), AccountHistoryStatement.DATE);
+
+                    return history;
+                })
+
+                .flatMap((JsonNode history) -> Stream.of(accountLastHistoryStatement.insert(history), accountHistoryStatement.insert(history)))
+
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -135,13 +157,11 @@ public class AccountResourceImpl implements AccountResource {
         batch.add(update);
         JsonNode account = OperationHelper.diff(source, origin, accountStatement.getTableMetadata());
         if (account.elements().hasNext()) {
-            this.createHistories(id, account, now).stream().forEach(batch::add);
+            this.createHistories(id, account, now).forEach(batch::add);
         }
         session.execute(batch);
 
-        OperationHelper.merge(source, origin, accountStatement.getTableMetadata());
-
-        return origin;
+        return this.getById(id).orElseThrow(IllegalArgumentException::new);
     }
 
     @Override

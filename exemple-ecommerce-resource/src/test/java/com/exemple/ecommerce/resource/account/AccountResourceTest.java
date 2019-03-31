@@ -44,6 +44,7 @@ import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
+import com.exemple.ecommerce.resource.core.statement.AccountLastHistoryStatement;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -64,6 +65,9 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private AccountHistoryStatement accountHistoryStatement;
+
+    @Autowired
+    private AccountLastHistoryStatement accountLastHistoryStatement;
 
     @AfterClass
     public void executionContextDestroy() {
@@ -135,11 +139,13 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(this.account.get("creation_date"), is(account.get("creation_date")));
         assertThat(this.account.get("preferences"), is(account.get("preferences")));
 
-        List<JsonNode> histories = JsonNodeUtils
-                .stream(accountHistoryStatement.getByIndex("histories", AccountHistoryStatement.ID, id).get("histories").elements())
-                .collect(Collectors.toList());
+        List<JsonNode> histories = accountHistoryStatement.findById(id);
 
         assertThat(histories, is(hasSize(9)));
+
+        List<JsonNode> lastHistories = accountLastHistoryStatement.findById(id);
+
+        assertThat(lastHistories, is(hasSize(9)));
 
     }
 
@@ -234,7 +240,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(account.get("birthday"), is(model.get("birthday")));
         assertThat(account.get("addresses"), is(model.get("addresses")));
         assertThat(account.get("children"), is(model.get("children")));
-        assertThat(account.get("cgus"), is(((ArrayNode) model.get("cgus")).addAll((ArrayNode) JsonNodeUtils.create(this.account.get("cgus")))));
+        assertThat(account.get("cgus"), is(((ArrayNode) JsonNodeUtils.create(this.account.get("cgus"))).addAll((ArrayNode) model.get("cgus"))));
         assertThat(account.get("profiles"), is(model.get("profiles")));
         assertThat(account.get("phones"), is(model.get("phones")));
         assertThat(account.get("notes"), is(model.get("notes")));
@@ -277,11 +283,14 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(account.get("creation_date"), is(model.get("creation_date")));
         assertThat(account.get("preferences"), is(model.get("preferences")));
 
-        List<JsonNode> histories = JsonNodeUtils
-                .stream(accountHistoryStatement.getByIndex("histories", AccountHistoryStatement.ID, id).get("histories").elements())
+        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
                 .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
 
         assertThat(histories, is(hasSize(10)));
+
+        List<JsonNode> lastHistories = accountLastHistoryStatement.findById(id);
+
+        assertThat(lastHistories, is(hasSize(13)));
     }
 
     @DataProvider(name = "accounts")
@@ -324,8 +333,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
             assertThat(node.getKey() + " no match", node.getValue(), is(origin.get(node.getKey())));
         });
 
-        List<JsonNode> histories = JsonNodeUtils
-                .stream(accountHistoryStatement.getByIndex("histories", AccountHistoryStatement.ID, id).get("histories").elements())
+        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
                 .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
 
         assertThat(histories, hasSize(expectedHistories));
@@ -344,8 +352,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
         assertThat(account.path("addresses").getNodeType(), is(JsonNodeType.MISSING));
 
-        List<JsonNode> histories = JsonNodeUtils
-                .stream(accountHistoryStatement.getByIndex("histories", AccountHistoryStatement.ID, id).get("histories").elements())
+        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
                 .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
 
         assertThat(histories, is(hasSize(1)));

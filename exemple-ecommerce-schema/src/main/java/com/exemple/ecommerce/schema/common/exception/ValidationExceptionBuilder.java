@@ -27,7 +27,7 @@ public final class ValidationExceptionBuilder {
 
         if (!exception.getCausingExceptions().isEmpty()) {
 
-            exception.getCausingExceptions().stream().forEach(e -> buildException(e, validationException));
+            exception.getCausingExceptions().forEach(e -> buildException(e, validationException));
 
         } else {
 

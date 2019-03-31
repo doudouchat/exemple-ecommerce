@@ -72,7 +72,7 @@ public class SchemaValidationImpl implements SchemaValidation {
         }
 
         Map<String, Set<String>> rules = schemaResource.getRule(app, version, resource);
-        rules.entrySet().stream().forEach(rule -> rule.getValue().stream().forEach((String p) -> {
+        rules.entrySet().forEach(rule -> rule.getValue().forEach((String p) -> {
             ValidatorService validatorService = applicationContext.getBean(rule.getKey().concat("Validator"), ValidatorService.class);
             validatorService.validate(p, form, old, validationException);
         }));

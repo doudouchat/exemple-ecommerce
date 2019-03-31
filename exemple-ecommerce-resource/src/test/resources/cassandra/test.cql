@@ -50,7 +50,14 @@ CREATE TABLE account_history (
 	id UUID,
 	field text,
 	date timestamp,
-	PRIMARY KEY ((id, field, date))
+	PRIMARY KEY ((id), field, date)
+);
+
+CREATE TABLE account_last_history ( 
+	id UUID,
+	field text,
+	date timestamp,
+	PRIMARY KEY ((id), field)
 );
 
 CREATE TYPE schema_label_type (
@@ -83,9 +90,6 @@ CREATE TABLE account_schema (
 
 CREATE INDEX IF NOT EXISTS account_status
 	ON account ( status );
-	
-CREATE INDEX IF NOT EXISTS account_history_id
-	ON account_history ( id );
 	
 CREATE TABLE stock ( 
 	store text,

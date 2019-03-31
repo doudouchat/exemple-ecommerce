@@ -51,7 +51,14 @@ CREATE TABLE IF NOT EXISTS account_history (
 	id UUID,
 	field text,
 	date timestamp,
-	PRIMARY KEY ((id, field, date))
+	PRIMARY KEY ((id), field, date)
+);
+
+CREATE TABLE account_last_history ( 
+	id UUID,
+	field text,
+	date timestamp,
+	PRIMARY KEY ((id), field)
 );
 
 CREATE TABLE IF NOT EXISTS parameter ( 
@@ -73,9 +80,6 @@ CREATE TABLE IF NOT EXISTS resource_schema (
        
 CREATE INDEX IF NOT EXISTS account_status
 	ON account ( status );
-	
-CREATE INDEX IF NOT EXISTS account_history_id
-	ON account_history ( id );
 	
 CREATE TABLE IF NOT EXISTS stock ( 
 	store text,

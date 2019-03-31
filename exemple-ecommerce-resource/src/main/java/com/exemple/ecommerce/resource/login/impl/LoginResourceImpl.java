@@ -92,7 +92,7 @@ public class LoginResourceImpl implements LoginResource {
                 save(id, login, loginData);
             } catch (LoginResourceExistException e) {
                 exceptions.add(e);
-                removeLogins.stream().forEach(removeLogin -> this.session.execute(loginStatement.delete(removeLogin)));
+                removeLogins.forEach(removeLogin -> this.session.execute(loginStatement.delete(removeLogin)));
                 return false;
             }
             removeLogins.add(login);
@@ -146,7 +146,7 @@ public class LoginResourceImpl implements LoginResource {
         });
 
         save(addlogins.stream(), id, loginData);
-        removeLogins.stream().forEach((String login) -> {
+        removeLogins.forEach((String login) -> {
             LOG.debug("delete login {}", login);
             this.session.execute(loginStatement.delete(login));
         });

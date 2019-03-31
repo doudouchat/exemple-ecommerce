@@ -23,12 +23,7 @@ public final class JsonNodeFilterUtils {
 
             if (JsonNodeType.OBJECT == e.getValue().getNodeType()) {
 
-                if (((ObjectNode) e.getValue()).isEmpty(null)) {
-                    ((ObjectNode) source).remove(e.getKey());
-                } else {
-
-                    clean(source.get(e.getKey()));
-                }
+                clean(source.get(e.getKey()));
             }
 
             if (JsonNodeType.ARRAY == e.getValue().getNodeType()) {

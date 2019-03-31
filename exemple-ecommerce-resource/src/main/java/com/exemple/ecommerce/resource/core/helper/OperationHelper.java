@@ -1,7 +1,6 @@
 package com.exemple.ecommerce.resource.core.helper;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -11,11 +10,9 @@ import java.util.stream.Collectors;
 
 import com.datastax.driver.core.AbstractTableMetadata;
 import com.datastax.driver.core.DataType;
-import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public final class OperationHelper {
 
@@ -38,39 +35,6 @@ public final class OperationHelper {
                     return root;
                 }, function);
 
-    }
-
-    public static void merge(JsonNode source, JsonNode target, AbstractTableMetadata tableMetadata) {
-
-        source.fields().forEachRemaining((Map.Entry<String, JsonNode> node) -> {
-
-            DataType type = tableMetadata.getColumn(node.getKey()).getType();
-
-            if (type.getName() == DataType.Name.MAP && !target.get(node.getKey()).isNull()) {
-
-                node.getValue().fields()
-                        .forEachRemaining((Map.Entry<String, JsonNode> e) -> ((ObjectNode) target.get(node.getKey())).set(e.getKey(), e.getValue()));
-
-            } else if (type.getName() == DataType.Name.SET && !target.get(node.getKey()).isNull()) {
-
-                List<JsonNode> values = JsonNodeUtils.stream(target.get(node.getKey()).elements()).collect(Collectors.toList());
-
-                List<JsonNode> newValues = JsonNodeUtils.stream(node.getValue().elements()).filter((JsonNode e) -> !values.contains(e))
-                        .collect(Collectors.toList());
-
-                newValues.addAll(values);
-
-                JsonNodeUtils.set(target, newValues, node.getKey());
-
-            } else {
-
-                JsonNodeUtils.set(target, node.getValue(), node.getKey());
-
-            }
-
-        });
-
-        JsonNodeFilterUtils.clean(target);
     }
 
     private static Map.Entry<String, ?> diffTransform(JsonNode target, AbstractTableMetadata tableMetadata, Map.Entry<String, JsonNode> node) {
