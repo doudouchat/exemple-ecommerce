@@ -51,13 +51,7 @@ CREATE TABLE IF NOT EXISTS account_history (
 	id UUID,
 	field text,
 	date timestamp,
-	PRIMARY KEY ((id), field, date)
-);
-
-CREATE TABLE account_last_history ( 
-	id UUID,
-	field text,
-	date timestamp,
+	value text,
 	PRIMARY KEY ((id), field)
 );
 

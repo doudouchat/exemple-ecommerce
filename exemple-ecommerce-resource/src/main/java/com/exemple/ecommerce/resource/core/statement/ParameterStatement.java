@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -26,12 +25,11 @@ public class ParameterStatement extends StatementResource {
 
     public static final String APP_DEFAULT = "default";
 
-    @Autowired
-    private Session session;
+    private final Session session;
 
-    @Autowired
-    public ParameterStatement(Cluster cluster) {
+    public ParameterStatement(Cluster cluster, Session session) {
         super(cluster, TABLE);
+        this.session = session;
     }
 
     public JsonNode get(String parameter) {

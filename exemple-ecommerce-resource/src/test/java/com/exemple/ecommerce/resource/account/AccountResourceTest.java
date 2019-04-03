@@ -9,10 +9,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +33,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.resource.account.model.Account;
+import com.exemple.ecommerce.resource.account.model.AccountHistory;
 import com.exemple.ecommerce.resource.account.model.Address;
 import com.exemple.ecommerce.resource.account.model.Cgu;
 import com.exemple.ecommerce.resource.account.model.Child;
@@ -44,7 +42,6 @@ import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
-import com.exemple.ecommerce.resource.core.statement.AccountLastHistoryStatement;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -65,9 +62,6 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private AccountHistoryStatement accountHistoryStatement;
-
-    @Autowired
-    private AccountLastHistoryStatement accountLastHistoryStatement;
 
     @AfterClass
     public void executionContextDestroy() {
@@ -139,13 +133,9 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(this.account.get("creation_date"), is(account.get("creation_date")));
         assertThat(this.account.get("preferences"), is(account.get("preferences")));
 
-        List<JsonNode> histories = accountHistoryStatement.findById(id);
+        List<AccountHistory> histories = accountHistoryStatement.findById(id);
 
         assertThat(histories, is(hasSize(9)));
-
-        List<JsonNode> lastHistories = accountLastHistoryStatement.findById(id);
-
-        assertThat(lastHistories, is(hasSize(9)));
 
     }
 
@@ -283,14 +273,10 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(account.get("creation_date"), is(model.get("creation_date")));
         assertThat(account.get("preferences"), is(model.get("preferences")));
 
-        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
-                .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
+        List<AccountHistory> histories = accountHistoryStatement.findById(id).stream().filter(h -> h.getDate().equals(now.toInstant()))
+                .collect(Collectors.toList());
 
         assertThat(histories, is(hasSize(10)));
-
-        List<JsonNode> lastHistories = accountLastHistoryStatement.findById(id);
-
-        assertThat(lastHistories, is(hasSize(13)));
     }
 
     @DataProvider(name = "accounts")
@@ -328,13 +314,11 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         JsonNode account = resource.update(id, model);
         JsonNode origin = resource.get(id).get();
 
-        account.fields().forEachRemaining((Map.Entry<String, JsonNode> node) -> {
+        account.fields().forEachRemaining(
+                (Map.Entry<String, JsonNode> node) -> assertThat(node.getKey() + " no match", node.getValue(), is(origin.get(node.getKey()))));
 
-            assertThat(node.getKey() + " no match", node.getValue(), is(origin.get(node.getKey())));
-        });
-
-        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
-                .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
+        List<AccountHistory> histories = accountHistoryStatement.findById(id).stream().filter(h -> h.getDate().equals(now.toInstant()))
+                .collect(Collectors.toList());
 
         assertThat(histories, hasSize(expectedHistories));
     }
@@ -352,16 +336,10 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
         assertThat(account.path("addresses").getNodeType(), is(JsonNodeType.MISSING));
 
-        List<JsonNode> histories = accountHistoryStatement.findById(id).stream()
-                .filter(h -> localDateTimeValue(h.get(AccountHistoryStatement.DATE), now.getOffset()).equals(now)).collect(Collectors.toList());
+        List<AccountHistory> histories = accountHistoryStatement.findById(id).stream().filter(h -> h.getDate().equals(now.toInstant()))
+                .collect(Collectors.toList());
 
         assertThat(histories, is(hasSize(1)));
-    }
-
-    private static OffsetDateTime localDateTimeValue(JsonNode node, ZoneOffset offset) {
-
-        return OffsetDateTime.of(LocalDateTime.parse(node.asText(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSX")), ZoneOffset.UTC)
-                .withOffsetSameInstant(offset);
     }
 
     @DataProvider(name = "failures")

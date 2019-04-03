@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
@@ -25,12 +24,11 @@ public class AccountStatement extends StatementResource {
 
     public static final String ID = "id";
 
-    @Autowired
-    private Session session;
+    private final Session session;
 
-    @Autowired
-    public AccountStatement(Cluster cluster) {
+    public AccountStatement(Cluster cluster, Session session) {
         super(cluster, TABLE);
+        this.session = session;
     }
 
     public Update update(UUID id, JsonNode source) {

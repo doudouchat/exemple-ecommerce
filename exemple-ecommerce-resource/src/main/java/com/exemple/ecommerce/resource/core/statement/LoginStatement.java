@@ -1,6 +1,5 @@
 package com.exemple.ecommerce.resource.core.statement;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
@@ -20,12 +19,11 @@ public class LoginStatement extends StatementResource {
 
     public static final String LOGIN = "login";
 
-    @Autowired
-    private Session session;
+    private final Session session;
 
-    @Autowired
-    public LoginStatement(Cluster cluster) {
+    public LoginStatement(Cluster cluster, Session session) {
         super(cluster, LOGIN);
+        this.session = session;
     }
 
     public JsonNode get(String email) {

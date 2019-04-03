@@ -24,12 +24,15 @@ public final class JsonNodeFilterUtils {
             if (JsonNodeType.OBJECT == e.getValue().getNodeType()) {
 
                 clean(source.get(e.getKey()));
+
             }
 
             if (JsonNodeType.ARRAY == e.getValue().getNodeType()) {
 
-                ((ObjectNode) source).replace(e.getKey(), JsonNodeUtils.create(JsonNodeUtils.stream(e.getValue().elements())
-                        .filter(node -> JsonNodeType.NULL != node.getNodeType()).collect(Collectors.toList())));
+                ((ObjectNode) source).replace(e.getKey(), JsonNodeUtils.create(JsonNodeUtils.stream(e.getValue().elements()).map((JsonNode node) -> {
+                    clean(node);
+                    return node;
+                }).filter((JsonNode node) -> JsonNodeType.NULL != node.getNodeType()).collect(Collectors.toList())));
 
                 clean(source.get(e.getKey()));
             }

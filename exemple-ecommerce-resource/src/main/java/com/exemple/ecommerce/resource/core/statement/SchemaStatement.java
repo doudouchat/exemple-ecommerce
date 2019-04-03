@@ -3,7 +3,6 @@ package com.exemple.ecommerce.resource.core.statement;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -37,12 +36,11 @@ public class SchemaStatement extends StatementResource {
 
     public static final String SCHEMA_DEFAULT = "{\"$schema\": \"http://json-schema.org/draft-07/schema\",\"additionalProperties\": false}";
 
-    @Autowired
-    private Session session;
+    private final Session session;
 
-    @Autowired
-    public SchemaStatement(Cluster cluster) {
+    public SchemaStatement(Cluster cluster, Session session) {
         super(cluster, TABLE);
+        this.session = session;
     }
 
     @Cacheable("schema_resource")

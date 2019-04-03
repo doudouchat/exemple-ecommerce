@@ -1,13 +1,15 @@
 package com.exemple.ecommerce.resource.account.impl;
 
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,12 +23,11 @@ import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.Statement;
 import com.exemple.ecommerce.resource.account.AccountResource;
+import com.exemple.ecommerce.resource.account.model.AccountHistory;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.common.StringHelper;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
-import com.exemple.ecommerce.resource.core.helper.OperationHelper;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
-import com.exemple.ecommerce.resource.core.statement.AccountLastHistoryStatement;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.core.statement.ParameterStatement;
@@ -47,16 +48,13 @@ public class AccountResourceImpl implements AccountResource {
 
     private AccountHistoryStatement accountHistoryStatement;
 
-    private AccountLastHistoryStatement accountLastHistoryStatement;
-
     private ParameterStatement parameterStatement;
 
     public AccountResourceImpl(Session session, AccountStatement accountStatement, AccountHistoryStatement accountHistoryStatement,
-            AccountLastHistoryStatement accountLastHistoryStatement, ParameterStatement parameterStatement) {
+            ParameterStatement parameterStatement) {
         this.session = session;
         this.accountStatement = accountStatement;
         this.accountHistoryStatement = accountHistoryStatement;
-        this.accountLastHistoryStatement = accountLastHistoryStatement;
         this.parameterStatement = parameterStatement;
     }
 
@@ -74,27 +72,30 @@ public class AccountResourceImpl implements AccountResource {
         BatchStatement batch = new BatchStatement();
         batch.add(account);
         this.createHistories(id, accountNode, now).forEach(batch::add);
+
         session.execute(batch);
 
         return accountNode;
 
     }
 
-    private List<Statement> createHistories(final UUID id, JsonNode source, OffsetDateTime now) {
+    private Collection<Statement> createHistories(final UUID id, JsonNode source, OffsetDateTime now) {
 
         BinaryOperator<String> function = (n1, n2) -> n2;
 
         Map<String, Boolean> historyFields = parameterStatement.getHistories();
 
-        Map<String, OffsetDateTime> lastHistories = accountLastHistoryStatement.findById(id).stream()
-                .collect(Collectors.toMap((JsonNode h) -> h.get(AccountLastHistoryStatement.FIELD).textValue(), (JsonNode h) -> OffsetDateTime
-                        .parse(h.get(AccountLastHistoryStatement.DATE).textValue(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSX"))));
+        Map<String, AccountHistory> histories = accountHistoryStatement.findById(id).stream()
+                .collect(Collectors.toMap(AccountHistory::getField, Function.identity()));
 
-        return JsonNodeUtils.stream(source.fields())
+        AccountHistory defaultHistory = new AccountHistory();
+        defaultHistory.setDate(now.toInstant().minusNanos(1));
+
+        List<AccountHistory> accountHistories = JsonNodeUtils.stream(source.fields())
 
                 .filter(e -> historyFields.containsKey(e.getKey()))
 
-                .filter(e -> now.isAfter(lastHistories.getOrDefault(e.getKey(), now.minusNanos(1))))
+                .filter(e -> now.toInstant().isAfter(histories.getOrDefault(e.getKey(), defaultHistory).getDate()))
 
                 .flatMap((Map.Entry<String, JsonNode> e) -> {
 
@@ -126,19 +127,21 @@ public class AccountResourceImpl implements AccountResource {
 
                 .map((Map.Entry<String, JsonNode> e) -> {
 
-                    LOG.debug("save history account {} {}", id, e.getKey());
-
-                    JsonNode history = JsonNodeUtils.init();
-                    JsonNodeUtils.set(history, id, AccountHistoryStatement.ID);
-                    JsonNodeUtils.set(history, e.getKey(), AccountHistoryStatement.FIELD);
-                    JsonNodeUtils.set(history, now.toString(), AccountHistoryStatement.DATE);
+                    AccountHistory history = new AccountHistory();
+                    history.setId(id);
+                    history.setField(e.getKey());
+                    history.setDate(now.toInstant());
+                    history.setValue(e.getValue());
 
                     return history;
                 })
 
-                .flatMap((JsonNode history) -> Stream.of(accountLastHistoryStatement.insert(history), accountHistoryStatement.insert(history)))
+                .filter((AccountHistory history) -> !Objects.equals(history.getValue(),
+                        histories.getOrDefault(history.getField(), defaultHistory).getValue()))
 
                 .collect(Collectors.toList());
+
+        return accountHistoryStatement.insert(accountHistories);
     }
 
     @Override
@@ -148,17 +151,13 @@ public class AccountResourceImpl implements AccountResource {
 
         OffsetDateTime now = ResourceExecutionContext.get().getDate();
 
-        JsonNode origin = this.getById(id).orElseThrow(IllegalArgumentException::new);
-
         Statement update = accountStatement.update(id, source);
 
         BatchStatement batch = new BatchStatement();
         batch.setConsistencyLevel(ConsistencyLevel.QUORUM);
         batch.add(update);
-        JsonNode account = OperationHelper.diff(source, origin, accountStatement.getTableMetadata());
-        if (account.elements().hasNext()) {
-            this.createHistories(id, account, now).forEach(batch::add);
-        }
+        this.createHistories(id, source, now).forEach(batch::add);
+
         session.execute(batch);
 
         return this.getById(id).orElseThrow(IllegalArgumentException::new);

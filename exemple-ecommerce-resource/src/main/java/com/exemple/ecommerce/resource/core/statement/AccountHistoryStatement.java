@@ -1,18 +1,24 @@
 package com.exemple.ecommerce.resource.core.statement;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.mapping.Mapper;
+import com.datastax.driver.mapping.MappingManager;
+import com.exemple.ecommerce.resource.account.model.AccountHistory;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
-import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 public class AccountHistoryStatement extends StatementResource {
@@ -21,24 +27,39 @@ public class AccountHistoryStatement extends StatementResource {
 
     public static final String ID = "id";
 
-    public static final String FIELD = "field";
+    private static final Logger LOG = LoggerFactory.getLogger(AccountHistoryStatement.class);
 
-    public static final String DATE = "date";
+    private final Session session;
 
-    @Autowired
-    private Session session;
-
-    @Autowired
-    public AccountHistoryStatement(Cluster cluster) {
+    public AccountHistoryStatement(Cluster cluster, Session session) {
         super(cluster, TABLE);
+        this.session = session;
     }
 
-    public List<JsonNode> findById(UUID id) {
+    public List<AccountHistory> findById(UUID id) {
 
-        Select select = QueryBuilder.select().json().all().from(ResourceExecutionContext.get().keyspace(), TABLE);
-        select.where(QueryBuilder.eq(ID, id));
+        String keyspace = ResourceExecutionContext.get().keyspace();
+        MappingManager manager = new MappingManager(session);
+        Mapper<AccountHistory> mapper = manager.mapper(AccountHistory.class, keyspace);
 
-        return session.execute(select).all().stream().map(row -> row.get(0, JsonNode.class)).collect(Collectors.toList());
+        Select select = QueryBuilder.select().from(keyspace, TABLE);
+        select.where().and(QueryBuilder.eq(ID, id));
+
+        return mapper.map(session.execute(select)).all();
+    }
+
+    public Collection<Statement> insert(Collection<AccountHistory> accountHistories) {
+
+        PreparedStatement prepared = session
+                .prepare("INSERT INTO " + ResourceExecutionContext.get().keyspace() + ".account_history (id,date,field,value) VALUES (?,?,?,?)");
+
+        return accountHistories.stream()
+
+                .map((AccountHistory history) -> {
+                    LOG.debug("save history account {} {} {}", history.getId(), history.getField(), history.getValue());
+                    return prepared.bind(history.getId(), history.getDate(), history.getField(), history.getValue());
+                }).collect(Collectors.toList());
+
     }
 
 }

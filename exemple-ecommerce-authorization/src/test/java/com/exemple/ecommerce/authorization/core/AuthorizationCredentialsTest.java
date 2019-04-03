@@ -147,4 +147,14 @@ public class AuthorizationCredentialsTest extends AbstractTestNGSpringContextTes
 
     }
 
+    @Test(dependsOnMethods = "credentialsSuccess")
+    public void tokenKey() {
+
+        Response response = requestSpecification.auth().basic("resource", "secret").get(restTemplate.getRootUri() + "/oauth/token_key");
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
+        assertThat(response.jsonPath().get("alg"), is(notNullValue()));
+        assertThat(response.jsonPath().get("value"), is(notNullValue()));
+    }
+
 }
