@@ -17,7 +17,7 @@ class LoginServiceResourceAspect {
     @Autowired
     private LoginServiceResource loginServiceResource
 
-    @Around("execution(public void com.exemple.ecommerce.resource.login.LoginResource.save(*, *)) && args (id,source)")
+    @Around("execution(public void com.exemple.ecommerce.resource.account.AccountLoginResource.save(*, *)) && args (id,source)")
     void saveLogin(ProceedingJoinPoint joinPoint, UUID id, JsonNode source) {
 
         if (source != null) {
@@ -30,8 +30,8 @@ class LoginServiceResourceAspect {
 
         joinPoint.proceed(id, source)
     }
-    
-    @Around("execution(public void com.exemple.ecommerce.resource.login.LoginResource.update(*, *)) && args (id,source)")
+
+    @Around("execution(public void com.exemple.ecommerce.resource.account.AccountLoginResource.update(*, *)) && args (id,source)")
     void updateLogin(ProceedingJoinPoint joinPoint, UUID id, JsonNode source) {
 
         if (source != null) {

@@ -5,7 +5,8 @@ CREATE TYPE address (
     city text,
     zip text,
     floor int,
-	enable boolean
+	enable boolean,
+	note text
 );
 
 CREATE TYPE child (

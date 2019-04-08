@@ -12,10 +12,10 @@ import com.exemple.ecommerce.customer.account.validation.AccountValidation;
 import com.exemple.ecommerce.customer.core.CustomerExecutionContext;
 import com.exemple.ecommerce.event.model.EventData;
 import com.exemple.ecommerce.event.model.EventType;
+import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
+import com.exemple.ecommerce.resource.account.exception.AccountLoginResourceException;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
-import com.exemple.ecommerce.resource.login.LoginResource;
-import com.exemple.ecommerce.resource.login.exception.LoginResourceException;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -26,7 +26,7 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountResource accountResource;
 
-    private LoginResource loginResource;
+    private AccountLoginResource accountloginResource;
 
     private AccountValidation accountValidation;
 
@@ -34,10 +34,10 @@ public class AccountServiceImpl implements AccountService {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public AccountServiceImpl(AccountResource accountResource, LoginResource loginResource, AccountValidation accountValidation,
+    public AccountServiceImpl(AccountResource accountResource, AccountLoginResource accountloginResource, AccountValidation accountValidation,
             SchemaFilter schemaFilter, ApplicationEventPublisher applicationEventPublisher) {
         this.accountResource = accountResource;
-        this.loginResource = loginResource;
+        this.accountloginResource = accountloginResource;
         this.accountValidation = accountValidation;
         this.schemaFilter = schemaFilter;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -51,8 +51,8 @@ public class AccountServiceImpl implements AccountService {
         UUID id = UUID.randomUUID();
 
         try {
-            loginResource.save(id, source);
-        } catch (LoginResourceException e) {
+            accountloginResource.save(id, source);
+        } catch (AccountLoginResourceException e) {
             throw new AccountServiceException(e);
         }
 
@@ -76,8 +76,8 @@ public class AccountServiceImpl implements AccountService {
         accountValidation.validate(source, old);
 
         try {
-            loginResource.update(id, source);
-        } catch (LoginResourceException e) {
+            accountloginResource.update(id, source);
+        } catch (AccountLoginResourceException e) {
             throw new AccountServiceException(e);
         }
 

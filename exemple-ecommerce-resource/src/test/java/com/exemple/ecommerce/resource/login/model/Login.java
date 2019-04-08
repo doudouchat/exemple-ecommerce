@@ -2,22 +2,20 @@ package com.exemple.ecommerce.resource.login.model;
 
 public class Login {
 
-    private Object email;
+    private Object login;
 
     private Object password;
 
-    private Object lastname;
-
-    private Object fid;
+    private Object id;
 
     private Object enable;
 
-    public Object getEmail() {
-        return email;
+    public Object getLogin() {
+        return login;
     }
 
-    public void setEmail(Object email) {
-        this.email = email;
+    public void setLogin(Object login) {
+        this.login = login;
     }
 
     public Object getPassword() {
@@ -28,14 +26,6 @@ public class Login {
         this.password = password;
     }
 
-    public Object getLastname() {
-        return lastname;
-    }
-
-    public void setLastname(Object lastname) {
-        this.lastname = lastname;
-    }
-
     public Object getEnable() {
         return enable;
     }
@@ -44,12 +34,12 @@ public class Login {
         this.enable = enable;
     }
 
-    public Object getFid() {
-        return fid;
+    public Object getId() {
+        return id;
     }
 
-    public void setFid(Object fid) {
-        this.fid = fid;
+    public void setId(Object id) {
+        this.id = id;
     }
 
 }

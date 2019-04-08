@@ -1,8 +1,8 @@
-package com.exemple.ecommerce.resource.login.exception;
+package com.exemple.ecommerce.resource.account.exception;
 
 import java.text.MessageFormat;
 
-public class LoginResourceExistException extends LoginResourceException {
+public class AccountLoginResourceExistException extends AccountLoginResourceException {
 
     protected static final String EXCEPTION_MESSAGE = "Login {0} already exists";
 
@@ -10,7 +10,7 @@ public class LoginResourceExistException extends LoginResourceException {
 
     private final String login;
 
-    public LoginResourceExistException(String login) {
+    public AccountLoginResourceExistException(String login) {
         super(MessageFormat.format(EXCEPTION_MESSAGE, login));
         this.login = login;
     }

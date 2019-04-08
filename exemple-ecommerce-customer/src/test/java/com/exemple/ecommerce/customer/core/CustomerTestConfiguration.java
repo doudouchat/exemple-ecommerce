@@ -4,6 +4,7 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
@@ -16,6 +17,11 @@ public class CustomerTestConfiguration extends CustomerConfiguration {
     @Bean
     public AccountResource accountResource() {
         return Mockito.mock(AccountResource.class);
+    }
+
+    @Bean
+    public AccountLoginResource accountLoginResource() {
+        return Mockito.mock(AccountLoginResource.class);
     }
 
     @Bean
