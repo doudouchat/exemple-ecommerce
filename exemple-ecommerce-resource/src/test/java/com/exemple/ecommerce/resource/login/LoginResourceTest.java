@@ -49,7 +49,7 @@ public class LoginResourceTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    @Test(dependsOnMethods = "save")
+    @Test
     public void get() {
 
         JsonNode login0 = resource.get((String) login.getLogin()).get();
