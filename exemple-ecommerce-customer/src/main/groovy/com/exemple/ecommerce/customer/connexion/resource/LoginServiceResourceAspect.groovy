@@ -44,4 +44,18 @@ class LoginServiceResourceAspect {
 
         joinPoint.proceed(id, source)
     }
+    
+    @Around("execution(public void com.exemple.ecommerce.resource.login.LoginResource.save(*, *)) && args (login,source)")
+    void updateLogin(ProceedingJoinPoint joinPoint, String login, JsonNode source) {
+
+        if (source != null) {
+
+            def jsonSlurper = new JsonSlurper()
+            def sourceJson = jsonSlurper.parseText(source.toString())
+
+            source =  JsonNodeUtils.create(loginServiceResource.updateLogin(new JsonBuilder(sourceJson).content))
+        }
+
+        joinPoint.proceed(login, source)
+    }
 }

@@ -87,6 +87,9 @@ CREATE TABLE account_schema (
 CREATE INDEX IF NOT EXISTS account_status
 	ON account ( status );
 	
+CREATE INDEX IF NOT EXISTS login_id
+	ON login ( id );
+	
 CREATE TABLE stock ( 
 	store text,
 	product text,

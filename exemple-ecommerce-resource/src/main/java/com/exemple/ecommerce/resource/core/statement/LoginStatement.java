@@ -1,5 +1,9 @@
 package com.exemple.ecommerce.resource.core.statement;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
@@ -50,6 +54,14 @@ public class LoginStatement extends StatementResource {
         update.where().and(QueryBuilder.eq(LOGIN, login));
 
         return update;
+    }
+
+    public List<JsonNode> findById(UUID id) {
+
+        Select select = QueryBuilder.select().json().from(ResourceExecutionContext.get().keyspace(), LOGIN);
+        select.where().and(QueryBuilder.eq(ID, id));
+
+        return session.execute(select).all().stream().map((Row row) -> row.get(0, JsonNode.class)).collect(Collectors.toList());
     }
 
 }

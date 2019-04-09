@@ -43,4 +43,14 @@ class LoginServiceResourceImpl implements LoginServiceResource {
         }
         return login
     }
+    
+    @Override
+    Map<String, ?> updateLogin(Map<String, ?> source) {
+
+        Map<String, ?> login = new HashMap()
+        if( source.containsKey(PASSWORD)) {
+            login.put(PASSWORD, "{bcrypt}" + BCrypt.hashpw(source.get(PASSWORD), BCrypt.gensalt()))
+        }
+        return login
+    }
 }
