@@ -34,6 +34,16 @@
 				<ignoreVersion type="regex">(?i).*beta(?:-?\d+)?</ignoreVersion>
 			</ignoreVersions>
 		</rule>
+		<rule groupId="org.springframework" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">5.2.0.M1</ignoreVersion>
+			</ignoreVersions>
+		</rule>
+		<rule groupId="org.springframework.kafka" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">2.3.0.M1</ignoreVersion>
+			</ignoreVersions>
+		</rule>
 		<rule groupId="org.springframework.security" comparisonMethod="maven">
 			<ignoreVersions>
 				<ignoreVersion type="regex">5.2.0.M1</ignoreVersion>
