@@ -62,7 +62,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            authorizationResourceKeyspace.initKeyspace(authentication.getOAuth2Request().getResourceIds());
+            authorizationResourceKeyspace.initKeyspace(authentication.getOAuth2Request());
 
             return super.attemptAuthentication(request, response);
 

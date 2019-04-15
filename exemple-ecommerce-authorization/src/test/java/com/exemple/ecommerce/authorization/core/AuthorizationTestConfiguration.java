@@ -17,17 +17,19 @@ import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.authorization.core.authentication.AuthenticationConfiguration;
 import com.exemple.ecommerce.authorization.core.client.AuthorizationClientTestConfiguration;
 import com.exemple.ecommerce.authorization.core.cors.AuthorizationCorsConfiguration;
+import com.exemple.ecommerce.authorization.core.feature.FeatureTestConfiguration;
 import com.exemple.ecommerce.authorization.core.property.AuthorizationPropertyConfiguration;
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
 import com.exemple.ecommerce.authorization.core.session.HazelcastHttpSessionConfiguration;
 import com.exemple.ecommerce.authorization.core.swagger.SwaggerConfiguration;
 import com.exemple.ecommerce.authorization.core.token.AuthorizationTokenConfiguration;
+import com.exemple.ecommerce.resource.account.AccountResource;
 import com.exemple.ecommerce.resource.login.LoginResource;
 
 @Configuration
 @Import({ AuthorizationConfiguration.class, AuthenticationConfiguration.class, AuthorizationTokenConfiguration.class,
         HazelcastHttpSessionConfiguration.class, SwaggerConfiguration.class, AuthorizationCorsConfiguration.class,
-        AuthorizationClientTestConfiguration.class })
+        AuthorizationClientTestConfiguration.class, FeatureTestConfiguration.class })
 @ComponentScan(basePackageClasses = AuthorizationResourceKeyspace.class)
 @EnableAutoConfiguration
 public class AuthorizationTestConfiguration extends AuthorizationPropertyConfiguration {
@@ -35,6 +37,11 @@ public class AuthorizationTestConfiguration extends AuthorizationPropertyConfigu
     @Bean
     public LoginResource loginResource() {
         return Mockito.mock(LoginResource.class);
+    }
+
+    @Bean
+    public AccountResource accountResource() {
+        return Mockito.mock(AccountResource.class);
     }
 
     @Bean

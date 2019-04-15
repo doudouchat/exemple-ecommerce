@@ -30,4 +30,9 @@
 			<class name="com.exemple.ecommerce.authorization.core.AuthorizationPasswordTest" />
 		</classes>
 	</test>
+	<test name="ut password">
+		<packages>
+			<package name="com.exemple.ecommerce.authorization.password" />
+		</packages>
+	</test>
 </suite>

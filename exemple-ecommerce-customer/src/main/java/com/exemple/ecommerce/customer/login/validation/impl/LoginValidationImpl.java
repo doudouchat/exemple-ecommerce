@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import com.exemple.ecommerce.customer.core.CustomerExecutionContext;
 import com.exemple.ecommerce.customer.login.validation.LoginValidation;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,9 +16,8 @@ class LoginValidationImpl implements LoginValidation {
     private SchemaValidation schemaValidation;
 
     @Override
-    public void validate(JsonNode form, JsonNode old) {
+    public void validate(JsonNode form, JsonNode old, String app, String version) {
 
-        CustomerExecutionContext context = CustomerExecutionContext.get();
-        schemaValidation.validate(context.getApp(), context.getVersion(), "login", form, old);
+        schemaValidation.validate(app, version, "login", form, old);
     }
 }

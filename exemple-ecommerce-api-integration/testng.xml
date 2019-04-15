@@ -11,6 +11,7 @@
 			<class name="com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT" />
 			<class name="com.exemple.ecommerce.api.integration.account.v1.AccountFailureIT" />
 			<class name="com.exemple.ecommerce.api.integration.login.v1.LoginIT" />
+			<class name="com.exemple.ecommerce.api.integration.password.v1.PasswordIT" />
 		</classes>
 	</test>
 	<test name="stock">

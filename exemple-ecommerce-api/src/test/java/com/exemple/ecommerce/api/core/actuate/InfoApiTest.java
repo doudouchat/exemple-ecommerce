@@ -9,14 +9,14 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 
 public class InfoApiTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     private static final String URL = "/";

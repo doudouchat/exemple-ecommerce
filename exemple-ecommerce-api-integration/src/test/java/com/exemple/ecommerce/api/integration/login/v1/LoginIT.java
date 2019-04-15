@@ -17,7 +17,7 @@ import io.restassured.response.Response;
 
 public class LoginIT {
 
-    private static final String URL = "/ws/v1/login";
+    public static final String URL = "/ws/v1/login";
 
     @Test(dependsOnMethods = "com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.connexion")
     public void exist() {

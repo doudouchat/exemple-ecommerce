@@ -16,14 +16,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.customer.account.model.Account;
-import com.exemple.ecommerce.customer.core.CustomerExecutionContext;
 import com.exemple.ecommerce.customer.core.CustomerTestConfiguration;
 import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
@@ -51,20 +49,15 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private SchemaFilter schemaFilter;
 
+    private static final String APP = "default";
+
+    private static final String VERSION = "default";
+
     @BeforeMethod
     private void before() {
 
-        CustomerExecutionContext.get().setApp("default");
-        CustomerExecutionContext.get().setVersion("default");
-
         Mockito.reset(resource, accountloginResource, schemaFilter);
 
-    }
-
-    @AfterClass
-    private void excutionContextDestroy() {
-
-        CustomerExecutionContext.destroy();
     }
 
     @Test
@@ -82,7 +75,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
                 schemaFilter.filter(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(JsonNode.class)))
                 .thenReturn(JsonNodeUtils.create(model));
 
-        JsonNode account = service.save(JsonNodeUtils.create(model));
+        JsonNode account = service.save(JsonNodeUtils.create(model), APP, VERSION);
         assertThat(account, is(notNullValue()));
 
         assertThat(account, hasJsonField("email", "jean.dupont@gmail.com"));
@@ -103,7 +96,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
         model.setLastname("Dupont");
         model.setFirstname("Jean");
 
-        service.save(JsonNodeUtils.create(model));
+        service.save(JsonNodeUtils.create(model), APP, VERSION);
     }
 
     @Test
@@ -121,7 +114,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
                 schemaFilter.filter(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class), Mockito.any(JsonNode.class)))
                 .thenReturn(JsonNodeUtils.create(model));
 
-        JsonNode account = service.save(id, JsonNodeUtils.create(model));
+        JsonNode account = service.save(id, JsonNodeUtils.create(model), APP, VERSION);
 
         // Mockito.verify(resource).get(Mockito.eq(id));
         // Mockito.verify(resource).update(Mockito.eq(id), Mockito.any(JsonNode.class));
@@ -143,7 +136,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
         Map<String, Object> model = new HashMap<>();
 
         try {
-            service.save(UUID.randomUUID(), JsonNodeUtils.create(model));
+            service.save(UUID.randomUUID(), JsonNodeUtils.create(model), APP, VERSION);
         } catch (ValidationException e) {
 
             e.getAllExceptions().stream().map(exeception -> exeception.getMessage()).forEach(m -> LOG.debug(m));
@@ -165,7 +158,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
                 .thenReturn(JsonNodeUtils.create(model));
         Mockito.when(resource.get(Mockito.eq(id))).thenReturn(Optional.of(JsonNodeUtils.create(model)));
 
-        JsonNode account = service.get(id);
+        JsonNode account = service.get(id, APP, VERSION);
         assertThat(account, is(notNullValue()));
 
         assertThat(account, hasJsonField("email", "jean.dupont@gmail.com"));
@@ -185,7 +178,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
 
         Mockito.when(resource.get(Mockito.eq(id))).thenReturn(Optional.empty());
 
-        service.get(id);
+        service.get(id, APP, VERSION);
 
     }
 

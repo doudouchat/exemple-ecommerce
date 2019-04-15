@@ -10,15 +10,15 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.actuate.HealthApiTest;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 
 public class CorsResponseFilterTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     @Test

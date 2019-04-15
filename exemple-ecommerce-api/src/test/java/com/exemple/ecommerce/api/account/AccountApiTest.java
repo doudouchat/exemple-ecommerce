@@ -29,8 +29,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
@@ -42,7 +42,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     @Autowired
@@ -62,7 +62,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
         UUID id = UUID.randomUUID();
 
-        Mockito.when(service.get(Mockito.eq(id))).thenReturn(JsonNodeUtils.init("email"));
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
 
         Response response = target(URL + "/" + id).request(MediaType.APPLICATION_JSON)
 
@@ -70,7 +70,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .get();
 
-        Mockito.verify(service).get(id);
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.getEntity(), is(notNullValue()));
@@ -102,8 +102,9 @@ public class AccountApiTest extends JerseySpringSupport {
 
         UUID id = UUID.randomUUID();
 
-        Mockito.when(service.get(Mockito.eq(id))).thenReturn(JsonNodeUtils.create(Collections.singletonMap("lastname", null)));
-        Mockito.when(service.save(Mockito.eq(id), Mockito.any(JsonNode.class)))
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1")))
+                .thenReturn(JsonNodeUtils.create(Collections.singletonMap("lastname", null)));
+        Mockito.when(service.save(Mockito.eq(id), Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1")))
                 .thenReturn(JsonNodeUtils.create(Collections.singletonMap("lastname", "Dupond")));
 
         Map<String, Object> patch = new HashMap<>();
@@ -117,8 +118,8 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .method("PATCH", Entity.json(MAPPER.writeValueAsString(Collections.singletonList(patch))));
 
-        Mockito.verify(service).save(Mockito.eq(id), Mockito.any(JsonNode.class));
-        Mockito.verify(service).get(Mockito.eq(id));
+        Mockito.verify(service).save(Mockito.eq(id), Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
 
@@ -134,7 +135,7 @@ public class AccountApiTest extends JerseySpringSupport {
         patch.put("path", "/lastname");
         patch.put("value", "Dupond");
 
-        Mockito.when(service.get(Mockito.eq(id))).thenReturn(JsonNodeUtils.init());
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init());
 
         Response response = target(URL + "/" + id).property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true).request(MediaType.APPLICATION_JSON)
 
@@ -142,7 +143,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .method("PATCH", Entity.json(MAPPER.writeValueAsString(Collections.singletonList(patch))));
 
-        // Mockito.verify(service).get(Mockito.eq(id));
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
         assertThat(response.getEntity(), is(notNullValue()));
@@ -154,7 +155,8 @@ public class AccountApiTest extends JerseySpringSupport {
 
         UUID id = UUID.randomUUID();
 
-        Mockito.when(service.save(Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.create(Collections.singletonMap("id", id)));
+        Mockito.when(service.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1")))
+                .thenReturn(JsonNodeUtils.create(Collections.singletonMap("id", id)));
 
         Response response = target(URL).request(MediaType.APPLICATION_JSON)
 
@@ -162,7 +164,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
 
-        Mockito.verify(service).save(Mockito.any(JsonNode.class));
+        Mockito.verify(service).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
         URI baseUri = target(URL).getUri();
@@ -209,7 +211,7 @@ public class AccountApiTest extends JerseySpringSupport {
     @Test(dataProvider = "serviceFailures")
     public void createFailure(Exception exception, Status expectedStatus) throws Exception {
 
-        Mockito.when(service.save(Mockito.any(JsonNode.class))).thenThrow(exception);
+        Mockito.when(service.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"))).thenThrow(exception);
 
         Response response = target(URL).request(MediaType.APPLICATION_JSON)
 
@@ -217,7 +219,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
 
-        Mockito.verify(service).save(Mockito.any(JsonNode.class));
+        Mockito.verify(service).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(expectedStatus.getStatusCode()));
         assertThat(response.getEntity(), is(notNullValue()));
@@ -229,7 +231,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
         UUID id = UUID.randomUUID();
 
-        Mockito.when(service.get(Mockito.eq(id))).thenThrow(new AccountServiceNotFoundException());
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenThrow(new AccountServiceNotFoundException());
 
         Response response = target(URL + "/" + id).request(MediaType.APPLICATION_JSON)
 
@@ -237,7 +239,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
                 .get();
 
-        Mockito.verify(service).get(id);
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
 

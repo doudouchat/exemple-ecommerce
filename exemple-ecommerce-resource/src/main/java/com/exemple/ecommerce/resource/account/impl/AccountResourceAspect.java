@@ -5,18 +5,13 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
 import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
-import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -53,12 +48,6 @@ public class AccountResourceAspect {
         });
     }
 
-    @After("execution(public com.fasterxml.jackson.databind.JsonNode com.exemple.ecommerce.resource.account.AccountResource.update(*, *))")
-    public void afterUpdate(JoinPoint joinPoint) {
-
-        ResourceExecutionContext.get().setAccount((UUID) joinPoint.getArgs()[0], null);
-    }
-
     @AfterReturning(pointcut = "execution(public com.fasterxml.jackson.databind.JsonNode "
             + "com.exemple.ecommerce.resource.account.AccountResource.*(..))", returning = "source")
     public void afterReturning(JsonNode source) {
@@ -73,21 +62,6 @@ public class AccountResourceAspect {
 
         source.ifPresent(JsonNodeFilterUtils::clean);
 
-    }
-
-    @SuppressWarnings("unchecked")
-    @Around("execution(public java.util.Optional<com.fasterxml.jackson.databind.JsonNode> "
-            + "com.exemple.ecommerce.resource.account.AccountResource.get(*)) && args(id)")
-    public Optional<JsonNode> get(ProceedingJoinPoint joinPoint, UUID id) throws Throwable {
-
-        ResourceExecutionContext context = ResourceExecutionContext.get();
-
-        if (context.getAccount(id) == null) {
-
-            context.setAccount(id, ((Optional<JsonNode>) joinPoint.proceed()).orElse(null));
-        }
-
-        return Optional.ofNullable(context.getAccount(id));
     }
 
 }

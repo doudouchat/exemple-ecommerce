@@ -15,6 +15,8 @@ authorization:
       location: file:${project.parent.basedir}/conf/authorization/mytest.jks
       alias: mytest
       password: mypass
+   kafka:
+      bootstrap-servers: localhost:${kafka.port}
 store:
    zookeeper:
       host: 127.0.0.1:${zmp.clientPort}
@@ -24,3 +26,6 @@ application:
 api:
    authorization:
       path: ${authorization.host}:${application.port}/${authorization.contextpath}
+   hazelcast:
+      port: ${hazelcast.port}
+      member: 127.0.0.1:${hazelcast.port}

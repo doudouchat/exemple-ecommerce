@@ -64,18 +64,18 @@ public class IntegrationTestConfiguration {
         detail.setKeyspace("test");
         detail.setCompany("test_company");
 
-        Set<String> filter = new HashSet<>();
-        filter.add("id");
-        filter.add("lastname");
-        filter.add("firstname");
-        filter.add("email");
-        filter.add("optin_mobile");
-        filter.add("civility");
-        filter.add("mobile");
-        filter.add("creation_date");
-        filter.add("birthday");
-        filter.add("addresses[*[city,street]]");
-        filter.add("cgus[code,version]");
+        Set<String> accountFilter = new HashSet<>();
+        accountFilter.add("id");
+        accountFilter.add("lastname");
+        accountFilter.add("firstname");
+        accountFilter.add("email");
+        accountFilter.add("optin_mobile");
+        accountFilter.add("civility");
+        accountFilter.add("mobile");
+        accountFilter.add("creation_date");
+        accountFilter.add("birthday");
+        accountFilter.add("addresses[*[city,street]]");
+        accountFilter.add("cgus[code,version]");
         Map<String, Set<String>> dateTime = Collections.singletonMap("date_time", Collections.singleton("creation_date"));
         Map<String, Set<String>> rules = new HashMap<>();
         rules.put("unique", Collections.singleton("/email"));
@@ -84,17 +84,32 @@ public class IntegrationTestConfiguration {
 
         ResourceExecutionContext.get().setKeyspace(detail.getKeyspace());
 
-        ResourceSchema resourceSchema = new ResourceSchema();
-        resourceSchema.setApplication(APP_HEADER_VALUE);
-        resourceSchema.setVersion(VERSION_HEADER_VALUE);
-        resourceSchema.setResource("account");
-        resourceSchema.setContent(IOUtils.toByteArray(new ClassPathResource("account.json").getInputStream()));
-        resourceSchema.setFilters(filter);
-        resourceSchema.setTransforms(dateTime);
-        resourceSchema.setRules(rules);
+        ResourceSchema accountSchema = new ResourceSchema();
+        accountSchema.setApplication(APP_HEADER_VALUE);
+        accountSchema.setVersion(VERSION_HEADER_VALUE);
+        accountSchema.setResource("account");
+        accountSchema.setContent(IOUtils.toByteArray(new ClassPathResource("account.json").getInputStream()));
+        accountSchema.setFilters(accountFilter);
+        accountSchema.setTransforms(dateTime);
+        accountSchema.setRules(rules);
 
-        schemaResource.save(resourceSchema);
+        schemaResource.save(accountSchema);
 
+        Set<String> loginFilter = new HashSet<>();
+        loginFilter.add("id");
+        loginFilter.add("enable");
+        loginFilter.add("login");
+
+        ResourceSchema loginSchema = new ResourceSchema();
+        loginSchema.setApplication(APP_HEADER_VALUE);
+        loginSchema.setVersion(VERSION_HEADER_VALUE);
+        loginSchema.setResource("login");
+        loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
+        loginSchema.setFilters(loginFilter);
+        loginSchema.setTransforms(dateTime);
+        loginSchema.setRules(rules);
+
+        schemaResource.save(loginSchema);
         applicationDetailService.put(APP_HEADER_VALUE, detail);
 
     }
@@ -128,6 +143,11 @@ public class IntegrationTestConfiguration {
                 .and()
 
                 .withClient("resource").secret(password).authorizedGrantTypes("client_credentials").authorities("ROLE_TRUSTED_CLIENT")
+
+                .and()
+
+                .withClient("trusted_client").secret(password).authorizedGrantTypes("client_credentials").scopes("xxx").autoApprove("xxx")
+                .authorities("ROLE_TRUSTED_CLIENT").resourceIds(APP_HEADER_VALUE)
 
                 .and().build();
     }

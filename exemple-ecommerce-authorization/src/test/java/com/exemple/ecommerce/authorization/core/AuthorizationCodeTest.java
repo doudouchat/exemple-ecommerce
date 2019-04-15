@@ -6,9 +6,6 @@ import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import java.security.KeyPair;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -25,14 +22,11 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -66,6 +60,9 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private AuthorizationClientBuilder authorizationClientBuilder;
+
+    @Autowired
+    private Algorithm algorithm;
 
     private String xAuthToken;
 
@@ -205,26 +202,8 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    @Value("${authorization.certificat.location}")
-    private String certificateLocation;
-
-    @Value("${authorization.certificat.alias}")
-    private String certificateAlias;
-
-    @Value("${authorization.certificat.password}")
-    private String certificatePassword;
-
-    @Autowired
-    private ResourceLoader resourceLoader;
-
     @DataProvider(name = "loginFailure")
     private Object[][] loginFailure() {
-
-        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(resourceLoader.getResource(certificateLocation),
-                certificatePassword.toCharArray());
-        KeyPair keyPair = keyStoreKeyFactory.getKeyPair(certificateAlias);
-
-        Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) keyPair.getPublic(), (RSAPrivateKey) keyPair.getPrivate());
 
         String accessToken1 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).sign(algorithm);
         String accessToken2 = JWT.create().withExpiresAt(new Date(Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli()))

@@ -55,7 +55,7 @@ public class AccountLoginResourceTest extends AbstractTestNGSpringContextTests {
         this.id = UUID.randomUUID();
 
         account = new Account();
-        account.setEmail("jean.dupont@gmail.com");
+        account.setEmail(UUID.randomUUID() + "@gmail.com");
         account.setLastname("Dupont");
 
         JsonNode source = JsonNodeUtils.create(account);

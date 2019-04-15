@@ -74,6 +74,9 @@ CREATE TABLE IF NOT EXISTS resource_schema (
        
 CREATE INDEX IF NOT EXISTS account_status
 	ON account ( status );
+
+CREATE INDEX IF NOT EXISTS login_id
+	ON login ( id );
 	
 CREATE TABLE IF NOT EXISTS stock ( 
 	store text,

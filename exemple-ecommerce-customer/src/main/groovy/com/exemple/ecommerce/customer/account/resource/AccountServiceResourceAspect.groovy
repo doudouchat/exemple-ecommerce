@@ -5,7 +5,7 @@ import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.springframework.beans.factory.annotation.Autowired
 
-import com.exemple.ecommerce.customer.core.CustomerExecutionContext
+import com.exemple.ecommerce.customer.common.CustomerExecutionContext
 import com.exemple.ecommerce.resource.common.JsonNodeTransformUtils
 import com.exemple.ecommerce.resource.common.JsonNodeUtils
 import com.exemple.ecommerce.resource.schema.SchemaResource

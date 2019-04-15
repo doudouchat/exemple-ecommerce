@@ -3,6 +3,9 @@ package com.exemple.ecommerce.api.core.authorization;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.ws.rs.client.Entity;
@@ -27,8 +30,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -40,7 +43,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration().register(testFilter);
+        return new FeatureConfiguration().register(testFilter);
     }
 
     @Autowired
@@ -140,8 +143,8 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = JWT.create().withClaim("id", id.toString()).withClaim("user_name", "john_doe")
-                .withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("test")
-                .withArrayClaim("scope", new String[] { "account:read" }).sign(algorithm);
+                .withExpiresAt(Date.from(Instant.now().plus(10, ChronoUnit.SECONDS))).withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" })
+                .withAudience("test").withArrayClaim("scope", new String[] { "account:read" }).sign(algorithm);
 
         DecodedJWT jwt = JWT.decode(token);
         String payload = StringUtils.newStringUtf8(Base64.decodeBase64(jwt.getPayload()));
@@ -150,14 +153,14 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
         Mockito.when(responseMock.readEntity(String.class)).thenReturn(payload);
 
-        Mockito.when(service.get(Mockito.eq(id))).thenReturn(JsonNodeUtils.init("email"));
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
         Mockito.when(authorizationService.checkToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(URL + "/" + id).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
-        Mockito.verify(service).get(id);
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
         Mockito.verify(authorizationService).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
@@ -174,7 +177,8 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Algorithm algorithm = Algorithm.HMAC256("secret");
         String token = JWT.create().withClaim("client_id", "test").withArrayClaim("authorities", new String[] { "ROLE_APP" }).withAudience("test")
-                .withArrayClaim("scope", new String[] { "account:create" }).sign(algorithm);
+                .withExpiresAt(Date.from(Instant.now().plus(10, ChronoUnit.SECONDS))).withArrayClaim("scope", new String[] { "account:create" })
+                .sign(algorithm);
 
         DecodedJWT jwt = JWT.decode(token);
         String payload = StringUtils.newStringUtf8(Base64.decodeBase64(jwt.getPayload()));
@@ -183,7 +187,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
         Mockito.when(responseMock.readEntity(String.class)).thenReturn(payload);
 
-        Mockito.when(service.save(Mockito.any(JsonNode.class))).thenReturn(JsonNodeUtils.init("id"));
+        Mockito.when(service.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("id"));
         Mockito.when(authorizationService.checkToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(URL).request(MediaType.APPLICATION_JSON)
@@ -191,8 +195,13 @@ public class AuthorizationTest extends JerseySpringSupport {
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
 
-        Mockito.verify(service).save(Mockito.any(JsonNode.class));
-        Mockito.verify(authorizationService).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
+        target(URL).request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
+                .post(Entity.json(JsonNodeUtils.init("email").toString()));
+
+        Mockito.verify(service, Mockito.times(2)).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(authorizationService, Mockito.times(1)).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
 

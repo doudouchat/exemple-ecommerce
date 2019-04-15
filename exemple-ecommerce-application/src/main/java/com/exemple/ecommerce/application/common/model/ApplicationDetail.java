@@ -12,6 +12,8 @@ public class ApplicationDetail {
     @NotBlank
     private String company;
 
+    private Long expiryTimePassword;
+
     public String getKeyspace() {
         return keyspace;
     }
@@ -28,10 +30,19 @@ public class ApplicationDetail {
         this.company = company;
     }
 
+    public Long getExpiryTimePassword() {
+        return expiryTimePassword;
+    }
+
+    public void setExpiryTimePassword(Long expiryTimePassword) {
+        this.expiryTimePassword = expiryTimePassword;
+    }
+
     @Override
     public String toString() {
 
-        return new ToStringBuilder(this).append("keyspace", keyspace).append("company", company).toString();
+        return new ToStringBuilder(this).append("keyspace", keyspace).append("company", company).append("expiryTimePassword", expiryTimePassword)
+                .toString();
 
     }
 

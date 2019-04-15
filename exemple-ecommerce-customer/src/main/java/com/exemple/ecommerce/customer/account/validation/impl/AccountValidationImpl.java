@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import com.exemple.ecommerce.customer.account.validation.AccountValidation;
-import com.exemple.ecommerce.customer.core.CustomerExecutionContext;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -17,9 +16,8 @@ class AccountValidationImpl implements AccountValidation {
     private SchemaValidation schemaValidation;
 
     @Override
-    public void validate(JsonNode form, JsonNode old) {
+    public void validate(JsonNode form, JsonNode old, String app, String version) {
 
-        CustomerExecutionContext context = CustomerExecutionContext.get();
-        schemaValidation.validate(context.getApp(), context.getVersion(), "account", form, old);
+        schemaValidation.validate(app, version, "account", form, old);
     }
 }

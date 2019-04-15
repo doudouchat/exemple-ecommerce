@@ -45,7 +45,8 @@ CREATE TABLE login (
 	id UUID,
 	login text PRIMARY KEY,
 	password text,
-	enable boolean
+	enable boolean,
+	note text
 );
 
 CREATE TABLE account_history ( 

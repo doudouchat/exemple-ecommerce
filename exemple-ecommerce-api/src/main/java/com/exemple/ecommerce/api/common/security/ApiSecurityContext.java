@@ -67,7 +67,7 @@ public class ApiSecurityContext implements SecurityContext {
 
     public enum Resource {
 
-        ACCOUNT
+        ACCOUNT, LOGIN
     }
 
 }

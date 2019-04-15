@@ -41,7 +41,7 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
     public static String ACCESS_APP_TOKEN = null;
 
-    private Map<String, Object> accountBody;
+    public static Map<String, Object> ACCOUNT_BODY;
 
     @Test
     public void connexion() {
@@ -62,15 +62,15 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
     @Test(dependsOnMethods = "connexion")
     public void createSuccess() {
 
-        accountBody = new HashMap<>();
-        accountBody.put("civility", "Mr");
-        accountBody.put("lastname", "Dupont");
-        accountBody.put("firstname", "Jean");
-        accountBody.put("email", UUID.randomUUID().toString() + "@gmail.com");
-        accountBody.put("password", "mdp");
-        accountBody.put("optin_mobile", true);
-        accountBody.put("mobile", "0610203040");
-        accountBody.put("birthday", "1967-06-15");
+        ACCOUNT_BODY = new HashMap<>();
+        ACCOUNT_BODY.put("civility", "Mr");
+        ACCOUNT_BODY.put("lastname", "Dupont");
+        ACCOUNT_BODY.put("firstname", "Jean");
+        ACCOUNT_BODY.put("email", UUID.randomUUID().toString() + "@gmail.com");
+        ACCOUNT_BODY.put("password", "mdp");
+        ACCOUNT_BODY.put("optin_mobile", true);
+        ACCOUNT_BODY.put("mobile", "0610203040");
+        ACCOUNT_BODY.put("birthday", "1967-06-15");
 
         Map<String, Object> adressesBody = new HashMap<>();
 
@@ -88,13 +88,13 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
         adressesBody.put("holiday1", null);
         adressesBody.put("holiday2", null);
 
-        accountBody.put("addresses", adressesBody);
+        ACCOUNT_BODY.put("addresses", adressesBody);
 
         Map<String, Object> cgu = new HashMap<>();
         cgu.put("code", "code_1");
         cgu.put("version", "v0");
 
-        accountBody.put("cgus", Collections.singleton(cgu));
+        ACCOUNT_BODY.put("cgus", Collections.singleton(cgu));
 
         Response response = JsonRestTemplate.given()
 
@@ -102,7 +102,7 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
                 .header("Authorization", "Bearer " + ACCESS_APP_TOKEN)
 
-                .body(accountBody).post(ACCOUNT_URL);
+                .body(ACCOUNT_BODY).post(ACCOUNT_URL);
 
         assertThat(response.getStatusCode(), is(HttpStatus.CREATED.value()));
 
@@ -115,8 +115,8 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
         Map<String, Object> params = new HashMap<>();
         params.put("grant_type", "password");
-        params.put("username", accountBody.get("email"));
-        params.put("password", accountBody.get("password"));
+        params.put("username", ACCOUNT_BODY.get("email"));
+        params.put("password", ACCOUNT_BODY.get("password"));
         params.put("client_id", "test_user");
         params.put("redirect_uri", "xxx");
 
@@ -139,12 +139,12 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
                 .header("Authorization", "Bearer " + ACCESS_TOKEN).get(ACCOUNT_URL + "/{id}", ID);
 
-        assertThat(response.jsonPath().getString("civility"), is(accountBody.get("civility")));
-        assertThat(response.jsonPath().getString("lastname"), is(accountBody.get("lastname")));
-        assertThat(response.jsonPath().getString("firstname"), is(accountBody.get("firstname")));
-        assertThat(response.jsonPath().getString("email"), is(accountBody.get("email")));
-        assertThat(response.jsonPath().getBoolean("optin_mobile"), is(accountBody.get("optin_mobile")));
-        assertThat(response.jsonPath().getString("birthday"), is(accountBody.get("birthday")));
+        assertThat(response.jsonPath().getString("civility"), is(ACCOUNT_BODY.get("civility")));
+        assertThat(response.jsonPath().getString("lastname"), is(ACCOUNT_BODY.get("lastname")));
+        assertThat(response.jsonPath().getString("firstname"), is(ACCOUNT_BODY.get("firstname")));
+        assertThat(response.jsonPath().getString("email"), is(ACCOUNT_BODY.get("email")));
+        assertThat(response.jsonPath().getBoolean("optin_mobile"), is(ACCOUNT_BODY.get("optin_mobile")));
+        assertThat(response.jsonPath().getString("birthday"), is(ACCOUNT_BODY.get("birthday")));
     }
 
     @Test(dependsOnMethods = "getSuccess")
@@ -237,7 +237,7 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
         assertThat(responseGet.jsonPath().getString("lastname"), is(patch0.get("value")));
         assertThat(responseGet.jsonPath().getString("firstname"), is(patch1.get("value")));
-        assertThat(responseGet.jsonPath().getString("email"), is(this.accountBody.get("email")));
+        assertThat(responseGet.jsonPath().getString("email"), is(ACCOUNT_BODY.get("email")));
 
     }
 

@@ -51,7 +51,7 @@ public class AuthorizationConfiguration extends AuthorizationServerConfigurerAda
 
                         super.validateScope(tokenRequest, client);
 
-                        authorizationResourceKeyspace.initKeyspace(client.getResourceIds());
+                        authorizationResourceKeyspace.initKeyspace(client);
                     }
                 });
     }

@@ -32,6 +32,7 @@ import com.exemple.ecommerce.api.common.PatchUtils;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext.Resource;
+import com.exemple.ecommerce.api.common.security.ApiSecurityContextUtils;
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
@@ -80,16 +81,16 @@ public class AccountApi {
 
             @ApiResponse(description = "Account Data", responseCode = "200", content = @Content(schema = @Schema(ref = ACCOUNT_SCHEMA))),
             @ApiResponse(description = "Account is not found", responseCode = "404"),
-            @ApiResponse(description = "Account is not found accessible", responseCode = "403")
+            @ApiResponse(description = "Account is not accessible", responseCode = "403")
 
     })
     @RolesAllowed("account:read")
     public JsonNode get(@NotNull @PathParam("id") UUID id, @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam)
             throws AccountServiceException {
 
-        checkAuthorization(id);
+        ApiSecurityContextUtils.checkAuthorization(id.toString(), Resource.ACCOUNT, (ApiSecurityContext) servletContext.getSecurityContext());
 
-        return service.get(id);
+        return service.get(id, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
     }
 
@@ -108,7 +109,7 @@ public class AccountApi {
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam, @Context UriInfo uriInfo)
             throws AccountServiceException {
 
-        JsonNode source = service.save(account);
+        JsonNode source = service.save(account, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
         return Response.status(Status.CREATED).location(URI.create(uriInfo.getAbsolutePath() + "/" + source.get(AccountStatement.ID).textValue()))
                 .build();
@@ -124,33 +125,25 @@ public class AccountApi {
 
             @ApiResponse(description = "Account is updated", responseCode = "204"),
             @ApiResponse(description = "Account is not found", responseCode = "404"),
-            @ApiResponse(description = "Account is not found accessible", responseCode = "403")
+            @ApiResponse(description = "Account is not accessible", responseCode = "403")
 
     })
     @RolesAllowed("account:update")
     public Response update(@NotNull @PathParam("id") UUID id, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws AccountServiceException {
 
-        checkAuthorization(id);
+        ApiSecurityContextUtils.checkAuthorization(id.toString(), Resource.ACCOUNT, (ApiSecurityContext) servletContext.getSecurityContext());
 
         schemaValidation.validatePatch(patch);
 
-        JsonNode source = service.get(id);
+        JsonNode source = service.get(id, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
         JsonNode account = PatchUtils.diff(patch, source);
         LOG.debug("account update {}", account);
 
-        service.save(id, account);
+        service.save(id, account, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
         return Response.status(Status.NO_CONTENT).build();
 
-    }
-
-    private void checkAuthorization(UUID id) throws AccountServiceNotAuthorizedException {
-
-        if (!((ApiSecurityContext) servletContext.getSecurityContext()).isAuthorized(id.toString(), Resource.ACCOUNT)) {
-
-            throw new AccountServiceNotAuthorizedException();
-        }
     }
 
     @Provider
@@ -162,24 +155,6 @@ public class AccountApi {
             return Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build();
 
         }
-
-    }
-
-    @Provider
-    public static class AccountServiceNotAuthorizedExceptionMapper implements ExceptionMapper<AccountServiceNotAuthorizedException> {
-
-        @Override
-        public Response toResponse(AccountServiceNotAuthorizedException ex) {
-
-            return Response.status(Status.FORBIDDEN).type(MediaType.APPLICATION_JSON).build();
-
-        }
-
-    }
-
-    private static class AccountServiceNotAuthorizedException extends AccountServiceException {
-
-        private static final long serialVersionUID = 1L;
 
     }
 }

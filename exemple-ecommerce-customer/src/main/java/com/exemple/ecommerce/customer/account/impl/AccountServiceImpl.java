@@ -9,7 +9,6 @@ import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.customer.account.validation.AccountValidation;
-import com.exemple.ecommerce.customer.core.CustomerExecutionContext;
 import com.exemple.ecommerce.event.model.EventData;
 import com.exemple.ecommerce.event.model.EventType;
 import com.exemple.ecommerce.resource.account.AccountLoginResource;
@@ -44,9 +43,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public JsonNode save(JsonNode source) throws AccountServiceException {
+    public JsonNode save(JsonNode source, String app, String version) throws AccountServiceException {
 
-        accountValidation.validate(source, null);
+        accountValidation.validate(source, null, app, version);
 
         UUID id = UUID.randomUUID();
 
@@ -58,22 +57,18 @@ public class AccountServiceImpl implements AccountService {
 
         JsonNode account = accountResource.save(id, source);
 
-        CustomerExecutionContext context = CustomerExecutionContext.get();
-        String app = context.getApp();
-        String version = context.getVersion();
-
         EventData eventData = new EventData(account, ACCOUNT, EventType.CREATE, app, version, ResourceExecutionContext.get().getDate().toString());
         applicationEventPublisher.publishEvent(eventData);
 
-        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
+        return schemaFilter.filter(app, version, ACCOUNT, account);
     }
 
     @Override
-    public JsonNode save(UUID id, JsonNode source) throws AccountServiceException {
+    public JsonNode save(UUID id, JsonNode source, String app, String version) throws AccountServiceException {
 
         JsonNode old = accountResource.get(id).orElseThrow(AccountServiceNotFoundException::new);
 
-        accountValidation.validate(source, old);
+        accountValidation.validate(source, old, app, version);
 
         try {
             accountloginResource.update(id, source);
@@ -83,22 +78,17 @@ public class AccountServiceImpl implements AccountService {
 
         JsonNode account = accountResource.update(id, source);
 
-        CustomerExecutionContext context = CustomerExecutionContext.get();
-        String app = context.getApp();
-        String version = context.getVersion();
-
         EventData eventData = new EventData(account, ACCOUNT, EventType.UPDATE, app, version, ResourceExecutionContext.get().getDate().toString());
         applicationEventPublisher.publishEvent(eventData);
 
-        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
+        return schemaFilter.filter(app, version, ACCOUNT, account);
     }
 
     @Override
-    public JsonNode get(UUID id) throws AccountServiceNotFoundException {
+    public JsonNode get(UUID id, String app, String version) throws AccountServiceNotFoundException {
 
         JsonNode account = accountResource.get(id).orElseThrow(AccountServiceNotFoundException::new);
-        CustomerExecutionContext context = CustomerExecutionContext.get();
 
-        return schemaFilter.filter(context.getApp(), context.getVersion(), ACCOUNT, account);
+        return schemaFilter.filter(app, version, ACCOUNT, account);
     }
 }

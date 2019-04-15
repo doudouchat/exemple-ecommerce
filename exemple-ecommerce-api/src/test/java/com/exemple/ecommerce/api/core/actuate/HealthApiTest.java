@@ -10,8 +10,8 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,7 +19,7 @@ public class HealthApiTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     public static final String URL = "/health";

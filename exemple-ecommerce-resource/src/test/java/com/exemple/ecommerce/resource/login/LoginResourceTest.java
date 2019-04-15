@@ -17,6 +17,7 @@ import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.login.model.Login;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 @ContextConfiguration(classes = { ResourceTestConfiguration.class })
 public class LoginResourceTest extends AbstractTestNGSpringContextTests {
@@ -36,7 +37,7 @@ public class LoginResourceTest extends AbstractTestNGSpringContextTests {
         source.setId(UUID.randomUUID());
         source.setEnable(true);
 
-        login = "jean.dupont@gmail.com";
+        login = UUID.randomUUID() + "@gmail.com";
 
         resource.save(login, JsonNodeUtils.create(source));
 
@@ -50,6 +51,7 @@ public class LoginResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(login0.get(LoginStatement.ID).textValue(), is(source.getId().toString()));
         assertThat(login0.get("password").textValue(), is(source.getPassword()));
         assertThat(login0.get("enable").booleanValue(), is(source.getEnable()));
+        assertThat(login0.path("note").getNodeType(), is(JsonNodeType.MISSING));
     }
 
     @Test

@@ -18,9 +18,9 @@ import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.api.account.AccountApiTest;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.actuate.HealthApiTest;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 
@@ -28,7 +28,7 @@ public class ExceptionApiTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     @Autowired
@@ -73,13 +73,13 @@ public class ExceptionApiTest extends JerseySpringSupport {
 
         UUID id = UUID.randomUUID();
 
-        Mockito.when(service.get(Mockito.eq(id))).thenThrow(new AccountServiceException());
+        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenThrow(new AccountServiceException());
 
         Response response = target(AccountApiTest.URL + "/" + id).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").get();
 
-        Mockito.verify(service).get(id);
+        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.INTERNAL_SERVER_ERROR.getStatusCode()));
 

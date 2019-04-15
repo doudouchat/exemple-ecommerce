@@ -15,3 +15,10 @@ authorization:
       location: file:${project.parent.basedir}/conf/authorization/mytest.jks
       alias: mytest
       password: mypass
+   kafka:
+      bootstrap-servers: localhost:${kafka.port}
+      embedded:
+         dir: ${kafka.broker.logs-dir}
+         port: ${kafka.port}
+   password:
+      expiryTime: 60

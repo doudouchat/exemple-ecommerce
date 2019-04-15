@@ -17,3 +17,6 @@ api:
    swagger:
       authorization:
          path: http://localhost:8084/ExempleAuthorization
+   hazelcast:
+      port: 5705
+      member: 127.0.0.1:5705

@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.api.core.ApiJerseyConfiguration;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.api.stock.model.Stock;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.store.common.InsufficientStockException;
@@ -35,7 +35,7 @@ public class StockApiTest extends JerseySpringSupport {
 
     @Override
     protected ResourceConfig configure() {
-        return new ApiJerseyConfiguration();
+        return new FeatureConfiguration();
     }
 
     @Autowired

@@ -86,6 +86,8 @@ public class AuthenticationConfiguration extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/v2/api-docs/**").permitAll()
 
+                .antMatchers("/ws/**").permitAll()
+
                 .anyRequest().authenticated().and().csrf().disable();
     }
 }

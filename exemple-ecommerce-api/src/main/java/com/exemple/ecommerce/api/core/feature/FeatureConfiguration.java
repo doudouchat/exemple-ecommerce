@@ -1,4 +1,4 @@
-package com.exemple.ecommerce.api.core;
+package com.exemple.ecommerce.api.core.feature;
 
 import java.util.logging.Level;
 
@@ -22,9 +22,9 @@ import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 @ApplicationPath("/ws")
-public class ApiJerseyConfiguration extends ResourceConfig {
+public class FeatureConfiguration extends ResourceConfig {
 
-    public ApiJerseyConfiguration() {
+    public FeatureConfiguration() {
 
         // Resources
         packages(
@@ -55,7 +55,7 @@ public class ApiJerseyConfiguration extends ResourceConfig {
 
                         // swagger
 
-                        .register(new DocumentApiResource())
+                        .register(DocumentApiResource.class)
 
                         // execution context
 
