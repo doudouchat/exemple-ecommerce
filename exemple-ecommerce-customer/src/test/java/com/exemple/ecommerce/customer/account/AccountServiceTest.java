@@ -16,9 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.exemple.ecommerce.customer.account.context.AccountContext;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.customer.account.model.Account;
@@ -57,6 +59,13 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     private void before() {
 
         Mockito.reset(resource, accountloginResource, schemaFilter);
+
+    }
+
+    @AfterClass
+    private void afterClass() {
+
+        AccountContext.destroy();
 
     }
 
@@ -139,7 +148,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
             service.save(UUID.randomUUID(), JsonNodeUtils.create(model), APP, VERSION);
         } catch (ValidationException e) {
 
-            e.getAllExceptions().stream().map(exeception -> exeception.getMessage()).forEach(m -> LOG.debug(m));
+            e.getAllExceptions().stream().map(exception -> exception.getMessage()).forEach(m -> LOG.debug(m));
         }
     }
 
@@ -164,6 +173,18 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
         assertThat(account, hasJsonField("email", "jean.dupont@gmail.com"));
         assertThat(account, hasJsonField("lastname", "Dupont"));
         assertThat(account, hasJsonField("firstname", "Jean"));
+
+    }
+
+    @Test
+    public void getMultiple() throws AccountServiceException {
+
+        UUID id = UUID.randomUUID();
+
+        Mockito.when(resource.get(Mockito.eq(id))).thenReturn(Optional.of(JsonNodeUtils.init()));
+
+        resource.get(id);
+        resource.get(id);
 
     }
 

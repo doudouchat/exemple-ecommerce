@@ -143,7 +143,6 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
     public void get() {
 
         JsonNode account = resource.get(id).get();
-        resource.get(id);
 
         assertThat(account.get("email"), is(this.account.get("email")));
         assertThat(account.get("lastname"), is(this.account.get("lastname")));

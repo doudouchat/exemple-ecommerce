@@ -15,6 +15,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -35,6 +37,7 @@ import com.exemple.ecommerce.api.common.security.ApiSecurityContext.Resource;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContextUtils;
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.account.AccountService;
+import com.exemple.ecommerce.customer.account.context.AccountContext;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
@@ -153,6 +156,17 @@ public class AccountApi {
         public Response toResponse(AccountServiceNotFoundException ex) {
 
             return Response.status(Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).build();
+
+        }
+
+    }
+
+    @Provider
+    public static class AccountContextResponseFilter implements ContainerResponseFilter {
+
+        public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+            
+            AccountContext.destroy();
 
         }
 

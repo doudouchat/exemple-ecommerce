@@ -15,7 +15,7 @@ class AccountValidationAspect {
     @Autowired
     private AccountValidationCustom accountValidationCustom
 
-    @After("execution(public void com.exemple.ecommerce.customer.account.validation.AccountValidation.validate(*, *)) && args(form, old)")
+    @After("execution(public void com.exemple.ecommerce.customer.account.validation.AccountValidation.validate(*, *, ..)) && args(form, old, ..)")
     void validate(JsonNode form, JsonNode old) {
 
         def jsonSlurper = new JsonSlurper()

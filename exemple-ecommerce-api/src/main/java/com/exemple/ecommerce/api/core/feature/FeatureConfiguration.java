@@ -15,7 +15,7 @@ import org.springframework.validation.beanvalidation.MessageSourceResourceBundle
 
 import com.exemple.ecommerce.api.core.authorization.AuthorizationFilter;
 import com.exemple.ecommerce.api.core.filter.CorsResponseFilter;
-import com.exemple.ecommerce.api.core.filter.ExcutionContextResponseFilter;
+import com.exemple.ecommerce.api.core.filter.ExecutionContextResponseFilter;
 import com.exemple.ecommerce.api.core.keyspace.KeyspaceFilter;
 import com.exemple.ecommerce.api.core.listener.ApiEventListener;
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
@@ -59,7 +59,7 @@ public class FeatureConfiguration extends ResourceConfig {
 
                         // execution context
 
-                        .register(ExcutionContextResponseFilter.class)
+                        .register(ExecutionContextResponseFilter.class)
 
                         // listener event
 

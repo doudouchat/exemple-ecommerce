@@ -1,11 +1,5 @@
 package com.exemple.ecommerce.customer.common;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 public final class CustomerExecutionContext {
 
     private static ThreadLocal<CustomerExecutionContext> executionContext = new ThreadLocal<>();
@@ -13,8 +7,6 @@ public final class CustomerExecutionContext {
     private String app;
 
     private String version;
-
-    private final Map<UUID, JsonNode> accounts = new HashMap<>();
 
     private CustomerExecutionContext() {
 
@@ -48,14 +40,6 @@ public final class CustomerExecutionContext {
 
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    public JsonNode getAccount(UUID id) {
-        return accounts.get(id);
-    }
-
-    public void setAccount(UUID id, JsonNode account) {
-        this.accounts.put(id, account);
     }
 
 }
