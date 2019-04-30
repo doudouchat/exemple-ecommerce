@@ -5,6 +5,7 @@
 		<packages>
 			<package name="com.exemple.ecommerce.customer.account" />
 			<package name="com.exemple.ecommerce.customer.login" />
+			<package name="com.exemple.ecommerce.customer.subscription" />
 			<package name="com.exemple.ecommerce.customer.core.validator.rule" />
 		</packages>
 	</test>

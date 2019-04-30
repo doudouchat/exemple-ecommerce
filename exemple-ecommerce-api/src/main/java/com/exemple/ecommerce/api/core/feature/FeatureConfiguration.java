@@ -40,6 +40,8 @@ public class FeatureConfiguration extends ResourceConfig {
                 "com.exemple.ecommerce.api.schema",
                 // login
                 "com.exemple.ecommerce.api.login",
+                // subscription
+                "com.exemple.ecommerce.api.subscription",
                 // stock
                 "com.exemple.ecommerce.api.stock")
 

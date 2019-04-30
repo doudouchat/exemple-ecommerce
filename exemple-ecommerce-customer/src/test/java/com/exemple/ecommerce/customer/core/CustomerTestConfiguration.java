@@ -8,6 +8,7 @@ import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
+import com.exemple.ecommerce.resource.subscription.SubscriptionResource;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 
@@ -42,6 +43,11 @@ public class CustomerTestConfiguration extends CustomerConfiguration {
     @Bean
     public SchemaResource schemaResource() {
         return Mockito.mock(SchemaResource.class);
+    }
+
+    @Bean
+    public SubscriptionResource subscriptionResource() {
+        return Mockito.mock(SubscriptionResource.class);
     }
 
 }

@@ -15,6 +15,7 @@ import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.login.LoginService;
+import com.exemple.ecommerce.customer.subcription.SubscriptionService;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
 import com.exemple.ecommerce.schema.description.SchemaDescription;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
@@ -51,6 +52,11 @@ public class ApiTestConfiguration extends ApiConfiguration {
     @Bean
     public SchemaResource schemaResource() {
         return Mockito.mock(SchemaResource.class);
+    }
+
+    @Bean
+    public SubscriptionService subscriptionService() {
+        return Mockito.mock(SubscriptionService.class);
     }
 
     @Bean(name = "authorizationServiceImpl")

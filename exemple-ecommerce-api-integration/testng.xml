@@ -12,6 +12,7 @@
 			<class name="com.exemple.ecommerce.api.integration.account.v1.AccountFailureIT" />
 			<class name="com.exemple.ecommerce.api.integration.login.v1.LoginIT" />
 			<class name="com.exemple.ecommerce.api.integration.password.v1.PasswordIT" />
+			<class name="com.exemple.ecommerce.api.integration.subscription.v1.SubscriptionIT" />
 		</classes>
 	</test>
 	<test name="stock">

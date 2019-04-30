@@ -106,10 +106,28 @@ public class IntegrationTestConfiguration {
         loginSchema.setResource("login");
         loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
         loginSchema.setFilters(loginFilter);
-        loginSchema.setTransforms(dateTime);
-        loginSchema.setRules(rules);
+        loginSchema.setTransforms(Collections.emptyMap());
+        loginSchema.setRules(Collections.emptyMap());
 
         schemaResource.save(loginSchema);
+
+        Set<String> subscriptionFilter = new HashSet<>();
+        subscriptionFilter.add("email");
+
+        Map<String, Set<String>> subscriptionRules = new HashMap<>();
+        subscriptionRules.put("unique", Collections.singleton("/email"));
+
+        ResourceSchema subscriptionSchema = new ResourceSchema();
+        subscriptionSchema.setApplication(APP_HEADER_VALUE);
+        subscriptionSchema.setVersion(VERSION_HEADER_VALUE);
+        subscriptionSchema.setResource("subscription");
+        subscriptionSchema.setContent(IOUtils.toByteArray(new ClassPathResource("subscription.json").getInputStream()));
+        subscriptionSchema.setFilters(subscriptionFilter);
+        subscriptionSchema.setTransforms(Collections.emptyMap());
+        subscriptionSchema.setRules(subscriptionRules);
+
+        schemaResource.save(subscriptionSchema);
+
         applicationDetailService.put(APP_HEADER_VALUE, detail);
 
     }
@@ -121,8 +139,9 @@ public class IntegrationTestConfiguration {
 
         authorizationClientBuilder
 
-                .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx").scopes("account:create")
-                .autoApprove("account:create").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
+                .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx")
+                .scopes("account:create", "subscription:update", "subscription:read")
+                .autoApprove("account:create", "subscription:update", "subscription:read").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
 
                 .and()
 

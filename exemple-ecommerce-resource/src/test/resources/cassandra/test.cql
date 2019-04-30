@@ -49,6 +49,10 @@ CREATE TABLE login (
 	note text
 );
 
+CREATE TABLE subscription (
+	email text PRIMARY KEY
+);
+
 CREATE TABLE account_history ( 
 	id UUID,
 	field text,

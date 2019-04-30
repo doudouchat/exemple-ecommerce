@@ -8,6 +8,7 @@
 			<package name="com.exemple.ecommerce.resource.login" />
 			<package name="com.exemple.ecommerce.resource.schema" />
 			<package name="com.exemple.ecommerce.resource.stock" />
+			<package name="com.exemple.ecommerce.resource.subscription" />
 		</packages>
 	</test>
 </suite>

@@ -177,7 +177,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    public void getMultiple() throws AccountServiceException {
+    public void getMultiple() {
 
         UUID id = UUID.randomUUID();
 

@@ -47,6 +47,10 @@ CREATE TABLE IF NOT EXISTS login (
 	scopes set<text>
 );
 
+CREATE TABLE IF NOT EXISTS subscription (
+	email text PRIMARY KEY
+);
+
 CREATE TABLE IF NOT EXISTS account_history ( 
 	id UUID,
 	field text,
