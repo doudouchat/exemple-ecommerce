@@ -1,7 +1,6 @@
 package com.exemple.ecommerce.authorization.core.token;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -61,21 +60,7 @@ public class AuthorizationTokenConfiguration {
     public TokenEnhancer tokenEnhancer() {
 
         TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(Arrays.asList((OAuth2AccessToken accessToken, OAuth2Authentication authentication) -> {
-
-            Map<String, Object> additionalInfo = new HashMap<>();
-
-            if (authentication.getPrincipal() instanceof AccountUser) {
-
-                AccountUser user = (AccountUser) authentication.getPrincipal();
-                additionalInfo.put("id", user.getAccount());
-
-            }
-
-            ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
-
-            return accessToken;
-        }, accessTokenConverter()));
+        tokenEnhancerChain.setTokenEnhancers(Collections.singletonList(accessTokenConverter()));
 
         return tokenEnhancerChain;
 

@@ -52,7 +52,7 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
         resourceSchema.setContent(schemaResource);
         resourceSchema.setFilters(Collections.singleton("filter"));
         resourceSchema.setTransforms(Collections.singletonMap("date_time", Collections.singleton("date")));
-        resourceSchema.setRules(Collections.singletonMap("unique", Collections.singleton("email")));
+        resourceSchema.setRules(Collections.singletonMap("login", Collections.singleton("email")));
 
         resource.save(resourceSchema);
 
@@ -152,7 +152,7 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
 
         Map<String, Set<String>> filter = resource.getRule("app1", "v1", "account");
 
-        assertThat(filter.get("unique"), hasItem("email"));
+        assertThat(filter.get("login"), hasItem("email"));
 
     }
 

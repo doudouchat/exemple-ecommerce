@@ -32,7 +32,7 @@
 		"email": {
 			"type": "string",
 			"format": "email",
-			"unique": true
+			"login": true
 		},
 		"civility": {
 			"type": "string",

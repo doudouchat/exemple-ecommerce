@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.Mockito;
@@ -54,7 +53,7 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
 
     private String accessTokenBack;
 
-    private UUID id;
+    private String login;
 
     @Autowired
     private LoginResource resource;
@@ -99,11 +98,9 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
     @Test
     public void passwordSuccess() {
 
-        String login = "jean.dupond@gmail.com";
-        id = UUID.randomUUID();
+        login = "jean.dupond@gmail.com";
 
         Map<String, Object> account = new HashMap<>();
-        account.put("id", id);
         account.put("login", login);
         account.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
         account.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
@@ -166,7 +163,7 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         JWTPartsParser parser = new JWTParser();
         Payload payload = parser.parsePayload(response.getBody().print());
 
-        assertThat(payload.getClaim("id").asString(), is(this.id.toString()));
+        assertThat(payload.getClaim("user_name").asString(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1"));
         assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_2", "ROLE_1"));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));

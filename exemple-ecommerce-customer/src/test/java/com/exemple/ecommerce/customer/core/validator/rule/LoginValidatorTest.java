@@ -22,10 +22,10 @@ import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ContextConfiguration(classes = { CustomerTestConfiguration.class })
-public class UniqueValidatorTest extends AbstractTestNGSpringContextTests {
+public class LoginValidatorTest extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private UniqueValidator uniqueValidator;
+    private LoginValidator loginValidator;
 
     @Autowired
     private LoginResource loginResource;
@@ -59,11 +59,11 @@ public class UniqueValidatorTest extends AbstractTestNGSpringContextTests {
 
         ValidationException validationException = new ValidationException();
 
-        uniqueValidator.validate("/email", JsonNodeUtils.create(model), old, validationException);
+        loginValidator.validate("/email", JsonNodeUtils.create(model), old, validationException);
 
         assertThat(validationException.getAllExceptions().size(), is(1));
         assertThat(validationException.getAllExceptions().get(0).getPath(), is("/email"));
-        assertThat(validationException.getAllExceptions().get(0).getCode(), is("unique"));
+        assertThat(validationException.getAllExceptions().get(0).getCode(), is("login"));
 
         // Mockito.verify(loginResource.get(Mockito.eq((String) model.getEmail())));
     }
@@ -99,7 +99,7 @@ public class UniqueValidatorTest extends AbstractTestNGSpringContextTests {
 
         Mockito.when(loginResource.get(Mockito.eq((String) model.get("email")))).thenReturn(response);
 
-        uniqueValidator.validate("/email", JsonNodeUtils.create(model), old, validationException);
+        loginValidator.validate("/email", JsonNodeUtils.create(model), old, validationException);
 
         assertThat(validationException.getAllExceptions().size(), is(expectedExceptionSize));
 

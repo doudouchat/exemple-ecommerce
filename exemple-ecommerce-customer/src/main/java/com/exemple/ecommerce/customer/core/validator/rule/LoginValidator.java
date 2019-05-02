@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 @Component
-public class UniqueValidator implements ValidatorService {
+public class LoginValidator implements ValidatorService {
 
     @Autowired
     private LoginService loginService;
@@ -30,7 +30,7 @@ public class UniqueValidator implements ValidatorService {
 
             if ((oldUnique == null || !unique.equals(oldUnique)) && loginService.exist(unique.textValue())) {
 
-                ValidationExceptionModel exception = new ValidationExceptionModel(path, "unique",
+                ValidationExceptionModel exception = new ValidationExceptionModel(path, "login",
                         "[".concat(unique.textValue()).concat("] already exists"));
 
                 validationException.add(exception);

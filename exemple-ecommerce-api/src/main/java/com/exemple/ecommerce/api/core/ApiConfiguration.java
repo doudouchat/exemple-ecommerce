@@ -29,7 +29,7 @@ public class ApiConfiguration {
 
     public static final String JNDI_NAME = "java:comp/env/exemple-ecommerce-configuration";
 
-    public static final String AVAILABLE_TOKENS = "api.available.tokens";
+    public static final String TOKEN_BLACK_LIST = "token.black_list";
 
     @Value("${api.hazelcast.port}")
     private int port;
@@ -63,7 +63,7 @@ public class ApiConfiguration {
         config.getNetworkConfig().setPort(port);
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
-        config.getMapConfig(AVAILABLE_TOKENS);
+        config.getMapConfig(TOKEN_BLACK_LIST);
 
         return Hazelcast.newHazelcastInstance(config);
     }

@@ -87,7 +87,7 @@ public class SubscriptionIT {
                 .body(Collections.emptyMap()).put(URL + "/{email}", AccountNominalIT.ACCOUNT_BODY.get("email"));
 
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST.value()));
-        assertThat(response.jsonPath().getList("code").get(0), is("unique"));
+        assertThat(response.jsonPath().getList("code").get(0), is("login"));
         assertThat(response.jsonPath().getList("path").get(0), is("/email"));
 
     }

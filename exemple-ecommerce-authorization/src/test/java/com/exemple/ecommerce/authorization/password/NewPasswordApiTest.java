@@ -148,7 +148,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    private UUID id;
+    private String login;
 
     private String token;
 
@@ -158,8 +158,8 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
         String accessToken = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_TRUSTED_CLIENT" }).withAudience("app1", "app2")
                 .withClaim("client_id", "test").sign(algorithm);
 
-        String login = "jean.dupond@gmail.com";
-        id = UUID.randomUUID();
+        login = "jean.dupond@gmail.com";
+        UUID id = UUID.randomUUID();
 
         Map<String, Object> account = new HashMap<>();
         account.put("id", id);
@@ -201,7 +201,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
         JWTPartsParser parser = new JWTParser();
         Payload payload = parser.parsePayload(response.getBody().print());
 
-        assertThat(payload.getClaim("id").asString(), is(this.id.toString()));
+        assertThat(payload.getClaim("user_name").asString(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1", "app2"));
         assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_TRUSTED_CLIENT"));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));

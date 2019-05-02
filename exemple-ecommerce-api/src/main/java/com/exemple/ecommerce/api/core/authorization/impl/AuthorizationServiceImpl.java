@@ -4,9 +4,6 @@ import java.util.logging.Level;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.ClientProperties;
@@ -58,16 +55,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
 
     @Override
-    public Response checkToken(String token, String username, String password) {
+    public Response tokenKey(String username, String password) {
 
-        Form form = new Form();
-        form.param("token", token);
-
-        return client.target(path + "/oauth/check_token").request()
+        return client.target(path + "/oauth/token_key").request()
 
                 .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, username)
-                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, password)
-                .post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+                .property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, password).get();
 
     }
 

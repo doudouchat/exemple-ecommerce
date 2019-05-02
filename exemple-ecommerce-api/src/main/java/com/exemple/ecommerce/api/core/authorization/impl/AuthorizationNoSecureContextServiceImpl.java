@@ -1,6 +1,9 @@
 package com.exemple.ecommerce.api.core.authorization.impl;
 
 import java.security.Principal;
+import java.util.UUID;
+
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -13,11 +16,25 @@ import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 public class AuthorizationNoSecureContextServiceImpl implements AuthorizationContextService {
 
     @Override
-    public ApiSecurityContext buildContext(String token) {
+    public ApiSecurityContext buildContext(MultivaluedMap<String, String> headers) {
 
         Principal principal = () -> "anonymous";
 
         return new ApiSecurityContext(principal, "http");
+    }
+
+    @Override
+    public void verifyAccountId(UUID id, ApiSecurityContext securityContext) {
+
+        // Nope
+
+    }
+
+    @Override
+    public void verifyLogin(String login, ApiSecurityContext securityContext) {
+
+        // Nope
+
     }
 
 }

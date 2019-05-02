@@ -3,7 +3,6 @@ package com.exemple.ecommerce.authorization.core.authentication.provider;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -39,7 +38,6 @@ public class AccountAuthenticationProvider extends DaoAuthenticationProvider {
 
             JsonNode login = loginResource.get(username).orElseThrow(() -> new UsernameNotFoundException(username));
 
-            UUID account = UUID.fromString(login.get("id").textValue());
             String password = login.get("password").textValue();
 
             List<SimpleGrantedAuthority> roles = JsonNodeType.MISSING == login.findPath("roles").getNodeType() ? Collections.emptyList()
@@ -49,7 +47,7 @@ public class AccountAuthenticationProvider extends DaoAuthenticationProvider {
             Set<String> scopes = JsonNodeType.MISSING == login.findPath("scopes").getNodeType() ? Collections.emptySet()
                     : JsonNodeUtils.stream(login.get("scopes").elements()).map(JsonNode::asText).collect(Collectors.toSet());
 
-            return new AccountUser(account, username, password, roles, scopes);
+            return new AccountUser(username, password, roles, scopes);
         });
     }
 

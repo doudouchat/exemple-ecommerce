@@ -3,21 +3,29 @@ package com.exemple.ecommerce.api.core.authorization;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.StringUtils;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +36,13 @@ import org.testng.annotations.Test;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.account.AccountService;
+import com.exemple.ecommerce.customer.login.LoginService;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.login.LoginResource;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ActiveProfiles(inheritProfiles = false)
@@ -47,81 +56,102 @@ public class AuthorizationTest extends JerseySpringSupport {
     }
 
     @Autowired
-    private AccountService service;
+    private AccountService accountService;
+
+    @Autowired
+    private LoginService loginService;
+
+    @Autowired
+    private LoginResource loginResource;
 
     @Autowired
     private AuthorizationService authorizationService;
 
+    @Autowired
+    private AuthorizationAlgorithmFactory authorizationAlgorithmFactory;
+
     @BeforeMethod
     private void before() {
 
-        Mockito.reset(service);
+        Mockito.reset(accountService, accountService);
         Mockito.reset(authorizationService);
+        Mockito.reset(loginResource);
+
+        authorizationAlgorithmFactory.resetAlgorithm();
 
     }
 
-    public static final String URL = "/v1/account";
+    private static final Algorithm RSA256_ALGORITHM;
+
+    private static final Map<String, String> TOKEN_KEY_RESPONSE = new HashMap<>();
+
+    static {
+
+        KeyPairGenerator keyPairGenerator;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+
+        keyPairGenerator.initialize(1024);
+        KeyPair keypair = keyPairGenerator.genKeyPair();
+        PrivateKey privateKey = keypair.getPrivate();
+        PublicKey publicKey = keypair.getPublic();
+
+        RSA256_ALGORITHM = Algorithm.RSA256((RSAPublicKey) publicKey, (RSAPrivateKey) privateKey);
+
+        TOKEN_KEY_RESPONSE.put("alg", "SHA256withRSA");
+        TOKEN_KEY_RESPONSE.put("value",
+                "-----BEGIN PUBLIC KEY-----\n" + new String(Base64.encodeBase64(publicKey.getEncoded())) + "\n-----END PUBLIC KEY-----");
+
+    }
+
+    public static final String URL_ACCOUNT = "/v1/account";
+
+    public static final String URL_LOGIN = "/v1/login";
+
+    private static UUID ID = UUID.randomUUID();
 
     @DataProvider(name = "notAuthorized")
     private static Object[][] notAuthorized() {
 
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        UUID id = UUID.randomUUID();
+        String token1 = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
+                .sign(RSA256_ALGORITHM);
 
-        String token1 = JWT.create().withClaim("id", id.toString()).withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" })
-                .withAudience("test").withArrayClaim("scope", new String[] { "account:unknown" }).sign(algorithm);
-        String payload1 = StringUtils.newStringUtf8(Base64.decodeBase64(JWT.decode(token1).getPayload()));
+        String token2 = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
+                .sign(RSA256_ALGORITHM);
 
-        String token2 = JWT.create().withClaim("id", id.toString()).withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" })
-                .withAudience("test").withArrayClaim("scope", new String[] { "account:write" }).sign(algorithm);
-        String payload2 = StringUtils.newStringUtf8(Base64.decodeBase64(JWT.decode(token2).getPayload()));
-
-        String token3 = JWT.create().withClaim("id", id.toString()).withClaim("user_name", "john_doe")
-                .withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("test")
-                .withArrayClaim("scope", new String[] { "account:read" }).sign(algorithm);
-        String payload3 = StringUtils.newStringUtf8(Base64.decodeBase64(JWT.decode(token3).getPayload()));
-
-        String token4 = JWT.create().withClaim("id", id.toString()).withClaim("user_name", "john_doe").withClaim("id", UUID.randomUUID().toString())
-                .withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("test")
-                .withArrayClaim("scope", new String[] { "account:read" }).sign(algorithm);
-        String payload4 = StringUtils.newStringUtf8(Base64.decodeBase64(JWT.decode(token4).getPayload()));
+        String token3 = JWT.create().withClaim("user_name", "john_doe").withAudience("other").withArrayClaim("scope", new String[] { "account:read" })
+                .sign(RSA256_ALGORITHM);
 
         return new Object[][] {
 
-                { "token", null, "test", id, Status.BAD_REQUEST },
+                { token1, ID },
 
-                { token1, payload1, "test", id, Status.OK },
+                { token2, UUID.randomUUID() },
 
-                { token2, payload2, "test", id, Status.OK },
-
-                { token3, payload3, "test", UUID.randomUUID(), Status.OK },
-
-                { token4, payload4, "other", id, Status.OK },
-
-                { null, payload4, "test", id, Status.OK }
+                { token3, ID }
 
         };
     }
 
     @Test(dataProvider = "notAuthorized")
-    public void notAuthorized(String token, String payload, String application, UUID id, Status status) throws Exception {
+    public void authorizedGetUserFailure(String token, UUID id) throws Exception {
 
         Response responseMock = Mockito.mock(Response.class);
-        Mockito.when(responseMock.getStatus()).thenReturn(status.getStatusCode());
-        Mockito.when(responseMock.readEntity(String.class)).thenReturn(payload);
+        Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(authorizationService.checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", id))));
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL + "/" + id).request(MediaType.APPLICATION_JSON)
+        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
 
-                .header(SchemaBeanParam.APP_HEADER, application).header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
-        if (token != null) {
-            Mockito.verify(authorizationService).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
-        } else {
-            Mockito.verify(authorizationService, Mockito.never()).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
-
-        }
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
 
@@ -137,76 +167,152 @@ public class AuthorizationTest extends JerseySpringSupport {
     }
 
     @Test
-    public void authorizedUser() throws Exception {
+    public void authorizedGetAccount() throws Exception {
 
-        UUID id = UUID.randomUUID();
-
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        String token = JWT.create().withClaim("id", id.toString()).withClaim("user_name", "john_doe")
-                .withExpiresAt(Date.from(Instant.now().plus(10, ChronoUnit.SECONDS))).withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" })
-                .withAudience("test").withArrayClaim("scope", new String[] { "account:read" }).sign(algorithm);
-
-        DecodedJWT jwt = JWT.decode(token);
-        String payload = StringUtils.newStringUtf8(Base64.decodeBase64(jwt.getPayload()));
+        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
+                .sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
-        Mockito.when(responseMock.readEntity(String.class)).thenReturn(payload);
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(service.get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
-        Mockito.when(authorizationService.checkToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(accountService.get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
+        Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL + "/" + id).request(MediaType.APPLICATION_JSON)
+        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
-        Mockito.verify(service).get(Mockito.eq(id), Mockito.eq("test"), Mockito.eq("v1"));
-        Mockito.verify(authorizationService).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(accountService).get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(loginResource).get(Mockito.eq("john_doe"));
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
 
-        assertThat(testFilter.context.getUserPrincipal().getName(), is(id.toString()));
-        assertThat(testFilter.context.isUserInRole("ROLE_ACCOUNT"), is(true));
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
         assertThat(testFilter.context.isSecure(), is(true));
         assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
 
     }
 
     @Test
-    public void authorizedApp() throws Exception {
+    public void authorizedPostAccount() throws Exception {
 
-        Algorithm algorithm = Algorithm.HMAC256("secret");
-        String token = JWT.create().withClaim("client_id", "test").withArrayClaim("authorities", new String[] { "ROLE_APP" }).withAudience("test")
-                .withExpiresAt(Date.from(Instant.now().plus(10, ChronoUnit.SECONDS))).withArrayClaim("scope", new String[] { "account:create" })
-                .sign(algorithm);
-
-        DecodedJWT jwt = JWT.decode(token);
-        String payload = StringUtils.newStringUtf8(Base64.decodeBase64(jwt.getPayload()));
+        String token = JWT.create().withClaim("client_id", "test").withAudience("test").withArrayClaim("scope", new String[] { "account:create" })
+                .sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
-        Mockito.when(responseMock.readEntity(String.class)).thenReturn(payload);
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(service.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("id"));
-        Mockito.when(authorizationService.checkToken(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(accountService.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("id"));
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL).request(MediaType.APPLICATION_JSON)
-
-                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
-                .post(Entity.json(JsonNodeUtils.init("email").toString()));
-
-        target(URL).request(MediaType.APPLICATION_JSON)
+        Response response = target(URL_ACCOUNT).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
 
-        Mockito.verify(service, Mockito.times(2)).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
-        Mockito.verify(authorizationService, Mockito.times(1)).checkToken(Mockito.eq(token), Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(accountService).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
 
         assertThat(testFilter.context.getUserPrincipal().getName(), is("test"));
-        assertThat(testFilter.context.isUserInRole("ROLE_APP"), is(true));
+        assertThat(testFilter.context.isSecure(), is(true));
+        assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
+
+    }
+
+    @Test
+    public void authorizedGetUser() throws Exception {
+
+        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
+                .sign(RSA256_ALGORITHM);
+
+        Response responseMock = Mockito.mock(Response.class);
+        Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
+
+        Mockito.when(accountService.get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
+        Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+
+        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
+
+        Mockito.verify(accountService).get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(loginResource).get(Mockito.eq("john_doe"));
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
+        assertThat(testFilter.context.isSecure(), is(true));
+        assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
+
+    }
+
+    @Test
+    public void authorizedGetLogin() throws Exception {
+
+        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "login:read" })
+                .sign(RSA256_ALGORITHM);
+
+        Response responseMock = Mockito.mock(Response.class);
+        Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("password", "jean.dupont");
+        model.put("id", UUID.randomUUID());
+
+        Mockito.when(loginService.get(Mockito.eq("john_doe"), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.create(model));
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+
+        Response response = target(URL_LOGIN + "/" + "john_doe").request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
+
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+        Mockito.verify(loginService).get(Mockito.eq("john_doe"), Mockito.eq("test"), Mockito.eq("v1"));
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
+        assertThat(testFilter.context.isSecure(), is(true));
+        assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
+
+    }
+
+    @Test
+    public void authorizedGetLoginFailure() throws Exception {
+
+        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "login:read" })
+                .sign(RSA256_ALGORITHM);
+
+        Response responseMock = Mockito.mock(Response.class);
+        Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
+        Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
+        })).thenReturn(TOKEN_KEY_RESPONSE);
+
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+
+        Response response = target(URL_LOGIN + "/" + "other").request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
+
+        assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
+
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
         assertThat(testFilter.context.isSecure(), is(true));
         assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
 

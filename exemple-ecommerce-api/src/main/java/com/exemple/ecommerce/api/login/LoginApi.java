@@ -27,13 +27,11 @@ import com.exemple.ecommerce.api.common.PatchUtils;
 import com.exemple.ecommerce.api.common.model.ApplicationBeanParam;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
-import com.exemple.ecommerce.api.common.security.ApiSecurityContext.Resource;
-import com.exemple.ecommerce.api.common.security.ApiSecurityContextUtils;
+import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.login.LoginService;
 import com.exemple.ecommerce.customer.login.exception.LoginServiceException;
 import com.exemple.ecommerce.customer.login.exception.LoginServiceNotFoundException;
-import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -62,6 +60,9 @@ public class LoginApi {
     @Autowired
     private SchemaValidation schemaValidation;
 
+    @Autowired
+    private AuthorizationContextService authorizationContextService;
+
     @Context
     private ContainerRequestContext servletContext;
 
@@ -69,7 +70,7 @@ public class LoginApi {
     @Path("/{login}")
     @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
-    @RolesAllowed("ROLE_APP")
+    @RolesAllowed("login:head")
     public Response check(@NotBlank @PathParam("login") String login,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) ApplicationBeanParam applicationBeanParam) {
 
@@ -98,10 +99,9 @@ public class LoginApi {
     public Response update(@NotNull @PathParam("login") String login, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws LoginServiceException {
 
-        JsonNode source = loginService.get(login, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
+        authorizationContextService.verifyLogin(login, (ApiSecurityContext) servletContext.getSecurityContext());
 
-        ApiSecurityContextUtils.checkAuthorization(source.get(LoginStatement.ID).textValue(), Resource.LOGIN,
-                (ApiSecurityContext) servletContext.getSecurityContext());
+        JsonNode source = loginService.get(login, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
         schemaValidation.validatePatch(patch);
 
@@ -129,12 +129,9 @@ public class LoginApi {
     public JsonNode get(@NotNull @PathParam("login") String login,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws LoginServiceException {
 
-        JsonNode source = loginService.get(login, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
+        authorizationContextService.verifyLogin(login, (ApiSecurityContext) servletContext.getSecurityContext());
 
-        ApiSecurityContextUtils.checkAuthorization(source.get(LoginStatement.ID).textValue(), Resource.LOGIN,
-                (ApiSecurityContext) servletContext.getSecurityContext());
-
-        return source;
+        return loginService.get(login, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
     }
 

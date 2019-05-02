@@ -33,8 +33,7 @@ import org.springframework.stereotype.Component;
 import com.exemple.ecommerce.api.common.PatchUtils;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
-import com.exemple.ecommerce.api.common.security.ApiSecurityContext.Resource;
-import com.exemple.ecommerce.api.common.security.ApiSecurityContextUtils;
+import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.context.AccountContext;
@@ -72,6 +71,9 @@ public class AccountApi {
     @Autowired
     private SchemaValidation schemaValidation;
 
+    @Autowired
+    private AuthorizationContextService authorizationContextService;
+
     @Context
     private ContainerRequestContext servletContext;
 
@@ -91,7 +93,7 @@ public class AccountApi {
     public JsonNode get(@NotNull @PathParam("id") UUID id, @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam)
             throws AccountServiceException {
 
-        ApiSecurityContextUtils.checkAuthorization(id.toString(), Resource.ACCOUNT, (ApiSecurityContext) servletContext.getSecurityContext());
+        authorizationContextService.verifyAccountId(id, (ApiSecurityContext) servletContext.getSecurityContext());
 
         return service.get(id, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
@@ -135,7 +137,7 @@ public class AccountApi {
     public Response update(@NotNull @PathParam("id") UUID id, @NotNull @Parameter(schema = @Schema(name = "Patch")) ArrayNode patch,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam) throws AccountServiceException {
 
-        ApiSecurityContextUtils.checkAuthorization(id.toString(), Resource.ACCOUNT, (ApiSecurityContext) servletContext.getSecurityContext());
+        authorizationContextService.verifyAccountId(id, (ApiSecurityContext) servletContext.getSecurityContext());
 
         schemaValidation.validatePatch(patch);
 
@@ -165,7 +167,7 @@ public class AccountApi {
     public static class AccountContextResponseFilter implements ContainerResponseFilter {
 
         public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
-            
+
             AccountContext.destroy();
 
         }

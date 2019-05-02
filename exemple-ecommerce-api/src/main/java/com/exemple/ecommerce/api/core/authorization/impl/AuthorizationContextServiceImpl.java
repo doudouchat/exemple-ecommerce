@@ -1,30 +1,29 @@
 package com.exemple.ecommerce.api.core.authorization.impl;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import com.auth0.jwt.impl.JWTParser;
-import com.auth0.jwt.interfaces.JWTPartsParser;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Payload;
+import com.exemple.ecommerce.api.common.model.ApplicationBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
-import com.exemple.ecommerce.api.core.ApiConfiguration;
+import com.exemple.ecommerce.api.core.authorization.AuthorizationAlgorithmFactory;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;
-import com.exemple.ecommerce.api.core.authorization.AuthorizationService;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.core.statement.LoginStatement;
+import com.exemple.ecommerce.resource.login.LoginResource;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
 @Profile("!noSecurity")
@@ -32,72 +31,69 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
 
     private static final Pattern BEARER;
 
-    private final AuthorizationService authorizationService;
+    private final AuthorizationAlgorithmFactory authorizationAlgorithmFactory;
 
-    private final HazelcastInstance hazelcastInstance;
+    private final LoginResource loginResource;
 
-    private final JWTPartsParser parser;
+    public AuthorizationContextServiceImpl(AuthorizationAlgorithmFactory authorizationAlgorithmFactory, LoginResource loginResource) {
 
-    public AuthorizationContextServiceImpl(AuthorizationService authorizationService, HazelcastInstance hazelcastInstance) {
-
-        this.authorizationService = authorizationService;
-        this.hazelcastInstance = hazelcastInstance;
-        this.parser = new JWTParser();
+        this.authorizationAlgorithmFactory = authorizationAlgorithmFactory;
+        this.loginResource = loginResource;
 
     }
 
     static {
 
         BEARER = Pattern.compile("Bearer ");
+
     }
 
     @Override
-    public ApiSecurityContext buildContext(String token) throws AuthorizationException {
+    public ApiSecurityContext buildContext(MultivaluedMap<String, String> headers) throws AuthorizationException {
+
+        String token = headers.getFirst("Authorization");
 
         if (token != null) {
 
-            Payload payload = extractPayload(token);
+            JWTVerifier verifier = JWT.require(authorizationAlgorithmFactory.getAlgorithm())
+                    .withAudience(headers.getFirst(ApplicationBeanParam.APP_HEADER)).build();
 
-            Principal principal = () -> payload.getClaims().getOrDefault("id", payload.getClaim("client_id")).asString();
+            Payload payload;
+            try {
+                payload = verifier.verify(BEARER.matcher(token).replaceFirst(""));
+            } catch (JWTVerificationException e) {
+                throw new AuthorizationException(e);
+            }
 
-            return new ApiSecurityContext(principal, "https",
-                    payload.getClaim("authorities").asList(String.class).stream()
-                            .flatMap(role -> Stream.concat(Stream.of(role), payload.getClaim("scope").asList(String.class).stream()))
-                            .collect(Collectors.toList()),
-                    payload.getAudience());
+            Principal principal = () -> payload.getClaims().getOrDefault("user_name", payload.getClaim("client_id")).asString();
+
+            return new ApiSecurityContext(principal, "https", payload.getClaim("scope").asList(String.class));
 
         }
 
-        return new ApiSecurityContext(() -> "anonymous", "http", Collections.emptyList(), Collections.emptyList());
+        return new ApiSecurityContext(() -> "anonymous", "http", Collections.emptyList());
     }
 
-    private Payload extractPayload(String token) throws AuthorizationException {
+    @Override
+    public void verifyAccountId(UUID id, ApiSecurityContext securityContext) {
 
-        Payload payload;
-        IMap<String, String> tokens = hazelcastInstance.getMap(ApiConfiguration.AVAILABLE_TOKENS);
-        if (!tokens.containsKey(token)) {
+        JsonNode login = loginResource.get(securityContext.getUserPrincipal().getName()).orElseGet(JsonNodeUtils::init).get(LoginStatement.ID);
 
-            Response response = this.authorizationService.checkToken(BEARER.matcher(token).replaceFirst(""), "resource", "secret");
+        if (!id.toString().equals(login.asText(null))) {
 
-            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-
-                throw new AuthorizationException();
-            }
-
-            String body = response.readEntity(String.class);
-            payload = parser.parsePayload(body);
-            if (payload.getExpiresAt() != null) {
-
-                tokens.put(token, body, ChronoUnit.SECONDS.between(LocalDateTime.now(),
-                        payload.getExpiresAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()), TimeUnit.SECONDS);
-            }
-
-        } else {
-
-            payload = parser.parsePayload(tokens.get(token));
+            throw new ForbiddenException();
         }
 
-        return payload;
+    }
+
+    @Override
+    public void verifyLogin(String login, ApiSecurityContext securityContext) {
+
+        if (!login.equals(securityContext.getUserPrincipal().getName())) {
+
+            throw new ForbiddenException();
+        }
+
     }
 
 }

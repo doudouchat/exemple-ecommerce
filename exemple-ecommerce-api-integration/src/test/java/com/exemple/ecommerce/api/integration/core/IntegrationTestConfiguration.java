@@ -78,7 +78,7 @@ public class IntegrationTestConfiguration {
         accountFilter.add("cgus[code,version]");
         Map<String, Set<String>> dateTime = Collections.singletonMap("date_time", Collections.singleton("creation_date"));
         Map<String, Set<String>> rules = new HashMap<>();
-        rules.put("unique", Collections.singleton("/email"));
+        rules.put("login", Collections.singleton("/email"));
         rules.put("maxProperties", Collections.singleton("/addresses,2"));
         rules.put("dependencies", Collections.singleton("optin_mobile,mobile"));
 
@@ -115,7 +115,7 @@ public class IntegrationTestConfiguration {
         subscriptionFilter.add("email");
 
         Map<String, Set<String>> subscriptionRules = new HashMap<>();
-        subscriptionRules.put("unique", Collections.singleton("/email"));
+        subscriptionRules.put("login", Collections.singleton("/email"));
 
         ResourceSchema subscriptionSchema = new ResourceSchema();
         subscriptionSchema.setApplication(APP_HEADER_VALUE);
@@ -140,7 +140,7 @@ public class IntegrationTestConfiguration {
         authorizationClientBuilder
 
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx")
-                .scopes("account:create", "subscription:update", "subscription:read")
+                .scopes("account:create", "login:head", "subscription:update", "subscription:read")
                 .autoApprove("account:create", "subscription:update", "subscription:read").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
 
                 .and()

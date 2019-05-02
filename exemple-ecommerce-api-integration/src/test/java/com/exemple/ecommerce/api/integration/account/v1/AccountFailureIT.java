@@ -183,8 +183,8 @@ public class AccountFailureIT extends AbstractTestNGSpringContextTests {
                 { patch2, "/cgus", "uniqueItems" },
                 // maxitems
                 { patch3, "/cgus", "maxItems" },
-                // unique
-                { patch4, "/email", "unique" },
+                // login
+                { patch4, "/email", "login" },
                 // required mobile
                 { patch5, "/mobile", "required" },
                 // maxProperties

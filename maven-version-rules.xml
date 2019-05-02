@@ -16,7 +16,7 @@
 		</rule>
 		<rule groupId="org.codehaus.groovy" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">(?i).*alpha(?:-?\d+)?</ignoreVersion>
+				<ignoreVersion type="regex">(?i).*(alpha|beta)(?:-?\d+)?</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="javax.servlet" artifactId="javax.servlet-api" comparisonMethod="maven">
@@ -36,7 +36,7 @@
 		</rule>
 		<rule groupId="org.springframework" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">5.2.0.M1</ignoreVersion>
+				<ignoreVersion type="regex">5.2.0.M1|5.2.0.M2</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="org.springframework.kafka" comparisonMethod="maven">

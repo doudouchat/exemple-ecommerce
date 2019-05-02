@@ -152,7 +152,7 @@
 			<plugins>
 
 				<!-- CARGO -->
-				<!-- http://cargo.codehaus.org/Maven2+plugin -->
+				<!-- https://codehaus-cargo.github.io/cargo/Maven2+plugin.html -->
 				<plugin>
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
