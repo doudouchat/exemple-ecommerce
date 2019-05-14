@@ -92,8 +92,9 @@ public class NewPasswordApi {
 
             UUID id = UUID.fromString(login.get(LoginStatement.ID).textValue());
 
-            String accessToken = JWT.create().withArrayClaim("scope", new String[] { "login:update", "login:read" })
-                    .withClaim("user_name", newPassword.getLogin()).withExpiresAt(expiresAt)
+            String accessToken = JWT.create().withJWTId(UUID.randomUUID().toString())
+                    .withArrayClaim("scope", new String[] { "login:update", "login:read" }).withClaim("user_name", newPassword.getLogin())
+                    .withExpiresAt(expiresAt).withClaim("singleUse", Boolean.TRUE)
                     .withClaim("client_id", securityContext.getAuthentication().getOAuth2Request().getClientId())
                     .withAudience(securityContext.getAuthentication().getOAuth2Request().getResourceIds().stream().toArray(String[]::new))
                     .withArrayClaim("authorities", securityContext.getAuthentication().getOAuth2Request().getAuthorities().stream()

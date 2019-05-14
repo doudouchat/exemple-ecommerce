@@ -14,9 +14,8 @@ application:
 api:
    authorization:
       path: http://172.17.0.1:8084/ExempleAuthorization
+      hazelcast:
+         addresses: 172.17.0.1:5706
    swagger:
       authorization:
          path: http://localhost:8084/ExempleAuthorization
-   hazelcast:
-      port: 5705
-      member: 127.0.0.1:5705

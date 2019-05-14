@@ -51,6 +51,8 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
 
     private String accessToken;
 
+    private String refreshToken;
+
     private String accessTokenBack;
 
     private String login;
@@ -123,6 +125,9 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         accessToken = response.jsonPath().getString("access_token");
         assertThat(accessToken, is(notNullValue()));
 
+        refreshToken = response.jsonPath().getString("refresh_token");
+        assertThat(refreshToken, is(notNullValue()));
+
     }
 
     @Test
@@ -169,6 +174,31 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("account:read", "account:update"));
 
+    }
+
+    @Test(dependsOnMethods = "passwordSuccess")
+    public void refreshToken() {
+
+        Map<String, Object> account = new HashMap<>();
+        account.put("login", login);
+        account.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
+        account.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
+        account.put("scopes", new HashSet<>(Arrays.asList("account:read", "account:update")));
+
+        Mockito.when(resource.get(Mockito.eq(login))).thenReturn(Optional.of(MAPPER.convertValue(account, JsonNode.class)));
+
+        Map<String, String> params = new HashMap<>();
+        params.put("grant_type", "refresh_token");
+        params.put("client_id", "test_user");
+        params.put("refresh_token", refreshToken);
+
+        Response response = requestSpecification.auth().basic("test_user", "secret").formParams(params)
+                .post(restTemplate.getRootUri() + "/oauth/token");
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
+
+        String accessToken = response.jsonPath().getString("access_token");
+        assertThat(accessToken, is(notNullValue()));
     }
 
     @Test

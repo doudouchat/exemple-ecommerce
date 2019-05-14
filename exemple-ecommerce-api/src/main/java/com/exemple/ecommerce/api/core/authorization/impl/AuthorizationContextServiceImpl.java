@@ -1,29 +1,41 @@
 package com.exemple.ecommerce.api.core.authorization.impl;
 
 import java.security.Principal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.impl.NullClaim;
+import com.auth0.jwt.impl.PublicClaims;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Payload;
 import com.exemple.ecommerce.api.common.model.ApplicationBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationAlgorithmFactory;
+import com.exemple.ecommerce.api.core.authorization.AuthorizationConfiguration;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hazelcast.core.HazelcastInstance;
 
 @Service
 @Profile("!noSecurity")
@@ -35,10 +47,14 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
 
     private final LoginResource loginResource;
 
-    public AuthorizationContextServiceImpl(AuthorizationAlgorithmFactory authorizationAlgorithmFactory, LoginResource loginResource) {
+    private final HazelcastInstance hazelcastInstance;
+
+    public AuthorizationContextServiceImpl(AuthorizationAlgorithmFactory authorizationAlgorithmFactory, LoginResource loginResource,
+            HazelcastInstance hazelcastInstance) {
 
         this.authorizationAlgorithmFactory = authorizationAlgorithmFactory;
         this.loginResource = loginResource;
+        this.hazelcastInstance = hazelcastInstance;
 
     }
 
@@ -65,13 +81,36 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
                 throw new AuthorizationException(e);
             }
 
+            if (payload.getId() != null && hazelcastInstance.getMap(AuthorizationConfiguration.TOKEN_BLACK_LIST).containsKey(payload.getId())) {
+                throw new AuthorizationException(payload.getId() + " has been excluded");
+            }
+
             Principal principal = () -> payload.getClaims().getOrDefault("user_name", payload.getClaim("client_id")).asString();
 
-            return new ApiSecurityContext(principal, "https", payload.getClaim("scope").asList(String.class));
+            return new ApiSecurityContext(principal, "https", payload.getClaim("scope").asList(String.class), payload);
 
         }
 
-        return new ApiSecurityContext(() -> "anonymous", "http", Collections.emptyList());
+        return new ApiSecurityContext(() -> "anonymous", "http", Collections.emptyList(), null);
+    }
+
+    @Override
+    public void cleanContext(ApiSecurityContext securityContext, Response.StatusType statusInfo) {
+
+        if (Response.Status.Family.SUCCESSFUL == ObjectUtils.defaultIfNull(statusInfo.getFamily(), Response.Status.Family.OTHER)
+                && securityContext.getPayload() != null
+                && Boolean.TRUE.equals(securityContext.getPayload().getClaims().getOrDefault("singleUse", new NullClaim()).asBoolean())) {
+
+            Assert.notNull(securityContext.getPayload().getId(), PublicClaims.JWT_ID + " is required in accessToken");
+
+            Assert.notNull(securityContext.getPayload().getExpiresAt(), PublicClaims.EXPIRES_AT + " is required in accessToken");
+
+            hazelcastInstance.getMap(AuthorizationConfiguration.TOKEN_BLACK_LIST).put(securityContext.getPayload().getId(),
+                    securityContext.getPayload().getExpiresAt(), ChronoUnit.SECONDS.between(LocalDateTime.now(), Instant
+                            .ofEpochSecond(securityContext.getPayload().getExpiresAt().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime()),
+                    TimeUnit.SECONDS);
+        }
+
     }
 
     @Override

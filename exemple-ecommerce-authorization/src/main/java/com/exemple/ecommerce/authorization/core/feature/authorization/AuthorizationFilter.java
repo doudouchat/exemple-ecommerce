@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.common.exceptions.InvalidTokenExcepti
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
+import com.auth0.jwt.JWT;
 import com.exemple.ecommerce.authorization.common.security.AuthorizationContextSecurity;
 import com.exemple.ecommerce.authorization.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
@@ -41,8 +42,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
             try {
 
-                OAuth2Authentication authentication = tokenServices
-                        .loadAuthentication(BEARER.matcher(requestContext.getHeaderString("Authorization")).replaceFirst(""));
+                String accessToken = BEARER.matcher(requestContext.getHeaderString("Authorization")).replaceFirst("");
+
+                OAuth2Authentication authentication = tokenServices.loadAuthentication(accessToken);
 
                 if (!authentication.getOAuth2Request().getResourceIds().contains(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER))) {
 
@@ -50,7 +52,7 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
                 }
 
-                requestContext.setSecurityContext(new AuthorizationContextSecurity(authentication));
+                requestContext.setSecurityContext(new AuthorizationContextSecurity(authentication, JWT.decode(accessToken)));
 
                 authorizationResourceKeyspace.initKeyspace(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER));
 

@@ -54,7 +54,9 @@ public class FeatureConfiguration extends ResourceConfig {
         // Resources
         packages(
                 // password feature
-                "com.exemple.ecommerce.authorization.password")
+                "com.exemple.ecommerce.authorization.password",
+                // disconnection feature
+                "com.exemple.ecommerce.authorization.disconnection")
 
                         // security
 

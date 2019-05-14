@@ -26,6 +26,5 @@ application:
 api:
    authorization:
       path: ${authorization.host}:${application.port}/${authorization.contextpath}
-   hazelcast:
-      port: ${hazelcast.port}
-      member: 127.0.0.1:${hazelcast.port}
+      hazelcast:
+         addresses: 127.0.0.1:${hazelcast.port}

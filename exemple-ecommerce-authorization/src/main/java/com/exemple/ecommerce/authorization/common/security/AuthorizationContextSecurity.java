@@ -7,12 +7,17 @@ import javax.ws.rs.core.SecurityContext;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import com.auth0.jwt.interfaces.Payload;
+
 public class AuthorizationContextSecurity implements SecurityContext {
 
     private final OAuth2Authentication authentication;
 
-    public AuthorizationContextSecurity(OAuth2Authentication authentication) {
+    private final Payload payload;
+
+    public AuthorizationContextSecurity(OAuth2Authentication authentication, Payload payload) {
         this.authentication = authentication;
+        this.payload = payload;
     }
 
     @Override
@@ -37,5 +42,9 @@ public class AuthorizationContextSecurity implements SecurityContext {
 
     public OAuth2Authentication getAuthentication() {
         return authentication;
+    }
+
+    public Payload getPayload() {
+        return payload;
     }
 }

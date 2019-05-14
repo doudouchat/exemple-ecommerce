@@ -96,14 +96,30 @@ public class PasswordIT extends AbstractTestNGSpringContextTests {
 
     }
 
-    @Test(dependsOnMethods = "password")
+    @Test
     public void readLogin() {
 
-        Response response = JsonRestTemplate.given()
+        Map<String, Object> newPassword = new HashMap<>();
+        newPassword.put("login", AccountNominalIT.ACCOUNT_BODY.get("email"));
+
+        Response response = JsonRestTemplate.given(JsonRestTemplate.AUTHORIZATION_URL, ContentType.JSON)
+
+                .header(APP_HEADER, APP_HEADER_VALUE)
+
+                .header("Authorization", "Bearer " + ACCESS_APP_TOKEN)
+
+                .body(newPassword).post("/ws/v1/new_password");
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
+
+        String accessToken = response.jsonPath().getString("token");
+        assertThat(accessToken, is(notNullValue()));
+
+        response = JsonRestTemplate.given()
 
                 .header(APP_HEADER, APP_HEADER_VALUE).header(VERSION_HEADER, VERSION_HEADER_VALUE)
 
-                .header("Authorization", "Bearer " + ACCESS_TOKEN).get(LoginIT.URL + "/{login}", AccountNominalIT.ACCOUNT_BODY.get("email"));
+                .header("Authorization", "Bearer " + accessToken).get(LoginIT.URL + "/{login}", AccountNominalIT.ACCOUNT_BODY.get("email"));
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
         assertThat(response.jsonPath().getString("login"), is(AccountNominalIT.ACCOUNT_BODY.get("email")));
@@ -125,6 +141,29 @@ public class PasswordIT extends AbstractTestNGSpringContextTests {
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
         assertThat(response.jsonPath().getString("access_token"), is(notNullValue()));
+
+    }
+
+    @Test(dependsOnMethods = "updateLogin")
+    public void updateLoginForbidden() {
+
+        List<Map<String, Object>> patchs = new ArrayList<>();
+
+        Map<String, Object> patch = new HashMap<>();
+        patch.put("op", "add");
+        patch.put("path", "/password");
+        patch.put("value", newPassword);
+
+        patchs.add(patch);
+
+        Response response = JsonRestTemplate.given()
+
+                .header(APP_HEADER, APP_HEADER_VALUE).header(VERSION_HEADER, "v1")
+
+                .header("Authorization", "Bearer " + ACCESS_TOKEN).body(patchs)
+                .patch(LoginIT.URL + "/{login}", AccountNominalIT.ACCOUNT_BODY.get("email"));
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN.value()));
 
     }
 

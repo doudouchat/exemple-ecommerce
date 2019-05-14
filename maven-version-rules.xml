@@ -41,7 +41,7 @@
 		</rule>
 		<rule groupId="org.springframework.kafka" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">2.3.0.M1</ignoreVersion>
+				<ignoreVersion type="regex">2.3.0.M1|2.3.0.M2</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="org.springframework.security" comparisonMethod="maven">
@@ -51,7 +51,7 @@
 		</rule>
 		<rule groupId="org.springframework.boot" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.M1|2.2.0.M2</ignoreVersion>
+				<ignoreVersion type="regex">2.2.0.M1|2.2.0.M2|2.2.0.M3</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="org.springframework.session" comparisonMethod="maven">
