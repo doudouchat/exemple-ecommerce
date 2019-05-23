@@ -6,16 +6,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
 import com.datastax.driver.core.Cluster;
+import com.exemple.ecommerce.resource.core.cassandra.ResourceCassandraConfiguration;
 
 import info.archinnov.achilles.embedded.CassandraEmbeddedServerBuilder;
 import info.archinnov.achilles.embedded.CassandraShutDownHook;
 
 @Configuration
-public class ResourceTestConfiguration extends ResourceConfiguration {
+@Import(ResourceConfiguration.class)
+public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
 
     private CassandraShutDownHook shutdownHook = new CassandraShutDownHook();
 

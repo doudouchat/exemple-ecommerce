@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.provider.request.DefaultOAuth2Request
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 
+import com.exemple.ecommerce.authorization.core.authentication.account.AccountDetailsService;
 import com.exemple.ecommerce.authorization.core.client.AuthorizationClientBuilder;
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
 
@@ -30,21 +31,25 @@ public class AuthorizationConfiguration extends AuthorizationServerConfigurerAda
 
     private final AuthorizationResourceKeyspace authorizationResourceKeyspace;
 
+    private final AccountDetailsService accountDetailsService;
+
     public AuthorizationConfiguration(AuthenticationManager authenticationManager, TokenStore tokenStore, TokenEnhancer tokenEnhancer,
-            AuthorizationClientBuilder authorizationClientBuilder, AuthorizationResourceKeyspace authorizationResourceKeyspace) {
+            AuthorizationClientBuilder authorizationClientBuilder, AuthorizationResourceKeyspace authorizationResourceKeyspace,
+            AccountDetailsService accountDetailsService) {
 
         this.authenticationManager = authenticationManager;
         this.tokenStore = tokenStore;
         this.tokenEnhancer = tokenEnhancer;
         this.authorizationClientBuilder = authorizationClientBuilder;
         this.authorizationResourceKeyspace = authorizationResourceKeyspace;
+        this.accountDetailsService = accountDetailsService;
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 
-        endpoints.tokenStore(tokenStore).tokenEnhancer(tokenEnhancer).authenticationManager(authenticationManager)
-                .requestValidator(new DefaultOAuth2RequestValidator() {
+        endpoints.tokenStore(tokenStore).userDetailsService(accountDetailsService).tokenEnhancer(tokenEnhancer)
+                .authenticationManager(authenticationManager).requestValidator(new DefaultOAuth2RequestValidator() {
 
                     @Override
                     public void validateScope(TokenRequest tokenRequest, ClientDetails client) {

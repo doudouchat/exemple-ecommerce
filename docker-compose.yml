@@ -6,6 +6,7 @@ services:
     depends_on:
     - cassandra
     - zookeeper
+    - authorization
     networks:
     - db
     environment:
@@ -33,6 +34,7 @@ services:
     - "JAVA_OPTS=-Xms256m -Xmx512m -XX:MetaspaceSize=128m"
     ports:
     - 8084:8080
+    - 5706:5705
     volumes:
     - ./conf/authorization:/usr/local/tomcat/etc
     healthcheck:

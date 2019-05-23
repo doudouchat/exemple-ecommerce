@@ -1,12 +1,11 @@
 package com.exemple.ecommerce.api.core;
 
-import java.io.File;
 import java.io.IOException;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jndi.JndiObjectFactoryBean;
 import org.springframework.mock.jndi.ExpectedLookupTemplate;
 
@@ -91,9 +90,8 @@ public class ApiTestConfiguration extends ApiConfiguration {
         JndiObjectFactoryBean jndiObjectFactoryBean = super.jndiObjectFactoryBean();
 
         try {
-            File tempFile = File.createTempFile("test-", ".tmp");
-            tempFile.deleteOnExit();
-            jndiObjectFactoryBean.setJndiTemplate(new ExpectedLookupTemplate(JNDI_NAME, new FileSystemResource(tempFile).getURL().toString()));
+            jndiObjectFactoryBean.setJndiTemplate(
+                    new ExpectedLookupTemplate(JNDI_NAME, new ClassPathResource("exemple-ecommerce-api-test.yml").getURL().toString()));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.exemple.ecommerce.application.core.ApplicationConfiguration;
-import com.exemple.ecommerce.resource.core.ResourceConfiguration;
+import com.exemple.ecommerce.resource.core.cassandra.ResourceCassandraConfiguration;
 
 @Configuration
-@Import({ ResourceConfiguration.class, ApplicationConfiguration.class })
-@ComponentScan(basePackageClasses = AuthorizationResourceConfiguration.class)
+@Import({ ResourceCassandraConfiguration.class, ApplicationConfiguration.class })
+@ComponentScan(basePackages = { "com.exemple.ecommerce.resource.login", "com.exemple.ecommerce.resource.account" })
 public class AuthorizationResourceConfiguration {
 
 }

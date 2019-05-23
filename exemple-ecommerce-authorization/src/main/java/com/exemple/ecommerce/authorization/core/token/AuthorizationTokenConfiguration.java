@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
@@ -21,11 +22,15 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
+import com.auth0.jwt.impl.PublicClaims;
 import com.exemple.ecommerce.authorization.common.model.AccountUser;
 import com.exemple.ecommerce.authorization.common.model.BackUser;
+import com.hazelcast.core.HazelcastInstance;
 
 @Configuration
 public class AuthorizationTokenConfiguration {
+
+    public static final String TOKEN_BLACK_LIST = "token.black_list";
 
     @Value("${authorization.certificat.location}")
     private String location;
@@ -38,8 +43,11 @@ public class AuthorizationTokenConfiguration {
 
     private final ResourceLoader resourceLoader;
 
-    public AuthorizationTokenConfiguration(ResourceLoader resourceLoader) {
+    private final HazelcastInstance hazelcastInstance;
+
+    public AuthorizationTokenConfiguration(ResourceLoader resourceLoader, HazelcastInstance hazelcastInstance) {
         this.resourceLoader = resourceLoader;
+        this.hazelcastInstance = hazelcastInstance;
     }
 
     @Bean
@@ -53,6 +61,13 @@ public class AuthorizationTokenConfiguration {
         KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(resourceLoader.getResource(location), password.toCharArray());
         converter.setKeyPair(keyStoreKeyFactory.getKeyPair(alias));
         converter.setAccessTokenConverter(new CustomAccessTokenConverter());
+        converter.setJwtClaimsSetVerifier((Map<String, Object> claims) -> {
+
+            Object jti = claims.get(PublicClaims.JWT_ID);
+            if (jti != null && hazelcastInstance.getMap(TOKEN_BLACK_LIST).containsKey(jti.toString())) {
+                throw new InvalidTokenException(jti + " has been excluded");
+            }
+        });
         return converter;
     }
 
