@@ -29,17 +29,6 @@
 		<param-value>com.exemple.ecommerce.api.core.ApiConfiguration com.exemple.ecommerce.event.core.EventConfiguration com.exemple.ecommerce.schema.core.SchemaConfiguration com.exemple.ecommerce.application.core.ApplicationConfiguration com.exemple.ecommerce.customer.core.CustomerConfiguration com.exemple.ecommerce.store.core.StoreConfiguration com.exemple.ecommerce.resource.core.ResourceConfiguration</param-value>
 	</context-param>
 
-	<!-- SPRING SECURITY -->
-
-	<filter>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>springSecurityFilterChain</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>

@@ -60,7 +60,7 @@ services:
       start_period: 30s
   zookeeper:
     container_name: exemple-ecommerce-zookeeper
-    image: zookeeper:3.5.4-beta
+    image: zookeeper:3.5.5
     restart: always
     networks:
     - db
