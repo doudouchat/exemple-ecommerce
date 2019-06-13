@@ -6,9 +6,12 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.querybuilder.Insert;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.login.LoginResource;
+import com.exemple.ecommerce.resource.login.exception.LoginResourceExistException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Service
@@ -48,6 +51,26 @@ public class LoginResourceImpl implements LoginResource {
                     .forEach((String l) -> session.execute(loginStatement.update(l, source)));
         }
 
+    }
+
+    @Override
+    public void save(JsonNode source) throws LoginResourceExistException {
+
+        Insert insert = loginStatement.insert(source);
+        insert.ifNotExists();
+
+        Row resultLogin = session.execute(insert).one();
+        boolean notExistLogin = resultLogin.getBool(0);
+
+        if (!notExistLogin) {
+            throw new LoginResourceExistException(resultLogin.getString(1));
+        }
+    }
+
+    @Override
+    public void delete(String login) {
+
+        session.execute(loginStatement.delete(login));
     }
 
 }

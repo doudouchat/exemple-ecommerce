@@ -17,34 +17,22 @@ class LoginServiceResourceAspect {
     @Autowired
     private LoginServiceResource loginServiceResource
 
-    @Around("execution(public void com.exemple.ecommerce.resource.account.AccountLoginResource.save(*, *)) && args (id,source)")
-    void saveLogin(ProceedingJoinPoint joinPoint, UUID id, JsonNode source) {
+    @Around("execution(public void com.exemple.ecommerce.resource.login.LoginResource.save(*)) && args (source)")
+    void saveLogin(ProceedingJoinPoint joinPoint, JsonNode source) {
 
         if (source != null) {
 
             def jsonSlurper = new JsonSlurper()
-            def accountJson = jsonSlurper.parseText(source.toString())
+            def sourceJson = jsonSlurper.parseText(source.toString())
 
-            source =  JsonNodeUtils.create(loginServiceResource.saveLogin(id, new JsonBuilder(accountJson).content))
+            source =  JsonNodeUtils.create(loginServiceResource.saveLogin(new JsonBuilder(sourceJson).content))
+        } else {
+            source = JsonNodeUtils.init()
         }
 
-        joinPoint.proceed(id, source)
+        joinPoint.proceed(source)
     }
 
-    @Around("execution(public void com.exemple.ecommerce.resource.account.AccountLoginResource.update(*, *)) && args (id,source)")
-    void updateLogin(ProceedingJoinPoint joinPoint, UUID id, JsonNode source) {
-
-        if (source != null) {
-
-            def jsonSlurper = new JsonSlurper()
-            def accountJson = jsonSlurper.parseText(source.toString())
-
-            source =  JsonNodeUtils.create(loginServiceResource.updateLogin(id, new JsonBuilder(accountJson).content))
-        }
-
-        joinPoint.proceed(id, source)
-    }
-    
     @Around("execution(public void com.exemple.ecommerce.resource.login.LoginResource.save(*, *)) && args (login,source)")
     void updateLogin(ProceedingJoinPoint joinPoint, String login, JsonNode source) {
 

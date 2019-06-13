@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
+import com.exemple.ecommerce.resource.login.exception.LoginResourceExistException;
 import com.exemple.ecommerce.resource.login.model.Login;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -25,21 +26,34 @@ public class LoginResourceTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private LoginResource resource;
 
-    private Login source;
+    private Map<String, Object> source;
 
     private String login;
 
     @Test
-    public void save() {
-
-        source = new Login();
-        source.setPassword("jean.dupont");
-        source.setId(UUID.randomUUID());
-        source.setEnable(true);
+    public void save() throws LoginResourceExistException {
 
         login = UUID.randomUUID() + "@gmail.com";
 
-        resource.save(login, JsonNodeUtils.create(source));
+        source = new HashMap<>();
+        source.put("password", "jean.dupont");
+        source.put("id", UUID.randomUUID());
+        source.put("login", login);
+        source.put("enable", true);
+
+        resource.save(JsonNodeUtils.create(source));
+
+    }
+
+    @Test(dependsOnMethods = "save", expectedExceptions = LoginResourceExistException.class)
+    public void saveFailure() throws LoginResourceExistException {
+
+        Map<String, Object> source = new HashMap<>();
+        source.put("password", "jean.dupont");
+        source.put("id", UUID.randomUUID());
+        source.put("login", login);
+
+        resource.save(JsonNodeUtils.create(source));
 
     }
 
@@ -48,10 +62,17 @@ public class LoginResourceTest extends AbstractTestNGSpringContextTests {
 
         JsonNode login0 = resource.get(login).get();
         assertThat(login0.get(LoginStatement.LOGIN).textValue(), is(login));
-        assertThat(login0.get(LoginStatement.ID).textValue(), is(source.getId().toString()));
-        assertThat(login0.get("password").textValue(), is(source.getPassword()));
-        assertThat(login0.get("enable").booleanValue(), is(source.getEnable()));
+        assertThat(login0.get(LoginStatement.ID).textValue(), is(source.get("id").toString()));
+        assertThat(login0.get("password").textValue(), is(source.get("password")));
+        assertThat(login0.get("enable").booleanValue(), is(source.get("enable")));
         assertThat(login0.path("note").getNodeType(), is(JsonNodeType.MISSING));
+    }
+
+    @Test(dependsOnMethods = "get")
+    public void delete() {
+
+        resource.delete(login);
+        assertThat(resource.get(login).isPresent(), is(false));
     }
 
     @Test

@@ -2,16 +2,18 @@
 	"$schema": "http://json-schema.org/draft-07/schema",
 	"additionalProperties": false,
 	"required": [
-		"password"
+		"login",
+		"password",
+		"id"
 	],
 	"properties": {
 		"login": {
 			"type": "string",
-			"readOnly": true
+			"login": true
 		},
 		"id": {
-			"type": "number",
-			"readOnly": true
+			"type": "string",
+			"createOnly": true
 		},
 		"password": {
 			"type": "string",

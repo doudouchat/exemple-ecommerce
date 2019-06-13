@@ -77,10 +77,10 @@ public class IntegrationTestConfiguration {
         accountFilter.add("addresses[*[city,street]]");
         accountFilter.add("cgus[code,version]");
         Map<String, Set<String>> dateTime = Collections.singletonMap("date_time", Collections.singleton("creation_date"));
-        Map<String, Set<String>> rules = new HashMap<>();
-        rules.put("login", Collections.singleton("/email"));
-        rules.put("maxProperties", Collections.singleton("/addresses,2"));
-        rules.put("dependencies", Collections.singleton("optin_mobile,mobile"));
+        Map<String, Set<String>> accountRules = new HashMap<>();
+        accountRules.put("login", Collections.singleton("/email"));
+        accountRules.put("maxProperties", Collections.singleton("/addresses,2"));
+        accountRules.put("dependencies", Collections.singleton("optin_mobile,mobile"));
 
         ResourceExecutionContext.get().setKeyspace(detail.getKeyspace());
 
@@ -91,7 +91,7 @@ public class IntegrationTestConfiguration {
         accountSchema.setContent(IOUtils.toByteArray(new ClassPathResource("account.json").getInputStream()));
         accountSchema.setFilters(accountFilter);
         accountSchema.setTransforms(dateTime);
-        accountSchema.setRules(rules);
+        accountSchema.setRules(accountRules);
 
         schemaResource.save(accountSchema);
 
@@ -99,6 +99,9 @@ public class IntegrationTestConfiguration {
         loginFilter.add("id");
         loginFilter.add("enable");
         loginFilter.add("login");
+        Map<String, Set<String>> loginRules = new HashMap<>();
+        loginRules.put("login", Collections.singleton("/login"));
+        loginRules.put("createOnly", Collections.singleton("/id"));
 
         ResourceSchema loginSchema = new ResourceSchema();
         loginSchema.setApplication(APP_HEADER_VALUE);
@@ -107,7 +110,7 @@ public class IntegrationTestConfiguration {
         loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
         loginSchema.setFilters(loginFilter);
         loginSchema.setTransforms(Collections.emptyMap());
-        loginSchema.setRules(Collections.emptyMap());
+        loginSchema.setRules(loginRules);
 
         schemaResource.save(loginSchema);
 
@@ -140,14 +143,15 @@ public class IntegrationTestConfiguration {
         authorizationClientBuilder
 
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx")
-                .scopes("account:create", "login:head", "subscription:update", "subscription:read")
-                .autoApprove("account:create", "subscription:update", "subscription:read").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
+                .scopes("account:create", "login:head", "login:create", "subscription:update", "subscription:read")
+                .autoApprove("account:create", "login:create", "subscription:update", "subscription:read").authorities("ROLE_APP")
+                .resourceIds(APP_HEADER_VALUE)
 
                 .and()
 
                 .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
-                .scopes("account:read", "account:update").autoApprove("account:read", "account:update").authorities("ROLE_APP")
-                .resourceIds(APP_HEADER_VALUE)
+                .scopes("account:read", "account:update", "login:update", "login:delete")
+                .autoApprove("account:read", "account:update", "login:update", "login:delete").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
 
                 .and()
 

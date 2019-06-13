@@ -1,14 +1,13 @@
 USE test;
 
-INSERT INTO parameter (app, histories, logins) VALUES (
+INSERT INTO parameter (app, histories) VALUES (
 	'default',  
 	{ 	'lastname' : false,
 		'firstname' : false,
   		'address' : false,
   		'addresses' : true,
   		'cgus' : true,
-  		'phones' : true },
-	{ 	'email', 'lastname', 'fid' }
+  		'phones' : true }
 );
 
 INSERT INTO login (login) VALUES (

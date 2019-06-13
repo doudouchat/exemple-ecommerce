@@ -36,7 +36,7 @@ public class DisconnectionIT extends AbstractTestNGSpringContextTests {
         Map<String, Object> params = new HashMap<>();
         params.put("grant_type", "password");
         params.put("username", AccountNominalIT.ACCOUNT_BODY.get("email"));
-        params.put("password", AccountNominalIT.ACCOUNT_BODY.get("password"));
+        params.put("password", AccountNominalIT.LOGIN_BODY.get("password"));
         params.put("client_id", "test_user");
         params.put("redirect_uri", "xxx");
 

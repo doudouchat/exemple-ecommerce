@@ -1,14 +1,18 @@
 package com.exemple.ecommerce.api.login;
 
+import java.net.URI;
+
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,6 +21,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -32,6 +37,7 @@ import com.exemple.ecommerce.api.core.swagger.DocumentApiResource;
 import com.exemple.ecommerce.customer.login.LoginService;
 import com.exemple.ecommerce.customer.login.exception.LoginServiceException;
 import com.exemple.ecommerce.customer.login.exception.LoginServiceNotFoundException;
+import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.schema.validation.SchemaValidation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -40,6 +46,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -80,6 +87,28 @@ public class LoginApi {
         }
 
         return Response.status(Status.NO_CONTENT).build();
+
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+            @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
+    @ApiResponses(value = {
+
+            @ApiResponse(description = "login is created", responseCode = "201", headers = {
+                    @Header(name = "Location", description = "Links to Login Data", schema = @Schema(type = "string")) })
+
+    })
+    @RolesAllowed("login:create")
+    public Response create(@NotNull @Parameter(schema = @Schema(ref = LOGIN_SCHEMA)) JsonNode source,
+            @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam, @Context UriInfo uriInfo)
+            throws LoginServiceException {
+
+        loginService.save(source, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
+
+        return Response.status(Status.CREATED).location(URI.create(uriInfo.getAbsolutePath() + "/" + source.get(LoginStatement.LOGIN).textValue()))
+                .build();
 
     }
 
@@ -132,6 +161,19 @@ public class LoginApi {
         authorizationContextService.verifyLogin(login, (ApiSecurityContext) servletContext.getSecurityContext());
 
         return loginService.get(login, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
+
+    }
+
+    @DELETE
+    @Path("/{login}")
+    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+            @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
+    @RolesAllowed("login:delete")
+    public void delete(@NotNull @PathParam("login") String login) {
+
+        authorizationContextService.verifyLogin(login, (ApiSecurityContext) servletContext.getSecurityContext());
+
+        loginService.delete(login);
 
     }
 

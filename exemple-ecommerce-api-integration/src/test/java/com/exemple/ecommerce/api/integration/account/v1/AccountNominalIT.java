@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.api.integration.core.IntegrationTestConfiguration;
 import com.exemple.ecommerce.api.integration.core.JsonRestTemplate;
+import com.exemple.ecommerce.api.integration.login.v1.LoginIT;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -43,6 +44,8 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
     public static Map<String, Object> ACCOUNT_BODY;
 
+    public static Map<String, Object> LOGIN_BODY;
+
     @Test
     public void connexion() {
 
@@ -67,7 +70,6 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
         ACCOUNT_BODY.put("lastname", "Dupont");
         ACCOUNT_BODY.put("firstname", "Jean");
         ACCOUNT_BODY.put("email", UUID.randomUUID().toString() + "@gmail.com");
-        ACCOUNT_BODY.put("password", "mdp");
         ACCOUNT_BODY.put("optin_mobile", true);
         ACCOUNT_BODY.put("mobile", "0610203040");
         ACCOUNT_BODY.put("birthday", "1967-06-15");
@@ -111,12 +113,32 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
     }
 
     @Test(dependsOnMethods = "createSuccess")
+    public void createLogin() {
+
+        LOGIN_BODY = new HashMap<>();
+        LOGIN_BODY.put("login", ACCOUNT_BODY.get("email"));
+        LOGIN_BODY.put("password", "mdp");
+        LOGIN_BODY.put("id", ID);
+
+        Response response = JsonRestTemplate.given()
+
+                .header(APP_HEADER, APP_HEADER_VALUE).header(VERSION_HEADER, "v1")
+
+                .header("Authorization", "Bearer " + ACCESS_APP_TOKEN)
+
+                .body(LOGIN_BODY).post(LoginIT.URL);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED.value()));
+
+    }
+
+    @Test(dependsOnMethods = "createLogin")
     public void connexionSuccess() {
 
         Map<String, Object> params = new HashMap<>();
         params.put("grant_type", "password");
         params.put("username", ACCOUNT_BODY.get("email"));
-        params.put("password", ACCOUNT_BODY.get("password"));
+        params.put("password", "mdp");
         params.put("client_id", "test_user");
         params.put("redirect_uri", "xxx");
 
@@ -166,60 +188,53 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
         patchs.add(patch1);
 
-        Map<String, Object> patch2 = new HashMap<>();
-        patch2.put("op", "add");
-        patch2.put("path", "/password");
-        patch2.put("value", "new_mdp");
-
-        patchs.add(patch2);
-
         Map<String, Object> addresse = new HashMap<>();
         addresse.put("city", "New York");
         addresse.put("street", "5th avenue");
 
+        Map<String, Object> patch2 = new HashMap<>();
+        patch2.put("op", "replace");
+        patch2.put("path", "/addresses/job");
+        patch2.put("value", addresse);
+
+        patchs.add(patch2);
+
         Map<String, Object> patch3 = new HashMap<>();
-        patch3.put("op", "replace");
-        patch3.put("path", "/addresses/job");
-        patch3.put("value", addresse);
+        patch3.put("op", "remove");
+        patch3.put("path", "/civility");
 
         patchs.add(patch3);
-
-        Map<String, Object> patch4 = new HashMap<>();
-        patch4.put("op", "remove");
-        patch4.put("path", "/civility");
-
-        patchs.add(patch4);
 
         Map<String, Object> cgu = new HashMap<>();
         cgu.put("code", "code_1");
         cgu.put("version", "v1");
 
+        Map<String, Object> patch4 = new HashMap<>();
+        patch4.put("op", "add");
+        patch4.put("path", "/cgus/0");
+        patch4.put("value", cgu);
+
+        patchs.add(patch4);
+
         Map<String, Object> patch5 = new HashMap<>();
-        patch5.put("op", "add");
-        patch5.put("path", "/cgus/0");
-        patch5.put("value", cgu);
+        patch5.put("op", "replace");
+        patch5.put("path", "/addresses/home/city");
+        patch5.put("value", "New Orleans");
 
         patchs.add(patch5);
 
         Map<String, Object> patch6 = new HashMap<>();
-        patch6.put("op", "replace");
-        patch6.put("path", "/addresses/home/city");
-        patch6.put("value", "New Orleans");
+        patch6.put("op", "remove");
+        patch6.put("path", "/addresses/job");
 
         patchs.add(patch6);
 
         Map<String, Object> patch7 = new HashMap<>();
-        patch7.put("op", "remove");
-        patch7.put("path", "/addresses/job");
+        patch7.put("op", "add");
+        patch7.put("path", "/addresses/holidays");
+        patch7.put("value", addresse);
 
         patchs.add(patch7);
-
-        Map<String, Object> patch8 = new HashMap<>();
-        patch8.put("op", "add");
-        patch8.put("path", "/addresses/holidays");
-        patch8.put("value", addresse);
-
-        patchs.add(patch8);
 
         Response response = JsonRestTemplate.given()
 
@@ -238,8 +253,6 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
         assertThat(responseGet.jsonPath().getString("lastname"), is(patch0.get("value")));
         assertThat(responseGet.jsonPath().getString("firstname"), is(patch1.get("value")));
         assertThat(responseGet.jsonPath().getString("email"), is(ACCOUNT_BODY.get("email")));
-
-        ACCOUNT_BODY.put("password", "new_mdp");
 
     }
 

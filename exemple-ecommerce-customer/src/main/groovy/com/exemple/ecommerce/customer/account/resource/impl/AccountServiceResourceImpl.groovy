@@ -9,8 +9,6 @@ import com.exemple.ecommerce.customer.account.resource.AccountServiceResource
 @Component
 class AccountServiceResourceImpl implements AccountServiceResource {
 
-    private static final String PASSWORD = "password"
-
     private static final String CREATION_DATE = "creation_date"
 
     @Override
@@ -23,8 +21,6 @@ class AccountServiceResourceImpl implements AccountServiceResource {
 
     @Override
     Map<String, ?> saveOrUpdateAccount(UUID id, Map<String, ?> account) {
-
-        account.remove(PASSWORD)
 
         return account
     }

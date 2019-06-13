@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -25,28 +23,19 @@ import com.exemple.ecommerce.customer.account.exception.AccountServiceException;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
 import com.exemple.ecommerce.customer.account.model.Account;
 import com.exemple.ecommerce.customer.core.CustomerTestConfiguration;
-import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
-import com.exemple.ecommerce.resource.account.exception.AccountLoginResourceException;
-import com.exemple.ecommerce.resource.account.exception.AccountLoginResourceExistException;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
-import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @ContextConfiguration(classes = { CustomerTestConfiguration.class })
 public class AccountServiceTest extends AbstractTestNGSpringContextTests {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccountServiceTest.class);
-
     @Autowired
     private AccountService service;
 
     @Autowired
     private AccountResource resource;
-
-    @Autowired
-    private AccountLoginResource accountloginResource;
 
     @Autowired
     private SchemaFilter schemaFilter;
@@ -58,7 +47,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     @BeforeMethod
     private void before() {
 
-        Mockito.reset(resource, accountloginResource, schemaFilter);
+        Mockito.reset(resource, schemaFilter);
 
     }
 
@@ -95,19 +84,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
 
     }
 
-    @Test(expectedExceptions = AccountServiceException.class)
-    public void saveFailure() throws AccountServiceException, AccountLoginResourceException {
-
-        Mockito.doThrow(new AccountLoginResourceExistException("jean.dupont@gmail.com")).when(accountloginResource).save(Mockito.any(UUID.class),
-                Mockito.any(JsonNode.class));
-
-        Account model = new Account();
-        model.setLastname("Dupont");
-        model.setFirstname("Jean");
-
-        service.save(JsonNodeUtils.create(model), APP, VERSION);
-    }
-
     @Test
     public void update() throws AccountServiceException {
 
@@ -133,23 +109,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
         assertThat(account, hasJsonField("email", "jean.dupont@gmail.com"));
         assertThat(account, hasJsonField("lastname", "Dupont"));
 
-    }
-
-    @Test(expectedExceptions = AccountServiceException.class)
-    public void updateFailure() throws AccountServiceException, AccountLoginResourceException {
-
-        Mockito.when(resource.get(Mockito.any(UUID.class))).thenReturn(Optional.of(JsonNodeUtils.create(new Account())));
-        Mockito.doThrow(new AccountLoginResourceExistException("jean.dupont@gmail.com")).when(accountloginResource).update(Mockito.any(UUID.class),
-                Mockito.any(JsonNode.class));
-
-        Map<String, Object> model = new HashMap<>();
-
-        try {
-            service.save(UUID.randomUUID(), JsonNodeUtils.create(model), APP, VERSION);
-        } catch (ValidationException e) {
-
-            e.getAllExceptions().stream().map(exception -> exception.getMessage()).forEach(m -> LOG.debug(m));
-        }
     }
 
     @Test

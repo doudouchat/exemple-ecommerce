@@ -4,7 +4,7 @@ INSERT INTO account (id, lastname, firstname) VALUES (6ab09bec-e68e-48d9-a5f8-97
 
 SELECT * FROM account;
 
-INSERT INTO parameter (app, histories, logins) VALUES (
+INSERT INTO parameter (app, histories) VALUES (
 	'default',  
 	{ 	'lastname' : true,
   		'address' : false,
@@ -14,8 +14,7 @@ INSERT INTO parameter (app, histories, logins) VALUES (
   		'phones' : true,
   		'phones2' : true,
   		'cgus2' : true 
-  	},
-	{ 	'email', 'lastname', 'fid' }
+  	}
 );
 
 INSERT INTO resource_schema (app, version, resource, content) VALUES (
