@@ -69,8 +69,7 @@ CREATE TYPE schema_label_type (
 
 CREATE TABLE parameter ( 
 	app text PRIMARY KEY,
-	histories map<text, boolean>,
-	logins set<text>
+	histories map<text, boolean>
 );
 
 CREATE TABLE resource_schema ( 

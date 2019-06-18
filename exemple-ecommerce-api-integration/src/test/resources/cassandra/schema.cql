@@ -61,8 +61,7 @@ CREATE TABLE IF NOT EXISTS account_history (
 
 CREATE TABLE IF NOT EXISTS parameter ( 
 	app text PRIMARY KEY,
-	histories map<text, boolean>,
-	logins set<text>
+	histories map<text, boolean>
 );
 
 CREATE TABLE IF NOT EXISTS resource_schema ( 

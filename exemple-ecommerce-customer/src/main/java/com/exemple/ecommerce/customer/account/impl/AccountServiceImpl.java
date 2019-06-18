@@ -11,9 +11,7 @@ import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundEx
 import com.exemple.ecommerce.customer.account.validation.AccountValidation;
 import com.exemple.ecommerce.event.model.EventData;
 import com.exemple.ecommerce.event.model.EventType;
-import com.exemple.ecommerce.resource.account.AccountLoginResource;
 import com.exemple.ecommerce.resource.account.AccountResource;
-import com.exemple.ecommerce.resource.account.exception.AccountLoginResourceException;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,18 +23,15 @@ public class AccountServiceImpl implements AccountService {
 
     private AccountResource accountResource;
 
-    private AccountLoginResource accountloginResource;
-
     private AccountValidation accountValidation;
 
     private SchemaFilter schemaFilter;
 
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public AccountServiceImpl(AccountResource accountResource, AccountLoginResource accountloginResource, AccountValidation accountValidation,
-            SchemaFilter schemaFilter, ApplicationEventPublisher applicationEventPublisher) {
+    public AccountServiceImpl(AccountResource accountResource, AccountValidation accountValidation, SchemaFilter schemaFilter,
+            ApplicationEventPublisher applicationEventPublisher) {
         this.accountResource = accountResource;
-        this.accountloginResource = accountloginResource;
         this.accountValidation = accountValidation;
         this.schemaFilter = schemaFilter;
         this.applicationEventPublisher = applicationEventPublisher;
@@ -48,12 +43,6 @@ public class AccountServiceImpl implements AccountService {
         accountValidation.validate(source, null, app, version);
 
         UUID id = UUID.randomUUID();
-
-        try {
-            accountloginResource.save(id, source);
-        } catch (AccountLoginResourceException e) {
-            throw new AccountServiceException(e);
-        }
 
         JsonNode account = accountResource.save(id, source);
 
@@ -69,12 +58,6 @@ public class AccountServiceImpl implements AccountService {
         JsonNode old = accountResource.get(id).orElseThrow(AccountServiceNotFoundException::new);
 
         accountValidation.validate(source, old, app, version);
-
-        try {
-            accountloginResource.update(id, source);
-        } catch (AccountLoginResourceException e) {
-            throw new AccountServiceException(e);
-        }
 
         JsonNode account = accountResource.update(id, source);
 

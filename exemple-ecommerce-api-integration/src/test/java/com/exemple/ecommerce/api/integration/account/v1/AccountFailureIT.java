@@ -79,7 +79,6 @@ public class AccountFailureIT extends AbstractTestNGSpringContextTests {
         accountBody.put("email", UUID.randomUUID().toString() + "@gmail.com");
         accountBody.put("lastname", "Dupond");
         accountBody.put("firstname", "Jean");
-        accountBody.put("password", "mdp");
         accountBody.put("birthday", "1970-01-01");
 
         accountBody.put(field, value);

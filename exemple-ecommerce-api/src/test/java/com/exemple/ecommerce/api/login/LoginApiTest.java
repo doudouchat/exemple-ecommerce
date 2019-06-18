@@ -4,6 +4,7 @@ import static com.exemple.ecommerce.api.common.model.ApplicationBeanParam.APP_HE
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +79,32 @@ public class LoginApiTest extends JerseySpringSupport {
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
 
         Mockito.verify(service).exist(login);
+
+    }
+
+    @Test
+    public void create() throws Exception {
+
+        String login = "jean.dupond@gmail.com";
+
+        Map<String, Object> model = new HashMap<>();
+        model.put("login", login);
+        model.put("password", "jean.dupont");
+        model.put("id", UUID.randomUUID());
+
+        Mockito.doNothing().when(service).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
+
+        Response response = target(URL).request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1")
+
+                .post(Entity.json(JsonNodeUtils.create(model)));
+
+        Mockito.verify(service).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
+
+        assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
+        URI baseUri = target(URL).getUri();
+        assertThat(response.getLocation(), is(URI.create(baseUri + "/" + login)));
 
     }
 
@@ -176,6 +203,25 @@ public class LoginApiTest extends JerseySpringSupport {
         Mockito.verify(service).get(Mockito.eq(login), Mockito.eq("test"), Mockito.eq("v1"));
 
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
+
+    }
+
+    @Test
+    public void delete() throws Exception {
+
+        String login = "jean.dupond@gmail.com";
+
+        Mockito.doNothing().when(service).delete(Mockito.eq(login));
+
+        Response response = target(URL + "/" + login).request(MediaType.APPLICATION_JSON)
+
+                .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1")
+
+                .delete();
+
+        Mockito.verify(service).delete(Mockito.eq(login));
+
+        assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
 
     }
 

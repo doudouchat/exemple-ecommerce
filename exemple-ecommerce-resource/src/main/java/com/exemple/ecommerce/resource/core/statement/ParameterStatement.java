@@ -2,7 +2,6 @@ package com.exemple.ecommerce.resource.core.statement;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -38,11 +37,6 @@ public class ParameterStatement extends StatementResource {
         select.where().and(QueryBuilder.eq(APP, APP_DEFAULT));
 
         return Optional.of(session.execute(select).one()).orElseThrow(IllegalArgumentException::new).get(0, JsonNode.class);
-    }
-
-    @Cacheable("parameter_logins")
-    public Set<String> getLogins() {
-        return JsonNodeUtils.stream(this.get("logins").elements()).map(JsonNode::textValue).collect(Collectors.toSet());
     }
 
     @Cacheable("parameter_histories")

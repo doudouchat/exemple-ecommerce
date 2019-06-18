@@ -3,9 +3,12 @@ package com.exemple.ecommerce.customer.login.impl;
 import org.springframework.stereotype.Service;
 
 import com.exemple.ecommerce.customer.login.LoginService;
+import com.exemple.ecommerce.customer.login.exception.LoginServiceException;
+import com.exemple.ecommerce.customer.login.exception.LoginServiceExistException;
 import com.exemple.ecommerce.customer.login.exception.LoginServiceNotFoundException;
 import com.exemple.ecommerce.customer.login.validation.LoginValidation;
 import com.exemple.ecommerce.resource.login.LoginResource;
+import com.exemple.ecommerce.resource.login.exception.LoginResourceExistException;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -30,11 +33,33 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void save(String login, JsonNode source, String app, String version) {
+    public void save(String login, JsonNode source, String app, String version) throws LoginServiceNotFoundException {
+
+        JsonNode old = loginResource.get(login).orElseThrow(LoginServiceNotFoundException::new);
+
+        loginValidation.validate(source, old, app, version);
+
+        loginResource.save(login, source);
+
+    }
+
+    @Override
+    public void save(JsonNode source, String app, String version) throws LoginServiceException {
 
         loginValidation.validate(source, null, app, version);
 
-        loginResource.save(login, source);
+        try {
+            loginResource.save(source);
+        } catch (LoginResourceExistException e) {
+            throw new LoginServiceExistException(e);
+        }
+
+    }
+
+    @Override
+    public void delete(String login) {
+
+        loginResource.delete(login);
 
     }
 
@@ -45,4 +70,5 @@ public class LoginServiceImpl implements LoginService {
 
         return schemaFilter.filter(app, version, "login", source);
     }
+
 }

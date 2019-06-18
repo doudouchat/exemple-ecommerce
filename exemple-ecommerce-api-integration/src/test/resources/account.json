@@ -3,7 +3,6 @@
 	"additionalProperties": false,
 	"required": [
 		"email",
-		"password",
 		"lastname",
 		"firstname",
 		"birthday"
@@ -48,10 +47,6 @@
 		"firstname": {
 			"type": "string",
 			"pattern": "^(?!\\s*$).+"
-		},
-		"password": {
-			"type": "string",
-			"writeOnly": true
 		},
 		"birthday": {
 			"type": "string",
