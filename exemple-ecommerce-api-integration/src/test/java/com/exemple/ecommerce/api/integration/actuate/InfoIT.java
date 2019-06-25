@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,7 +25,7 @@ import io.restassured.response.Response;
 public class InfoIT {
 
     @Test
-    public void info() throws IOException, URISyntaxException {
+    public void template() throws IOException, URISyntaxException {
 
         Response response = JsonRestTemplate.given().accept(ContentType.HTML).get();
         assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
@@ -37,6 +38,17 @@ public class InfoIT {
 
         Matcher matcher = Pattern.compile(".*:([a-zA-Z0-9-.]*)").matcher(versionDiv.text().replaceAll(" ", ""));
         assertThat("L'expression régulière doit correspondre", matcher.find(), is(true));
+
+    }
+
+    @Test
+    public void info() {
+
+        Response response = JsonRestTemplate.given().get("/ws/info");
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
+        assertThat(response.jsonPath().getString("version"), is(notNullValue()));
+        assertThat(response.jsonPath().getString("buildTime"), is(notNullValue()));
 
     }
 

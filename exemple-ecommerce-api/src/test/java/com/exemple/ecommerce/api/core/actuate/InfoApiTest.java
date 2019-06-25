@@ -2,7 +2,9 @@ package com.exemple.ecommerce.api.core.actuate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -11,6 +13,8 @@ import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class InfoApiTest extends JerseySpringSupport {
 
@@ -22,12 +26,26 @@ public class InfoApiTest extends JerseySpringSupport {
     private static final String URL = "/";
 
     @Test
-    public void info() throws Exception {
+    public void template() throws Exception {
 
         Response response = target(URL).request().get();
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
 
+    }
+
+    @Test
+    public void info() throws Exception {
+
+        Response response = target(URL + "info").request(MediaType.APPLICATION_JSON).get();
+
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseBody = mapper.readTree(response.readEntity(String.class));
+
+        assertThat(responseBody.get("version"), is(notNullValue()));
+        assertThat(responseBody.get("buildTime"), is(notNullValue()));
     }
 
 }

@@ -15,7 +15,15 @@ import org.springframework.stereotype.Component;
 import com.exemple.ecommerce.api.common.ManifestUtils;
 import com.exemple.ecommerce.api.core.actuate.model.Info;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @Path("/")
+@OpenAPIDefinition(tags = @Tag(name = "info"))
 @Component
 public class InfoApi {
 
@@ -25,6 +33,16 @@ public class InfoApi {
     @GET
     @Template(name = "/info")
     @Produces({ MediaType.TEXT_XML, MediaType.TEXT_HTML })
+    public Info template() throws IOException {
+
+        return info();
+    }
+
+    @GET
+    @Path("/info")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(tags = { "info" })
+    @ApiResponse(content = @Content(schema = @Schema(implementation = Info.class)))
     public Info info() throws IOException {
 
         Info result = new Info();
