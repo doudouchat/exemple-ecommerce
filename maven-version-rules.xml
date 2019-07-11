@@ -51,7 +51,7 @@
 		</rule>
 		<rule groupId="org.springframework.boot" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.M1|2.2.0.M2|2.2.0.M3</ignoreVersion>
+				<ignoreVersion type="regex">2.2.0.M1|2.2.0.M2|2.2.0.M3|2.2.0.M4</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="org.springframework.session" comparisonMethod="maven">
