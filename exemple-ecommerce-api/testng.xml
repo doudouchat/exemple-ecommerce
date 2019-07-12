@@ -4,7 +4,6 @@
 	<test name="ut common">
 		<packages>
 			<package name="com.exemple.ecommerce.api.common" />
-			<package name="com.exemple.ecommerce.api.core.filter" />
 		</packages>
 	</test>
 	<test name="ut api">

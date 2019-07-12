@@ -76,4 +76,38 @@ public class DocumentApiResourceTest extends JerseySpringSupport {
 
     }
 
+    @Test
+    public void swaggerForwarded() throws Exception {
+
+        Mockito.when(schemaResource.allVersions(Mockito.anyString())).thenReturn(Collections.singletonMap("account", Arrays.asList("v1", "v2")));
+
+        Response response = target(URL).request(MediaType.APPLICATION_JSON).header("X-Forwarded-For", "0:0:0:0:0:0:0:1")
+                .header("X-Forwarded-Host", "localhost:8081").header("x-forwarded-prefix", "/example").header("X-Forwarded-Proto", "http").get();
+
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+
+        String baseUri = "http://localhost:8081/example";
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseBody = mapper.readTree(response.readEntity(String.class));
+
+        assertThat(responseBody, notNullValue());
+        assertThat(responseBody, hasJsonField("components", hasJsonField("schemas",
+                // Account
+                hasJsonField("Account.v1", hasJsonField("$ref", baseUri + "/ws/v1/schema/account/test/v1")),
+                // Account
+                hasJsonField("Account.v2", hasJsonField("$ref", baseUri + "/ws/v1/schema/account/test/v2")),
+                // Stock
+                hasJsonField("Stock", hasJsonField("type", "object"),
+                        hasJsonField("properties", hasJsonField("increment", hasJsonField("type", "integer")))),
+                // Patch
+                hasJsonField("Patch", hasJsonField("$ref", baseUri + "/ws/v1/schema/patch")),
+                // Health
+                hasJsonField("Health", hasJsonField("type", "object"),
+                        hasJsonField("properties", hasJsonField("status", hasJsonField("type", "string"))))
+
+        )));
+
+    }
+
 }

@@ -14,7 +14,6 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.validation.beanvalidation.MessageSourceResourceBundleLocator;
 
 import com.exemple.ecommerce.api.core.authorization.AuthorizationFilter;
-import com.exemple.ecommerce.api.core.filter.CorsResponseFilter;
 import com.exemple.ecommerce.api.core.filter.ExecutionContextResponseFilter;
 import com.exemple.ecommerce.api.core.keyspace.KeyspaceFilter;
 import com.exemple.ecommerce.api.core.listener.ApiEventListener;
@@ -50,10 +49,6 @@ public class FeatureConfiguration extends ResourceConfig {
 
                         // validation
                         .register(ValidationConfigurationContextResolver.class)
-
-                        // CORS response
-
-                        .register(CorsResponseFilter.class)
 
                         // swagger
 

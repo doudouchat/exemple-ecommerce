@@ -16,7 +16,6 @@ import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.authorization.core.authentication.AuthenticationConfiguration;
 import com.exemple.ecommerce.authorization.core.client.AuthorizationClientTestConfiguration;
-import com.exemple.ecommerce.authorization.core.cors.AuthorizationCorsConfiguration;
 import com.exemple.ecommerce.authorization.core.feature.FeatureTestConfiguration;
 import com.exemple.ecommerce.authorization.core.property.AuthorizationPropertyConfiguration;
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
@@ -28,8 +27,8 @@ import com.exemple.ecommerce.resource.login.LoginResource;
 
 @Configuration
 @Import({ AuthorizationConfiguration.class, AuthenticationConfiguration.class, AuthorizationTokenConfiguration.class,
-        HazelcastHttpSessionConfiguration.class, SwaggerConfiguration.class, AuthorizationCorsConfiguration.class,
-        AuthorizationClientTestConfiguration.class, FeatureTestConfiguration.class })
+        HazelcastHttpSessionConfiguration.class, SwaggerConfiguration.class, AuthorizationClientTestConfiguration.class,
+        FeatureTestConfiguration.class })
 @ComponentScan(basePackageClasses = AuthorizationResourceKeyspace.class)
 @EnableAutoConfiguration
 public class AuthorizationTestConfiguration extends AuthorizationPropertyConfiguration {

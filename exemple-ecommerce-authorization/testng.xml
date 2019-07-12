@@ -3,7 +3,6 @@
 <suite name="authorization" parallel="false">
 	<test name="ut core">
 		<packages>
-			<package name="com.exemple.ecommerce.authorization.core.cors" />
 			<package name="com.exemple.ecommerce.authorization.core.swagger" />
 		</packages>
 		<classes>

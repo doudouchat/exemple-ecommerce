@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.exemple.ecommerce.api.core.swagger.custom.DocumentApiCustom;
@@ -85,7 +86,13 @@ public class DocumentApiResource extends BaseOpenApiResource {
     public Response getOpenApi(@Context HttpHeaders headers, @Context UriInfo uriInfo, @PathParam("type") String type, @PathParam("app") String app)
             throws Exception {
 
-        headers.getRequestHeaders().put(APP_HOST, Collections.singletonList(uriInfo.getBaseUri().toString().replace("/ws", "")));
+        String host = uriInfo.getBaseUri().toString().replace("/ws", "");
+        if (!StringUtils.isEmpty(headers.getHeaderString("X-Forwarded-For"))) {
+            host = StringUtils.join(headers.getHeaderString("X-Forwarded-Proto") + "://" + headers.getHeaderString("X-Forwarded-Host")
+                    + headers.getHeaderString("x-forwarded-prefix") + "/");
+        }
+
+        headers.getRequestHeaders().put(APP_HOST, Collections.singletonList(host));
         headers.getRequestHeaders().put(APP, Collections.singletonList(app));
 
         ApplicationDetail applicationDetail = applicationDetailService.get(app);
