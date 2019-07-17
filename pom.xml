@@ -302,7 +302,7 @@
 			<dependency>
 				<groupId>com.flipkart.zjsonpatch</groupId>
 				<artifactId>zjsonpatch</artifactId>
-				<version>0.4.8</version>
+				<version>0.4.9</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.core</groupId>
@@ -351,7 +351,7 @@
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.12</version>
+				<version>1.13</version>
 			</dependency>
 
 			<!-- GOOGLE GUAVA -->
@@ -549,7 +549,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.12.2</version>
+				<version>3.13.1</version>
 				<scope>test</scope>
 			</dependency>
 

@@ -40,7 +40,7 @@ public class SubscriptionApiTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL = "/v1/subscription";
+    public static final String URL = "/v1/subscriptions";
 
     @DataProvider(name = "update")
     private static Object[][] update() {

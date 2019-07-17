@@ -1,7 +1,5 @@
 package com.exemple.ecommerce.api.subscription;
 
-import java.net.URI;
-
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -16,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -42,7 +41,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Path("/v1/subscription")
+@Path("/v1/subscriptions")
 @OpenAPIDefinition(tags = @Tag(name = "subscription"))
 @Component
 public class SubscriptionApi {
@@ -86,12 +85,14 @@ public class SubscriptionApi {
     })
     @RolesAllowed("subscription:update")
     public Response update(@NotNull @PathParam("email") String email,
-            @NotNull @Parameter(schema = @Schema(ref = "SUBSCRIPTION_SCHEMA")) JsonNode subscription,
+            @NotNull @Parameter(schema = @Schema(ref = SUBSCRIPTION_SCHEMA)) JsonNode subscription,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) SchemaBeanParam schemaBeanParam, @Context UriInfo uriInfo) {
 
         boolean created = service.save(email, subscription, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
-        return Response.status(created ? Status.CREATED : Status.NO_CONTENT).location(URI.create(uriInfo.getAbsolutePath() + "/" + email)).build();
+        UriBuilder builder = uriInfo.getAbsolutePathBuilder();
+        builder.path(email);
+        return Response.status(created ? Status.CREATED : Status.NO_CONTENT).location(builder.build()).build();
 
     }
 

@@ -24,7 +24,7 @@ import io.restassured.response.Response;
 
 public class SubscriptionIT {
 
-    public static final String URL = "/ws/v1/subscription";
+    public static final String URL = "/ws/v1/subscriptions";
 
     private static final String EMAIL = UUID.randomUUID().toString() + "@gmail.com";
 

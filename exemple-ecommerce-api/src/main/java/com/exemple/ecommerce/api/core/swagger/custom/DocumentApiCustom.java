@@ -92,7 +92,7 @@ public class DocumentApiCustom extends AbstractSpecFilter {
 
             StringBuilder ref = new StringBuilder();
             ref.append(host);
-            ref.append("ws/v1/schema/");
+            ref.append("ws/v1/schemas/");
             ref.append(schema.getName().toLowerCase(Locale.getDefault()));
             ref.append('/');
             ref.append(app);
@@ -105,7 +105,7 @@ public class DocumentApiCustom extends AbstractSpecFilter {
 
         if ("Patch".equals(schema.getName())) {
 
-            schema.$ref(host.concat("ws/v1/schema/patch"));
+            schema.$ref(host.concat("ws/v1/schemas/patch"));
 
         }
 

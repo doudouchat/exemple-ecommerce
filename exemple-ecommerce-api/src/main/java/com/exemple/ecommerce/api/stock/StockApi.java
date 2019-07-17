@@ -38,7 +38,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Path("/v1/stock")
+@Path("/v1/stocks")
 @OpenAPIDefinition(tags = @Tag(name = "stock"))
 @Component
 public class StockApi {
@@ -70,7 +70,7 @@ public class StockApi {
     @Path("/{store}/{product}")
     @Operation(tags = { "stock" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
-    @ApiResponse(content = @Content(schema = @Schema(implementation = Stock.class)))
+    @ApiResponse(description = "Stock Data", responseCode = "200", content = @Content(schema = @Schema(implementation = Stock.class)))
     @RolesAllowed("stock:read")
     public Stock get(@PathParam("store") String store, @PathParam("product") String product,
             @Valid @BeanParam @Parameter(in = ParameterIn.HEADER) ApplicationBeanParam applicationBeanParam) throws NoFoundStockException {

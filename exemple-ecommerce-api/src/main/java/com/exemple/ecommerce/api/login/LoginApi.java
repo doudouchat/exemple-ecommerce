@@ -1,7 +1,5 @@
 package com.exemple.ecommerce.api.login;
 
-import java.net.URI;
-
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -21,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -54,7 +53,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Path("/v1/login")
+@Path("/v1/logins")
 @OpenAPIDefinition(tags = @Tag(name = "login"))
 @Component
 public class LoginApi {
@@ -107,8 +106,9 @@ public class LoginApi {
 
         loginService.save(source, schemaBeanParam.getApp(), schemaBeanParam.getVersion());
 
-        return Response.status(Status.CREATED).location(URI.create(uriInfo.getAbsolutePath() + "/" + source.get(LoginStatement.LOGIN).textValue()))
-                .build();
+        UriBuilder builder = uriInfo.getAbsolutePathBuilder();
+        builder.path(source.get(LoginStatement.LOGIN).textValue());
+        return Response.created(builder.build()).build();
 
     }
 

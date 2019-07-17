@@ -34,7 +34,7 @@
 		<sonar.exclusions>**/core/PrimitivesAndStringFactory.java</sonar.exclusions>
 
 		<!-- API -->
-		<cassandra.host>0.0.0.0</cassandra.host>
+		<cassandra.host>127.0.0.1</cassandra.host>
 		<cassandra.nativeTransportPort>9042</cassandra.nativeTransportPort>
 		<hazelcast.port>5705</hazelcast.port>
 		<zmp.clientPort>10024</zmp.clientPort>
@@ -268,13 +268,6 @@
 		<profile>
 			<id>webservice</id>
 
-			<properties>
-
-				<!-- API -->
-				<cassandra.host>127.0.0.1</cassandra.host>
-
-			</properties>
-
 			<dependencies>
 
 				<dependency>
@@ -426,6 +419,17 @@
 							</configuration>
 						</configuration>
 					</plugin>
+
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>it</id>
+
+			<build>
+
+				<plugins>
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

@@ -48,7 +48,7 @@ public class LoginApiTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL = "/v1/login";
+    public static final String URL = "/v1/logins";
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

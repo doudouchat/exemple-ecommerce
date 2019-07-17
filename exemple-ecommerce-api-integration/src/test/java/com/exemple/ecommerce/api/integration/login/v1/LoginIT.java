@@ -25,7 +25,7 @@ import io.restassured.response.Response;
 
 public class LoginIT {
 
-    public static final String URL = "/ws/v1/login";
+    public static final String URL = "/ws/v1/logins";
 
     private static final String LOGIN = UUID.randomUUID() + "@gmail.com";
 

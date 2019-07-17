@@ -1,7 +1,8 @@
 <configuration>
 
 	<!-- console -->
-	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+	<appender name="console"
+		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d %-5p: %C - %m%n</pattern>
 			<charset>UTF-8</charset>
@@ -13,15 +14,19 @@
 	<logger name="ACHILLES_DDL_SCRIPT">
 		<level value="DEBUG" />
 	</logger>
-	
+
 	<logger name="com.datastax.driver.core.QueryLogger.NORMAL">
 		<level value="DEBUG" />
 	</logger>
-	
+
 	<logger name="com.hazelcast">
 		<level value="DEBUG" />
 	</logger>
-	
+
+	<logger name="info.archinnov.achilles">
+		<level value="INFO" />
+	</logger>
+
 	<!-- Niveau general pour l'application -->
 
 	<root level="WARN">

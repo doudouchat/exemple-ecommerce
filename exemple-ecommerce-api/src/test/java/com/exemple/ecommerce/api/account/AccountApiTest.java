@@ -55,7 +55,7 @@ public class AccountApiTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL = "/v1/account";
+    public static final String URL = "/v1/accounts";
 
     @Test
     public void get() throws Exception {

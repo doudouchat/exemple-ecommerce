@@ -26,7 +26,7 @@ import io.restassured.response.Response;
 @ContextConfiguration(classes = { IntegrationTestConfiguration.class })
 public class StockNominalIT extends AbstractTestNGSpringContextTests {
 
-    private static final String STOCK_URL = "/ws/v1/stock/{store}/{product}";
+    private static final String STOCK_URL = "/ws/v1/stocks/{store}/{product}";
 
     private final String product = "product#" + UUID.randomUUID();
 

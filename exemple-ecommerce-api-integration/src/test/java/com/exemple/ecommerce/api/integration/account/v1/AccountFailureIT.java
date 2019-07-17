@@ -35,7 +35,7 @@ public class AccountFailureIT extends AbstractTestNGSpringContextTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountFailureIT.class);
 
-    private static final String ACCOUNT_URL = "/ws/v1/account";
+    private static final String ACCOUNT_URL = "/ws/v1/accounts";
 
     @DataProvider(name = "createFailure")
     private static Object[][] createFailure() {

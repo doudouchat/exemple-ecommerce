@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,9 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.exemple.ecommerce.api.common.ManifestUtils;
 import com.exemple.ecommerce.api.core.swagger.custom.DocumentApiCustom;
 import com.exemple.ecommerce.api.core.swagger.security.DocumentApiSecurity;
 import com.exemple.ecommerce.application.common.model.ApplicationDetail;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
 import io.swagger.v3.oas.integration.api.OpenApiContext;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 
@@ -54,6 +56,9 @@ public class DocumentApiResource extends BaseOpenApiResource {
     private ServletConfig config;
 
     @Context
+    private ServletContext servletContext;
+
+    @Context
     private Application application;
 
     @Autowired(required = false)
@@ -73,8 +78,12 @@ public class DocumentApiResource extends BaseOpenApiResource {
         server.setUrl("{host}");
         ServerVariables serverVariables = new ServerVariables();
         server.setVariables(serverVariables);
-
         openAPI.addServersItem(server);
+
+        Info info = new Info();
+        info.title("Api documentation");
+        info.description("Api documentation");
+        openAPI.setInfo(info);
 
         this.openApiConfiguration = new SwaggerConfiguration().filterClass(DocumentApiCustom.class.getName()).openAPI(openAPI);
 
@@ -86,14 +95,10 @@ public class DocumentApiResource extends BaseOpenApiResource {
     public Response getOpenApi(@Context HttpHeaders headers, @Context UriInfo uriInfo, @PathParam("type") String type, @PathParam("app") String app)
             throws Exception {
 
-        String host = uriInfo.getBaseUri().toString().replace("/ws", "");
-        if (!StringUtils.isEmpty(headers.getHeaderString("X-Forwarded-For"))) {
-            host = StringUtils.join(headers.getHeaderString("X-Forwarded-Proto") + "://" + headers.getHeaderString("X-Forwarded-Host")
-                    + headers.getHeaderString("x-forwarded-prefix") + "/");
-        }
-
-        headers.getRequestHeaders().put(APP_HOST, Collections.singletonList(host));
+        headers.getRequestHeaders().put(APP_HOST, Collections.singletonList(uriInfo.getBaseUri().toString().replace("/ws", "")));
         headers.getRequestHeaders().put(APP, Collections.singletonList(app));
+
+        this.openApiConfiguration.getOpenAPI().getInfo().setVersion(ManifestUtils.version(servletContext));
 
         ApplicationDetail applicationDetail = applicationDetailService.get(app);
 

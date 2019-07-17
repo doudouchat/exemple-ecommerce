@@ -42,7 +42,7 @@ public class InfoApi {
     @Path("/info")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "info" })
-    @ApiResponse(content = @Content(schema = @Schema(implementation = Info.class)))
+    @ApiResponse(description = "Info Data", responseCode = "200", content = @Content(schema = @Schema(implementation = Info.class)))
     public Info info() throws IOException {
 
         Info result = new Info();

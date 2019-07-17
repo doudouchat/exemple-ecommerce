@@ -26,7 +26,7 @@ public class HealthApi {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(tags = { "health" })
-    @ApiResponse(content = @Content(schema = @Schema(implementation = Health.class)))
+    @ApiResponse(description = "UP!", responseCode = "200", content = @Content(schema = @Schema(implementation = Health.class)))
     public Response health() {
 
         Health result = new Health();

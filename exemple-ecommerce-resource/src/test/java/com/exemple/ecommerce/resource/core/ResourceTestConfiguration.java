@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -20,7 +21,7 @@ import info.archinnov.achilles.embedded.CassandraShutDownHook;
 @Import(ResourceConfiguration.class)
 public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
 
-    private CassandraShutDownHook shutdownHook = new CassandraShutDownHook();
+    private CassandraShutDownHook cassandraShutDownHook = new CassandraShutDownHook();
 
     @Value("${resource.cassandra.port}")
     private int port;
@@ -32,7 +33,7 @@ public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
         System.setProperty("com.datastax.driver.FORCE_NIO", "true");
 
         return CassandraEmbeddedServerBuilder.builder().withScript("cassandra/keyspace.cql").withScript("cassandra/test.cql")
-                .withScript("cassandra/exec.cql").withClusterName("test").withCQLPort(port).withShutdownHook(shutdownHook)
+                .withScript("cassandra/exec.cql").withClusterName("test").withCQLPort(port).withShutdownHook(cassandraShutDownHook)
                 .cleanDataFilesAtStartup(true);
 
     }
@@ -49,10 +50,10 @@ public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
         return propertySourcesPlaceholderConfigurer;
     }
 
-    @Bean()
+    @Bean
+    @DependsOn("embeddedServer")
     public Cluster cluster() {
 
-        embeddedServer();
         return super.cluster();
     }
 

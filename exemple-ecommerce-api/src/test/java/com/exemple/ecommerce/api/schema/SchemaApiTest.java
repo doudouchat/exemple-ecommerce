@@ -36,7 +36,7 @@ public class SchemaApiTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL = "/v1/schema";
+    public static final String URL = "/v1/schemas";
 
     @Test
     public void get() throws Exception {

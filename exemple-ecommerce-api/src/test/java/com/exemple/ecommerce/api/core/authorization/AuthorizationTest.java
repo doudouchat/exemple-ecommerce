@@ -36,9 +36,11 @@ import org.testng.annotations.Test;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.exemple.ecommerce.api.account.AccountApiTest;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
+import com.exemple.ecommerce.api.login.LoginApiTest;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.login.LoginService;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
@@ -107,10 +109,6 @@ public class AuthorizationTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL_ACCOUNT = "/v1/account";
-
-    public static final String URL_LOGIN = "/v1/login";
-
     private static UUID ID = UUID.randomUUID();
 
     @DataProvider(name = "notAuthorized")
@@ -147,7 +145,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", id))));
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
+        Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
@@ -181,7 +179,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
+        Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
@@ -208,10 +206,11 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(accountService.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("id"));
+        Mockito.when(accountService.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1")))
+                .thenReturn(JsonNodeUtils.create(Collections.singletonMap("id", UUID.randomUUID())));
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_ACCOUNT).request(MediaType.APPLICATION_JSON)
+        Response response = target(AccountApiTest.URL).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
@@ -242,7 +241,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_ACCOUNT + "/" + ID).request(MediaType.APPLICATION_JSON)
+        Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
@@ -276,7 +275,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(loginService.get(Mockito.eq("john_doe"), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.create(model));
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_LOGIN + "/" + "john_doe").request(MediaType.APPLICATION_JSON)
+        Response response = target(LoginApiTest.URL + "/" + "john_doe").request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
@@ -304,7 +303,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
-        Response response = target(URL_LOGIN + "/" + "other").request(MediaType.APPLICATION_JSON)
+        Response response = target(LoginApiTest.URL + "/" + "other").request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 

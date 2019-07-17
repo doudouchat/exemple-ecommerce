@@ -31,6 +31,7 @@ import org.testng.annotations.Test;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.exemple.ecommerce.api.account.AccountApiTest;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
@@ -92,8 +93,6 @@ public class AuthorizationAlgorithmFactoryTest extends JerseySpringSupport {
 
     }
 
-    public static final String URL = "/v1/account";
-
     @Test
     public void authorizedMultiple() throws InterruptedException, AccountServiceException {
 
@@ -152,7 +151,7 @@ public class AuthorizationAlgorithmFactoryTest extends JerseySpringSupport {
 
     private Response performService(String token) {
 
-        return target(URL).request(MediaType.APPLICATION_JSON)
+        return target(AccountApiTest.URL).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token)
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));

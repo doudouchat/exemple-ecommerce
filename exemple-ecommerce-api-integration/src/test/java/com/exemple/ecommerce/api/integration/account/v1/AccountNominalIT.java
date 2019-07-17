@@ -34,7 +34,7 @@ public class AccountNominalIT extends AbstractTestNGSpringContextTests {
 
     public static final String VERSION_HEADER_VALUE = "v1";
 
-    public static final String ACCOUNT_URL = "/ws/v1/account";
+    public static final String ACCOUNT_URL = "/ws/v1/accounts";
 
     public static UUID ID = null;
 

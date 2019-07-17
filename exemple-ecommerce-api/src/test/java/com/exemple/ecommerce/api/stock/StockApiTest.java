@@ -48,7 +48,7 @@ public class StockApiTest extends JerseySpringSupport {
 
     }
 
-    private static final String URL = "/v1/stock";
+    private static final String URL = "/v1/stocks";
 
     @Test
     public void update() throws Exception {
