@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -53,6 +54,12 @@ public class AuthorizationAlgorithmFactory {
 
     private CountDownLatch latch;
 
+    @Value("${api.authorization.client.clientId}")
+    private String clientId;
+
+    @Value("${api.authorization.client.clientSecret}")
+    private String clientSecret;
+
     static {
 
         RSA_PUBLIC_KEY = Pattern.compile("-----BEGIN PUBLIC KEY-----(.*)-----END PUBLIC KEY-----", Pattern.DOTALL);
@@ -75,7 +82,7 @@ public class AuthorizationAlgorithmFactory {
 
     private Algorithm buildAlgorithm() throws AuthorizationException {
 
-        Response response = this.authorizationService.tokenKey("resource", "secret");
+        Response response = this.authorizationService.tokenKey(clientId, clientSecret);
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 
