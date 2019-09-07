@@ -102,27 +102,30 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
         tokenKeyFailure.put("value",
                 "-----BEGIN PUBLIC KEY-----\n" + new String(Base64.encodeBase64("123".getBytes())) + "\n-----END PUBLIC KEY-----");
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
-                .withJWTId(UUID.randomUUID().toString()).sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:write" }).withJWTId(UUID.randomUUID().toString()).sign(RSA256_ALGORITHM);
 
-        String deprecatedToken = JWT.create().withClaim("user_name", "john_doe").withAudience("test")
+        String other = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("other")
+                .withArrayClaim("scope", new String[] { "account:write" }).withJWTId(UUID.randomUUID().toString()).sign(RSA256_ALGORITHM);
+
+        String deprecatedToken = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
                 .withArrayClaim("scope", new String[] { "account:write" }).withJWTId(DEPRECATED_TOKEN_ID.toString()).sign(RSA256_ALGORITHM);
 
         return new Object[][] {
 
-                { token, TOKEN_KEY_RESPONSE, "test", Status.BAD_REQUEST },
+                { token, TOKEN_KEY_RESPONSE, Status.BAD_REQUEST },
 
-                { token, tokenKeyFailure, "test", Status.OK },
+                { token, tokenKeyFailure, Status.OK },
 
-                { token, TOKEN_KEY_RESPONSE, "other", Status.OK },
+                { other, TOKEN_KEY_RESPONSE, Status.OK },
 
-                { deprecatedToken, TOKEN_KEY_RESPONSE, "test", Status.OK },
+                { deprecatedToken, TOKEN_KEY_RESPONSE, Status.OK },
 
         };
     }
 
     @Test(dataProvider = "authorizedFailure", expectedExceptions = AuthorizationException.class)
-    public void authorizedFailure(String token, Map<String, String> tokenKey, String application, Status status) throws AuthorizationException {
+    public void authorizedFailure(String token, Map<String, String> tokenKey, Status status) throws AuthorizationException {
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(status.getStatusCode());
@@ -133,7 +136,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
 
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.putSingle("Authorization", "Bearer " + token);
-        headers.putSingle(ApplicationBeanParam.APP_HEADER, application);
+        headers.putSingle(ApplicationBeanParam.APP_HEADER, "test");
 
         service.buildContext(headers);
 
@@ -142,8 +145,8 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
     @Test
     public void authorized() throws AuthorizationException {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
-                .withJWTId(UUID.randomUUID().toString()).sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:write" }).withJWTId(UUID.randomUUID().toString()).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -169,9 +172,9 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
     @Test(expectedExceptions = AuthorizationException.class)
     public void singleUse() throws AuthorizationException {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
-                .withClaim("singleUse", true).withJWTId(UUID.randomUUID().toString()).withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:write" }).withClaim("singleUse", true).withJWTId(UUID.randomUUID().toString())
+                .withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -193,9 +196,9 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
     @Test
     public void singleUseFailure() throws AuthorizationException {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
-                .withClaim("singleUse", true).withJWTId(UUID.randomUUID().toString()).withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:write" }).withClaim("singleUse", true).withJWTId(UUID.randomUUID().toString())
+                .withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());

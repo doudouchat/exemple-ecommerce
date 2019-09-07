@@ -24,6 +24,8 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.codec.binary.Base64;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.mockito.Mockito;
+import org.mockito.internal.stubbing.answers.AnswersWithDelay;
+import org.mockito.internal.stubbing.answers.DoesNothing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.testng.annotations.BeforeMethod;
@@ -96,8 +98,8 @@ public class AuthorizationAlgorithmFactoryTest extends JerseySpringSupport {
     @Test
     public void authorizedMultiple() throws InterruptedException, AccountServiceException {
 
-        String token = JWT.create().withClaim("client_id", "test").withAudience("test").withArrayClaim("scope", new String[] { "account:create" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:create" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -125,15 +127,16 @@ public class AuthorizationAlgorithmFactoryTest extends JerseySpringSupport {
     public void authorizedMultipleFailure() throws InterruptedException, AccountServiceException {
 
         CountDownLatch latch = new CountDownLatch(1);
-        CountDownLatch spylatch = Mockito.spy(latch);
+        CountDownLatch latchSpy = Mockito.spy(latch);
 
-        authorizationAlgorithmFactory.setLatch(spylatch);
+        authorizationAlgorithmFactory.setLatch(latchSpy);
 
-        String token = JWT.create().withClaim("client_id", "test").withAudience("test").withArrayClaim("scope", new String[] { "account:create" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withAudience("test")
+                .withArrayClaim("scope", new String[] { "account:create" }).sign(RSA256_ALGORITHM);
 
         Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException());
-        Mockito.doThrow(new InterruptedException()).when(spylatch).await();
+        Mockito.doThrow(new InterruptedException()).when(latchSpy).await();
+        Mockito.doAnswer(new AnswersWithDelay(1_000L, DoesNothing.doesNothing())).when(latchSpy).countDown();
 
         ExecutorService executorService = new ThreadPoolExecutor(10, 100, 1000, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
@@ -141,7 +144,7 @@ public class AuthorizationAlgorithmFactoryTest extends JerseySpringSupport {
             executorService.submit(() -> performService(token));
         }
 
-        executorService.awaitTermination(5, TimeUnit.SECONDS);
+        executorService.awaitTermination(3, TimeUnit.SECONDS);
         executorService.shutdown();
 
         Mockito.verify(service, Mockito.never()).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));

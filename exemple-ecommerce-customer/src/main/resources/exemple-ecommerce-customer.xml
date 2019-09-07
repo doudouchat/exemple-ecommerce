@@ -7,16 +7,16 @@
         http://www.springframework.org/schema/lang 
         http://www.springframework.org/schema/lang/spring-lang.xsd">
 
-	<lang:groovy
-		script-source="classpath:com/exemple/ecommerce/customer/account/resource/AccountServiceResourceAspect.groovy">
+	<lang:groovy id="accountServiceResourceImpl"
+		script-source="classpath:com/exemple/ecommerce/customer/account/resource/AccountServiceResourceImpl.groovy">
 	</lang:groovy>
 
-	<lang:groovy
-		script-source="classpath:com/exemple/ecommerce/customer/account/validation/AccountValidationAspect.groovy">
+	<lang:groovy id="accountValidationCustomImpl"
+		script-source="classpath:com/exemple/ecommerce/customer/account/validation/AccountValidationCustomImpl.groovy">
 	</lang:groovy>
 	
-	<lang:groovy
-		script-source="classpath:com/exemple/ecommerce/customer/connexion/resource/LoginServiceResourceAspect.groovy">
+	<lang:groovy id="loginServiceResourceImpl"
+		script-source="classpath:com/exemple/ecommerce/customer/login/resource/LoginServiceResourceImpl.groovy">
 	</lang:groovy>
 
 </beans>

@@ -1,6 +1,7 @@
 package com.exemple.ecommerce.resource.core;
 
 import javax.annotation.PostConstruct;
+import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.datastax.driver.core.Cluster;
 import com.exemple.ecommerce.resource.core.cassandra.ResourceCassandraConfiguration;
@@ -62,6 +65,21 @@ public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
 
         ResourceExecutionContext.get().setKeyspace("test");
 
+    }
+
+    @Bean
+    public Validator validator() {
+
+        return new LocalValidatorFactoryBean();
+    }
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+
+        MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
+        methodValidationPostProcessor.setValidator(validator());
+
+        return methodValidationPostProcessor;
     }
 
 }

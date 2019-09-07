@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
+import com.exemple.ecommerce.application.common.exception.NotFoundApplicationException;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.schema.description.SchemaDescription;
 
@@ -69,6 +70,24 @@ public class SchemaApiTest extends JerseySpringSupport {
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.getEntity(), is(notNullValue()));
+
+    }
+
+    @Test
+    public void getFailureNotFoundApplicationException() throws Exception {
+
+        String resource = "account";
+        String app = "default";
+        String version = "v1";
+
+        Mockito.when(service.get(Mockito.eq(app), Mockito.eq(version), Mockito.eq(resource)))
+                .thenThrow(new NotFoundApplicationException(app, new Exception()));
+
+        Response response = target(URL + "/" + resource + "/" + app + "/" + version).request(MediaType.APPLICATION_JSON).get();
+
+        Mockito.verify(service).get(app, version, resource);
+
+        assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
 
     }
 

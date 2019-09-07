@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = { "com.exemple.ecommerce.application" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.application")
 public class ApplicationConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationConfiguration.class);

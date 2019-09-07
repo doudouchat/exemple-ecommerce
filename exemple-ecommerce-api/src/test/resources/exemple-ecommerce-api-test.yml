@@ -1,4 +1,5 @@
 api:
+   resourceId: exemple
    authorization: 
       hazelcast:
          port: ${hazelcast.port}

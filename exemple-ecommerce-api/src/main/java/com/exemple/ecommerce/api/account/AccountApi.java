@@ -80,7 +80,7 @@ public class AccountApi {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "account", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 
@@ -101,7 +101,7 @@ public class AccountApi {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "account", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
     @ApiResponses(value = {
 
@@ -125,7 +125,7 @@ public class AccountApi {
     @PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "account" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "account", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 

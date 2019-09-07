@@ -52,7 +52,7 @@ public class StockApi {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{store}/{product}")
-    @Operation(tags = { "stock" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "stock", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
     @RolesAllowed("stock:update")
     public Long post(@PathParam("store") String store, @PathParam("product") String product,
@@ -68,7 +68,7 @@ public class StockApi {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{store}/{product}")
-    @Operation(tags = { "stock" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "stock", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
     @ApiResponse(description = "Stock Data", responseCode = "200", content = @Content(schema = @Schema(implementation = Stock.class)))
     @RolesAllowed("stock:read")

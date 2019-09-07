@@ -2,15 +2,15 @@ CREATE KEYSPACE IF NOT EXISTS test
   WITH REPLICATION = { 
    'class' : 'NetworkTopologyStrategy', 
    'datacenter1' : 1
-} ;
+};
 
 USE test;
 
 CREATE TYPE IF NOT EXISTS address (
-    street text,
-    city text,
-    zip text,
-    floor int,
+	street text,
+	city text,
+	zip text,
+	floor int,
 	enable boolean
 );
 
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS account (
 	lastname text, 
 	firstname text, 
 	birthday date,
-    address address,	
+	address address,	
 	addresses map<text, frozen<address>>,
 	profils set<text>,
 	cgus set<frozen<cgu>>,
@@ -42,9 +42,8 @@ CREATE TABLE IF NOT EXISTS login (
 	id UUID,
 	login text PRIMARY KEY,
 	password text,
-	enable boolean,
-	roles set<text>,
-	scopes set<text>
+	disabled boolean,
+	roles set<text>
 );
 
 CREATE TABLE IF NOT EXISTS subscription (
@@ -66,7 +65,7 @@ CREATE TABLE IF NOT EXISTS parameter (
 
 CREATE TABLE IF NOT EXISTS resource_schema ( 
 	app text,
-    version text,
+	version text,
 	resource text,
 	content blob,
 	filter set<text>,

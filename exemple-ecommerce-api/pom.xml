@@ -226,6 +226,13 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 
+		<!-- GOOGLE GUAVA -->
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+
 		<!-- ASPECTJ -->
 
 		<dependency>
@@ -283,8 +290,15 @@
 			<artifactId>hamcrest-jackson</artifactId>
 		</dependency>
 
+		<!-- JNDI SIMPLE -->
+
+		<dependency>
+			<groupId>com.github.h-thurow</groupId>
+			<artifactId>simple-jndi</artifactId>
+		</dependency>
+
 	</dependencies>
-	
+
 	<build>
 
 		<testResources>
@@ -319,5 +333,5 @@
 		</plugins>
 
 	</build>
-	
+
 </project>

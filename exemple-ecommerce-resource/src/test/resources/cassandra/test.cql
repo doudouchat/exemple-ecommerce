@@ -1,16 +1,16 @@
 USE test;
 
 CREATE TYPE address (
-    street text,
-    city text,
-    zip text,
-    floor int,
+	street text,
+	city text,
+	zip text,
+	floor int,
 	enable boolean,
 	note text
 );
 
 CREATE TYPE child (
-    birthday date
+	birthday date
 );
 
 CREATE TYPE cgu (
@@ -26,7 +26,7 @@ CREATE TABLE account (
 	lastname text, 
 	firstname text, 
 	birthday date,
-    address address,	
+	address address,	
 	addresses map<text, frozen<address>>,
 	children map<int, frozen<child>>,
 	phones map<text, text>,
@@ -74,7 +74,7 @@ CREATE TABLE parameter (
 
 CREATE TABLE resource_schema ( 
 	app text,
-    version text,
+	version text,
 	resource text,
 	content blob,
 	filter set<text>,

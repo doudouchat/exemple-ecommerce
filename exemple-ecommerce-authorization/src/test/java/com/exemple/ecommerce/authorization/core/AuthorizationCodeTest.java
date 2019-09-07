@@ -2,19 +2,18 @@ package com.exemple.ecommerce.authorization.core;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.Mockito;
@@ -76,6 +75,13 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
 
     private RequestSpecification requestSpecification;
 
+    private static final Pattern LOCATION;
+
+    static {
+
+        LOCATION = Pattern.compile(".*code=(\\w*)(&state=)?(.*)?", Pattern.DOTALL);
+    }
+
     @BeforeClass
     private void init() throws Exception {
 
@@ -84,12 +90,13 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
         authorizationClientBuilder
 
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx").scopes("account:create")
-                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1")
+                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
-                .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
-                .scopes("account:read", "account:update").autoApprove("account:read", "account:update").authorities("ROLE_APP").resourceIds("app1")
+                .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token")
+                .redirectUris("/ws/test").scopes("account:read", "account:update").autoApprove("account:read", "account:update")
+                .authorities("ROLE_APP").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
@@ -132,7 +139,6 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
         account.put("login", login);
         account.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
         account.put("roles", Collections.singleton("ROLE_ACCOUNT"));
-        account.put("scopes", new HashSet<>(Arrays.asList("account:read", "account:update")));
 
         Mockito.when(resource.get(Mockito.eq(login))).thenReturn(Optional.of(MAPPER.convertValue(account, JsonNode.class)));
 
@@ -148,18 +154,47 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
     @Test(dependsOnMethods = "login")
     public void authorize() {
 
-        String authorizeUrl = restTemplate.getRootUri() + "/oauth/authorize?response_type=code&client_id=" + "test_user" + "&scope=account:read";
-        Response response = requestSpecification.header("X-Auth-Token", xAuthToken).post(authorizeUrl);
+        String authorizeUrl = restTemplate.getRootUri() + "/oauth/authorize?response_type=code&client_id=test_user&scope=account:read&state=123";
+        Response response = requestSpecification.when().redirects().follow(false).header("X-Auth-Token", xAuthToken).get(authorizeUrl);
         location = response.getHeader(HttpHeaders.LOCATION);
 
-        assertThat(response.getStatusCode(), is(HttpStatus.FOUND.value()));
+        assertThat(response.getStatusCode(), is(HttpStatus.SEE_OTHER.value()));
         assertThat(location, is(notNullValue()));
     }
 
     @Test(dependsOnMethods = "authorize")
     public void token() {
 
-        String code = location.substring(location.indexOf("code=") + 5);
+        Matcher locationMatcher = LOCATION.matcher(location);
+        assertThat(locationMatcher.lookingAt(), is(true));
+
+        String code = locationMatcher.group(1);
+        String state = locationMatcher.group(3);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("grant_type", "authorization_code");
+        params.put("code", code);
+        params.put("client_id", "test_user");
+        params.put("redirect_uri", "/ws/test");
+
+        Response response = requestSpecification.auth().basic("test_user", "secret").formParams(params)
+                .post(restTemplate.getRootUri() + "/oauth/token");
+
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
+
+        accessToken = response.jsonPath().getString("access_token");
+        assertThat(accessToken, is(notNullValue()));
+        assertThat(state, is("123"));
+
+    }
+
+    @Test(dependsOnMethods = "token")
+    public void tokenFailure() {
+
+        Matcher locationMatcher = LOCATION.matcher(location);
+        assertThat(locationMatcher.lookingAt(), is(true));
+
+        String code = locationMatcher.group(1);
 
         Map<String, String> params = new HashMap<>();
         params.put("grant_type", "authorization_code");
@@ -170,10 +205,7 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
         Response response = requestSpecification.auth().basic("test_user", "secret").formParams(params)
                 .post(restTemplate.getRootUri() + "/oauth/token");
 
-        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
-
-        accessToken = response.jsonPath().getString("access_token");
-        assertThat(accessToken, is(notNullValue()));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST.value()));
 
     }
 
@@ -192,9 +224,9 @@ public class AuthorizationCodeTest extends AbstractTestNGSpringContextTests {
         Payload payload = parser.parsePayload(response.getBody().print());
 
         assertThat(payload.getClaim("user_name").asString(), is(this.login));
+        assertThat(payload.getSubject(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1"));
         assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_ACCOUNT"));
-        assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(1));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("account:read"));
 
     }

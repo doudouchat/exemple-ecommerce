@@ -12,26 +12,23 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.exemple.ecommerce.authorization.common.model.BackUser;
-
 @Component
 public class BackAuthenticationProvider extends DaoAuthenticationProvider {
 
-    private Map<String, BackUser> users = new HashMap<>();
+    private Map<String, User> users = new HashMap<>();
 
     public BackAuthenticationProvider() {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        users.put("admin",
-                new BackUser("admin", "{bcrypt}" + passwordEncoder.encode("admin123"),
-                        Arrays.stream(new String[] { "ROLE_STOCK" }).map(SimpleGrantedAuthority::new).collect(Collectors.toList()),
-                        Arrays.stream(new String[] { "stock:read", "stock:update" }).collect(Collectors.toSet())));
+        users.put("admin", new User("admin", "{bcrypt}" + passwordEncoder.encode("admin123"),
+                Arrays.stream(new String[] { "ROLE_BACK" }).map(SimpleGrantedAuthority::new).collect(Collectors.toList())));
     }
 
     @PostConstruct
@@ -39,7 +36,7 @@ public class BackAuthenticationProvider extends DaoAuthenticationProvider {
 
         this.setUserDetailsService((String username) -> {
 
-            BackUser user = this.users.get(username);
+            User user = this.users.get(username);
 
             if (user == null) {
 

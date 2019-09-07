@@ -1,9 +1,7 @@
 package com.exemple.ecommerce.api.integration.password.v1;
 
 import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.APP_HEADER;
-import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.APP_HEADER_VALUE;
 import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.VERSION_HEADER;
-import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.VERSION_HEADER_VALUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -30,6 +28,10 @@ import io.restassured.response.Response;
 @ContextConfiguration(classes = { IntegrationTestConfiguration.class })
 public class PasswordIT extends AbstractTestNGSpringContextTests {
 
+    public static final String APP_HEADER_VALUE = "admin";
+
+    public static final String VERSION_HEADER_VALUE = "v1";
+
     static String ACCESS_APP_TOKEN = null;
 
     static String ACCESS_TOKEN = null;
@@ -40,7 +42,7 @@ public class PasswordIT extends AbstractTestNGSpringContextTests {
         Map<String, Object> params = new HashMap<>();
         params.put("grant_type", "client_credentials");
 
-        Response response = JsonRestTemplate.given(JsonRestTemplate.AUTHORIZATION_URL, ContentType.URLENC).auth().basic("trusted_client", "secret")
+        Response response = JsonRestTemplate.given(JsonRestTemplate.AUTHORIZATION_URL, ContentType.URLENC).auth().basic("admin", "secret")
                 .formParams(params).post("/oauth/token");
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));

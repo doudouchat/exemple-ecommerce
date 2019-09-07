@@ -74,7 +74,7 @@ public class LoginApi {
 
     @HEAD
     @Path("/{login}")
-    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "login", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
     @RolesAllowed("login:head")
     public Response check(@NotBlank @PathParam("login") String login,
@@ -91,7 +91,7 @@ public class LoginApi {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "login", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_CLIENT_CREDENTIALS) })
     @ApiResponses(value = {
 
@@ -115,7 +115,7 @@ public class LoginApi {
     @PATCH
     @Path("/{login}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "login", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 
@@ -145,7 +145,7 @@ public class LoginApi {
     @GET
     @Path("/{login}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "login", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 
@@ -166,7 +166,7 @@ public class LoginApi {
 
     @DELETE
     @Path("/{login}")
-    @Operation(tags = { "login" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "login", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @RolesAllowed("login:delete")
     public void delete(@NotNull @PathParam("login") String login) {

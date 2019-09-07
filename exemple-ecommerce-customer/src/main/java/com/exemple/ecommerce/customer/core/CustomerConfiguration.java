@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ImportResource;
 
 @Configuration
 @EnableAspectJAutoProxy
-@ComponentScan(basePackages = { "com.exemple.ecommerce.customer" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.customer")
 @ImportResource("classpath:exemple-ecommerce-customer.xml")
 public class CustomerConfiguration {
 

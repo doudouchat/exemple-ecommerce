@@ -21,7 +21,7 @@ import com.exemple.ecommerce.authorization.core.authentication.provider.BackAuth
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
 
 @Configuration
-@ComponentScan(basePackages = { "com.exemple.ecommerce.authorization.core.authentication" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.authorization.core.authentication")
 public class AuthenticationConfiguration extends WebSecurityConfigurerAdapter {
 
     private final DefaultTokenServices tokenServices;

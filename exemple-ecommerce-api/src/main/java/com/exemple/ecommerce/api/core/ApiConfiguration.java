@@ -3,6 +3,8 @@ package com.exemple.ecommerce.api.core;
 import java.io.FileNotFoundException;
 import java.util.Properties;
 
+import javax.validation.Validator;
+
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -16,12 +18,14 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.jndi.JndiObjectFactoryBean;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.exemple.ecommerce.api.core.authorization.AuthorizationConfiguration;
 
 @Configuration
 @Import(AuthorizationConfiguration.class)
-@ComponentScan(basePackages = { "com.exemple.ecommerce.api" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.api")
 @ImportResource("classpath:exemple-ecommerce-api-security.xml")
 public class ApiConfiguration {
 
@@ -65,6 +69,21 @@ public class ApiConfiguration {
         propertySourcesPlaceholderConfigurer.setProperties(properties);
 
         return propertySourcesPlaceholderConfigurer;
+    }
+
+    @Bean
+    public Validator validator() {
+
+        return new LocalValidatorFactoryBean();
+    }
+
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+
+        MethodValidationPostProcessor methodValidationPostProcessor = new MethodValidationPostProcessor();
+        methodValidationPostProcessor.setValidator(validator());
+
+        return methodValidationPostProcessor;
     }
 
 }
