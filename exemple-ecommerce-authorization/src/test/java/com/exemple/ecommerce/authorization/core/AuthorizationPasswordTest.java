@@ -24,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.auth0.jwt.impl.JWTParser;
@@ -74,15 +75,17 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
 
                 .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
                 .scopes("account:read", "account:update").autoApprove("account:read", "account:update").authorities("ROLE_APP").resourceIds("app1")
+                .additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("back_user").secret(password).authorizedGrantTypes("password").scopes("stock:read", "stock:update")
-                .autoApprove("stock:read", "stock:update").authorities("ROLE_BACK").resourceIds("app1")
+                .autoApprove("stock:read", "stock:update").authorities("ROLE_BACK").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("resource").secret(password).authorizedGrantTypes("client_credentials").authorities("ROLE_TRUSTED_CLIENT")
+                .additionalInformation("keyspace=test")
 
                 .and().build();
 
@@ -106,7 +109,6 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         account.put("login", login);
         account.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
         account.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
-        account.put("scopes", new HashSet<>(Arrays.asList("account:read", "account:update")));
 
         Mockito.when(resource.get(Mockito.eq(login))).thenReturn(Optional.of(MAPPER.convertValue(account, JsonNode.class)));
 
@@ -130,12 +132,45 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
 
     }
 
-    @Test
-    public void passwordFailure() {
+    @DataProvider(name = "passwordFailure")
+    private Object[][] passwordFailure() {
+
+        Map<String, Object> account1 = new HashMap<>();
+        account1.put("login", "jean.dupond@gmail.com");
+        account1.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
+        account1.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
+        account1.put("disabled", true);
+
+        Map<String, Object> account2 = new HashMap<>();
+        account2.put("login", "jean.dupond@gmail.com");
+        account2.put("password", "{bcrypt}" + BCrypt.hashpw("124", BCrypt.gensalt()));
+        account2.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
+
+        Map<String, Object> account3 = new HashMap<>();
+        account3.put("login", "jean.dupond@gmail.com");
+        account3.put("password", "{bcrypt}" + BCrypt.hashpw("123", BCrypt.gensalt()));
+        account3.put("roles", new HashSet<>(Arrays.asList("ROLE_1", "ROLE_2")));
+        account3.put("accountLocked", true);
+
+        return new Object[][] {
+
+                { Optional.empty(), HttpStatus.UNAUTHORIZED, "Bad Credentials" },
+
+                { Optional.of(MAPPER.convertValue(account1, JsonNode.class)), HttpStatus.BAD_REQUEST, "User is disabled" },
+
+                { Optional.of(MAPPER.convertValue(account2, JsonNode.class)), HttpStatus.UNAUTHORIZED, "Bad Credentials" },
+
+                { Optional.of(MAPPER.convertValue(account3, JsonNode.class)), HttpStatus.BAD_REQUEST, "User account is locked" },
+
+        };
+    }
+
+    @Test(dataProvider = "passwordFailure")
+    public void passwordFailure(Optional<JsonNode> loginResponse, HttpStatus expectedStatus, String expectedError) {
 
         String login = "jean.dupond@gmail.com";
 
-        Mockito.when(resource.get(Mockito.eq(login))).thenReturn(Optional.empty());
+        Mockito.when(resource.get(Mockito.eq(login))).thenReturn(loginResponse);
 
         Map<String, String> params = new HashMap<>();
         params.put("grant_type", "password");
@@ -147,10 +182,10 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         Response response = requestSpecification.auth().basic("test_user", "secret").formParams(params)
                 .post(restTemplate.getRootUri() + "/oauth/token");
 
-        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED.value()));
+        assertThat(response.getStatusCode(), is(expectedStatus.value()));
 
-        String error = response.jsonPath().getString("error");
-        assertThat(error, is("unauthorized"));
+        String error = response.jsonPath().getString("error_description");
+        assertThat(error, is(expectedError));
 
     }
 
@@ -169,9 +204,9 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         Payload payload = parser.parsePayload(response.getBody().print());
 
         assertThat(payload.getClaim("user_name").asString(), is(this.login));
+        assertThat(payload.getSubject(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1"));
         assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_2", "ROLE_1"));
-        assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("account:read", "account:update"));
 
     }
@@ -256,7 +291,7 @@ public class AuthorizationPasswordTest extends AbstractTestNGSpringContextTests 
         Payload payload = parser.parsePayload(response.getBody().print());
 
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1"));
-        assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_STOCK"));
+        assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_BACK"));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("stock:read", "stock:update"));
 

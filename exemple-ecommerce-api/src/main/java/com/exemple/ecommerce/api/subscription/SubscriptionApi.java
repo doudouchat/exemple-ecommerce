@@ -54,7 +54,7 @@ public class SubscriptionApi {
     @GET
     @Path("/{email}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "subscription" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "subscription", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 
@@ -73,7 +73,7 @@ public class SubscriptionApi {
     @PUT
     @Path("/{email}")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(tags = { "subscription" }, security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
+    @Operation(tags = "subscription", security = { @SecurityRequirement(name = DocumentApiResource.BEARER_AUTH),
             @SecurityRequirement(name = DocumentApiResource.OAUTH2_PASS) })
     @ApiResponses(value = {
 

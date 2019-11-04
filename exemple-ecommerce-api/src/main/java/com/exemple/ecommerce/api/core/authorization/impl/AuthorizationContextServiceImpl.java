@@ -15,6 +15,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -31,6 +32,8 @@ import com.exemple.ecommerce.api.core.authorization.AuthorizationAlgorithmFactor
 import com.exemple.ecommerce.api.core.authorization.AuthorizationConfiguration;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;
+import com.exemple.ecommerce.application.common.model.ApplicationDetail;
+import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.login.LoginResource;
@@ -49,12 +52,18 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
 
     private final HazelcastInstance hazelcastInstance;
 
+    private final ApplicationDetailService applicationDetailService;
+
+    @Value("${api.resourceId}")
+    private String resourceId;
+
     public AuthorizationContextServiceImpl(AuthorizationAlgorithmFactory authorizationAlgorithmFactory, LoginResource loginResource,
-            HazelcastInstance hazelcastInstance) {
+            HazelcastInstance hazelcastInstance, ApplicationDetailService applicationDetailService) {
 
         this.authorizationAlgorithmFactory = authorizationAlgorithmFactory;
         this.loginResource = loginResource;
         this.hazelcastInstance = hazelcastInstance;
+        this.applicationDetailService = applicationDetailService;
 
     }
 
@@ -71,8 +80,7 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
 
         if (token != null) {
 
-            JWTVerifier verifier = JWT.require(authorizationAlgorithmFactory.getAlgorithm())
-                    .withAudience(headers.getFirst(ApplicationBeanParam.APP_HEADER)).build();
+            JWTVerifier verifier = JWT.require(authorizationAlgorithmFactory.getAlgorithm()).withAudience(resourceId).build();
 
             Payload payload;
             try {
@@ -81,11 +89,17 @@ public class AuthorizationContextServiceImpl implements AuthorizationContextServ
                 throw new AuthorizationException(e);
             }
 
+            ApplicationDetail applicationDetail = applicationDetailService.get(headers.getFirst(ApplicationBeanParam.APP_HEADER));
+            String clientId = payload.getClaim("client_id").asString();
+            if (!applicationDetail.getClientIds().contains(clientId)) {
+                throw new AuthorizationException(clientId + " is forbidden");
+            }
+
             if (payload.getId() != null && hazelcastInstance.getMap(AuthorizationConfiguration.TOKEN_BLACK_LIST).containsKey(payload.getId())) {
                 throw new AuthorizationException(payload.getId() + " has been excluded");
             }
 
-            Principal principal = () -> payload.getClaims().getOrDefault("user_name", payload.getClaim("client_id")).asString();
+            Principal principal = () -> ObjectUtils.defaultIfNull(payload.getSubject(), clientId);
 
             return new ApiSecurityContext(principal, "https", payload.getClaim("scope").asList(String.class), payload);
 

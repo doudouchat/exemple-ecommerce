@@ -71,11 +71,12 @@ public class AuthorizationCredentialsTest extends AbstractTestNGSpringContextTes
         authorizationClientBuilder
 
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx").scopes("account:create")
-                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1")
+                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("resource").secret(password).authorizedGrantTypes("client_credentials").authorities("ROLE_TRUSTED_CLIENT")
+                .additionalInformation("keyspace=test")
 
                 .and().build();
 

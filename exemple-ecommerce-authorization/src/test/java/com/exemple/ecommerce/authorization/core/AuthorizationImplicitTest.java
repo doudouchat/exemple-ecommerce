@@ -2,7 +2,6 @@ package com.exemple.ecommerce.authorization.core;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -72,12 +71,12 @@ public class AuthorizationImplicitTest extends AbstractTestNGSpringContextTests 
         authorizationClientBuilder
 
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx").scopes("account:create")
-                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1")
+                .autoApprove("account:create").authorities("ROLE_APP").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
-                .withClient("mobile").authorizedGrantTypes("implicit").redirectUris("xxx").scopes("account:read", "account:update")
-                .autoApprove("account:read", "account:update").authorities("ROLE_APP").resourceIds("app1")
+                .withClient("mobile").authorizedGrantTypes("implicit").redirectUris("/ws/test").scopes("account:read", "account:update")
+                .autoApprove("account:read", "account:update").authorities("ROLE_APP").resourceIds("app1").additionalInformation("keyspace=test")
 
                 .and()
 
@@ -134,13 +133,12 @@ public class AuthorizationImplicitTest extends AbstractTestNGSpringContextTests 
     @Test(dependsOnMethods = "login")
     public void token() {
 
-        String authorizeUrl = restTemplate.getRootUri() + "/oauth/authorize?response_type=token&client_id=" + "mobile";
+        String authorizeUrl = restTemplate.getRootUri() + "/oauth/authorize?response_type=token&client_id=mobile";
 
-        Response response = requestSpecification.header("X-Auth-Token", xAuthToken).post(authorizeUrl);
+        Response response = requestSpecification.when().redirects().follow(false).header("X-Auth-Token", xAuthToken).get(authorizeUrl);
         String location = response.getHeader(HttpHeaders.LOCATION);
 
-        assertThat(response.getStatusCode(), is(HttpStatus.FOUND.value()));
-        assertThat(location, is(notNullValue()));
+        assertThat(response.getStatusCode(), is(HttpStatus.SEE_OTHER.value()));
 
         accessToken = location.split("#|=|&")[2];
         assertThat(accessToken, is(notNullValue()));
@@ -161,9 +159,10 @@ public class AuthorizationImplicitTest extends AbstractTestNGSpringContextTests 
         Payload payload = parser.parsePayload(response.getBody().print());
 
         assertThat(payload.getClaim("user_name").asString(), is(this.login));
+        assertThat(payload.getSubject(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1"));
         assertThat(payload.getClaim("authorities"), instanceOf(NullClaim.class));
-        assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(0));
+        assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("account:read", "account:update"));
 
     }
 

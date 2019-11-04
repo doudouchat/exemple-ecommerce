@@ -1,8 +1,5 @@
 package com.exemple.ecommerce.api.integration.core;
 
-import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.APP_HEADER_VALUE;
-import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.VERSION_HEADER_VALUE;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,6 +19,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT;
+import com.exemple.ecommerce.api.integration.password.v1.PasswordIT;
+import com.exemple.ecommerce.api.integration.stock.v1.StockNominalIT;
 import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.core.ApplicationConfiguration;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
@@ -31,6 +31,7 @@ import com.exemple.ecommerce.resource.common.model.ResourceSchema;
 import com.exemple.ecommerce.resource.core.ResourceConfiguration;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
+import com.google.common.collect.Sets;
 
 @Configuration
 @Import({ ResourceConfiguration.class, ApplicationConfiguration.class, AuthorizationClientConfiguration.class })
@@ -60,9 +61,12 @@ public class IntegrationTestConfiguration {
     @PostConstruct
     public void initSchema() throws IOException {
 
+        // APP
+
         ApplicationDetail detail = new ApplicationDetail();
         detail.setKeyspace("test");
         detail.setCompany("test_company");
+        detail.setClientIds(Sets.newHashSet("test", "test_user"));
 
         Set<String> accountFilter = new HashSet<>();
         accountFilter.add("id");
@@ -85,8 +89,8 @@ public class IntegrationTestConfiguration {
         ResourceExecutionContext.get().setKeyspace(detail.getKeyspace());
 
         ResourceSchema accountSchema = new ResourceSchema();
-        accountSchema.setApplication(APP_HEADER_VALUE);
-        accountSchema.setVersion(VERSION_HEADER_VALUE);
+        accountSchema.setApplication(AccountNominalIT.APP_HEADER_VALUE);
+        accountSchema.setVersion(AccountNominalIT.VERSION_HEADER_VALUE);
         accountSchema.setResource("account");
         accountSchema.setContent(IOUtils.toByteArray(new ClassPathResource("account.json").getInputStream()));
         accountSchema.setFilters(accountFilter);
@@ -104,8 +108,8 @@ public class IntegrationTestConfiguration {
         loginRules.put("createOnly", Collections.singleton("/id"));
 
         ResourceSchema loginSchema = new ResourceSchema();
-        loginSchema.setApplication(APP_HEADER_VALUE);
-        loginSchema.setVersion(VERSION_HEADER_VALUE);
+        loginSchema.setApplication(AccountNominalIT.APP_HEADER_VALUE);
+        loginSchema.setVersion(AccountNominalIT.VERSION_HEADER_VALUE);
         loginSchema.setResource("login");
         loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
         loginSchema.setFilters(loginFilter);
@@ -121,8 +125,8 @@ public class IntegrationTestConfiguration {
         subscriptionRules.put("login", Collections.singleton("/email"));
 
         ResourceSchema subscriptionSchema = new ResourceSchema();
-        subscriptionSchema.setApplication(APP_HEADER_VALUE);
-        subscriptionSchema.setVersion(VERSION_HEADER_VALUE);
+        subscriptionSchema.setApplication(AccountNominalIT.APP_HEADER_VALUE);
+        subscriptionSchema.setVersion(AccountNominalIT.VERSION_HEADER_VALUE);
         subscriptionSchema.setResource("subscription");
         subscriptionSchema.setContent(IOUtils.toByteArray(new ClassPathResource("subscription.json").getInputStream()));
         subscriptionSchema.setFilters(subscriptionFilter);
@@ -131,7 +135,36 @@ public class IntegrationTestConfiguration {
 
         schemaResource.save(subscriptionSchema);
 
-        applicationDetailService.put(APP_HEADER_VALUE, detail);
+        applicationDetailService.put(AccountNominalIT.APP_HEADER_VALUE, detail);
+
+        // STOCK
+
+        ApplicationDetail backDetail = new ApplicationDetail();
+        backDetail.setKeyspace("test");
+        backDetail.setCompany("test_company");
+        backDetail.setClientIds(Sets.newHashSet("back", "back_user"));
+
+        applicationDetailService.put(StockNominalIT.APP_HEADER_VALUE, backDetail);
+
+        // ADMIN
+
+        loginSchema = new ResourceSchema();
+        loginSchema.setApplication(PasswordIT.APP_HEADER_VALUE);
+        loginSchema.setVersion(PasswordIT.VERSION_HEADER_VALUE);
+        loginSchema.setResource("login");
+        loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
+        loginSchema.setFilters(loginFilter);
+        loginSchema.setTransforms(Collections.emptyMap());
+        loginSchema.setRules(loginRules);
+
+        schemaResource.save(loginSchema);
+
+        ApplicationDetail adminDetail = new ApplicationDetail();
+        adminDetail.setKeyspace("test");
+        adminDetail.setCompany("test_company");
+        adminDetail.setClientIds(Sets.newHashSet("admin"));
+
+        applicationDetailService.put(PasswordIT.APP_HEADER_VALUE, adminDetail);
 
     }
 
@@ -145,23 +178,24 @@ public class IntegrationTestConfiguration {
                 .withClient("test").secret(password).authorizedGrantTypes("client_credentials").redirectUris("xxx")
                 .scopes("account:create", "login:head", "login:create", "subscription:update", "subscription:read")
                 .autoApprove("account:create", "login:create", "subscription:update", "subscription:read").authorities("ROLE_APP")
-                .resourceIds(APP_HEADER_VALUE)
+                .resourceIds("exemple").additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
                 .scopes("account:read", "account:update", "login:update", "login:delete")
-                .autoApprove("account:read", "account:update", "login:update", "login:delete").authorities("ROLE_APP").resourceIds(APP_HEADER_VALUE)
+                .autoApprove("account:read", "account:update", "login:update", "login:delete").authorities("ROLE_APP").resourceIds("exemple")
+                .additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("back").secret(password).authorizedGrantTypes("client_credentials").scopes("stock").autoApprove("stock")
-                .authorities("ROLE_BACK").resourceIds(APP_HEADER_VALUE)
+                .authorities("ROLE_BACK").resourceIds("exemple").additionalInformation("keyspace=test")
 
                 .and()
 
                 .withClient("back_user").secret(password).authorizedGrantTypes("password").scopes("stock:read", "stock:update")
-                .autoApprove("stock:read", "stock:update").authorities("ROLE_BACK").resourceIds(APP_HEADER_VALUE)
+                .autoApprove("stock:read", "stock:update").authorities("ROLE_BACK").resourceIds("exemple").additionalInformation("keyspace=test")
 
                 .and()
 
@@ -169,8 +203,8 @@ public class IntegrationTestConfiguration {
 
                 .and()
 
-                .withClient("trusted_client").secret(password).authorizedGrantTypes("client_credentials").scopes("xxx").autoApprove("xxx")
-                .authorities("ROLE_TRUSTED_CLIENT").resourceIds(APP_HEADER_VALUE)
+                .withClient("admin").secret(password).authorizedGrantTypes("client_credentials").scopes("xxx").autoApprove("xxx")
+                .authorities("ROLE_TRUSTED_CLIENT").resourceIds("exemple").additionalInformation("keyspace=test")
 
                 .and().build();
     }

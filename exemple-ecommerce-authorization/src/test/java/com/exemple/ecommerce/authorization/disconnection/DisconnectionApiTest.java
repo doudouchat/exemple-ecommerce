@@ -87,7 +87,7 @@ public class DisconnectionApiTest extends AbstractTestNGSpringContextTests {
 
         accessToken = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("app")
                 .withJWTId(UUID.randomUUID().toString()).withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
-                .withClaim("client_id", "test").sign(algorithm);
+                .withClaim("client_id", "clientId1").sign(algorithm);
 
         Response response = requestSpecification.contentType(ContentType.JSON).header("Authorization", "Bearer " + accessToken).header("app", "app")
                 .post(restTemplate.getRootUri() + "/ws/v1/disconnection");
@@ -100,10 +100,10 @@ public class DisconnectionApiTest extends AbstractTestNGSpringContextTests {
     private Object[][] disconnectionFailure() {
 
         String accessToken1 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("app")
-                .withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))).withClaim("client_id", "test").sign(algorithm);
+                .withExpiresAt(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))).withClaim("client_id", "clientId1").sign(algorithm);
 
         String accessToken2 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("app")
-                .withJWTId(UUID.randomUUID().toString()).withClaim("client_id", "test").sign(algorithm);
+                .withJWTId(UUID.randomUUID().toString()).withClaim("client_id", "clientId1").sign(algorithm);
 
         return new Object[][] {
                 // no jti

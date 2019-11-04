@@ -114,14 +114,17 @@ public class AuthorizationTest extends JerseySpringSupport {
     @DataProvider(name = "notAuthorized")
     private static Object[][] notAuthorized() {
 
-        String token1 = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:write" })
-                .sign(RSA256_ALGORITHM);
+        String token1 = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:write" }).sign(RSA256_ALGORITHM);
 
-        String token2 = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
-                .sign(RSA256_ALGORITHM);
+        String token2 = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:read" }).sign(RSA256_ALGORITHM);
 
-        String token3 = JWT.create().withClaim("user_name", "john_doe").withAudience("other").withArrayClaim("scope", new String[] { "account:read" })
-                .sign(RSA256_ALGORITHM);
+        String token3 = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("other")
+                .withArrayClaim("scope", new String[] { "account:read" }).sign(RSA256_ALGORITHM);
+
+        String token4 = JWT.create().withClaim("client_id", "clientId2").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:read" }).sign(RSA256_ALGORITHM);
 
         return new Object[][] {
 
@@ -129,7 +132,9 @@ public class AuthorizationTest extends JerseySpringSupport {
 
                 { token2, UUID.randomUUID() },
 
-                { token3, ID }
+                { token3, ID },
+
+                { token4, ID }
 
         };
     }
@@ -167,8 +172,8 @@ public class AuthorizationTest extends JerseySpringSupport {
     @Test
     public void authorizedGetAccount() throws Exception {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:read" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -198,8 +203,8 @@ public class AuthorizationTest extends JerseySpringSupport {
     @Test
     public void authorizedPostAccount() throws Exception {
 
-        String token = JWT.create().withClaim("client_id", "test").withAudience("test").withArrayClaim("scope", new String[] { "account:create" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:create" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -220,7 +225,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
 
-        assertThat(testFilter.context.getUserPrincipal().getName(), is("test"));
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("clientId1"));
         assertThat(testFilter.context.isSecure(), is(true));
         assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
 
@@ -229,8 +234,8 @@ public class AuthorizationTest extends JerseySpringSupport {
     @Test
     public void authorizedGetUser() throws Exception {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "account:read" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "account:read" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -260,8 +265,8 @@ public class AuthorizationTest extends JerseySpringSupport {
     @Test
     public void authorizedGetLogin() throws Exception {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "login:read" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "login:read" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());
@@ -293,8 +298,8 @@ public class AuthorizationTest extends JerseySpringSupport {
     @Test
     public void authorizedGetLoginFailure() throws Exception {
 
-        String token = JWT.create().withClaim("user_name", "john_doe").withAudience("test").withArrayClaim("scope", new String[] { "login:read" })
-                .sign(RSA256_ALGORITHM);
+        String token = JWT.create().withClaim("client_id", "clientId1").withSubject("john_doe").withAudience("exemple")
+                .withArrayClaim("scope", new String[] { "login:read" }).sign(RSA256_ALGORITHM);
 
         Response responseMock = Mockito.mock(Response.class);
         Mockito.when(responseMock.getStatus()).thenReturn(Status.OK.getStatusCode());

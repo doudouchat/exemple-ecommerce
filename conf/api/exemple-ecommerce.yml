@@ -12,6 +12,7 @@ application:
    zookeeper:
       host: 172.17.0.1:10024
 api:
+   resourceId: exemple
    authorization:
       path: http://172.17.0.1:8084/ExempleAuthorization
       hazelcast:

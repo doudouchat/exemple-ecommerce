@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 import com.auth0.jwt.JWT;
+import com.exemple.ecommerce.application.common.model.ApplicationDetail;
+import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.authorization.common.security.AuthorizationContextSecurity;
 import com.exemple.ecommerce.authorization.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.authorization.core.resource.keyspace.AuthorizationResourceKeyspace;
@@ -35,6 +37,9 @@ public class AuthorizationFilter implements ContainerRequestFilter {
     @Autowired
     private AuthorizationResourceKeyspace authorizationResourceKeyspace;
 
+    @Autowired
+    private ApplicationDetailService applicationDetailService;
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
@@ -46,15 +51,15 @@ public class AuthorizationFilter implements ContainerRequestFilter {
 
                 OAuth2Authentication authentication = tokenServices.loadAuthentication(accessToken);
 
-                if (!authentication.getOAuth2Request().getResourceIds().contains(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER))) {
-
-                    throw new InvalidTokenException(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER) + " is not authorized");
-
-                }
-
                 requestContext.setSecurityContext(new AuthorizationContextSecurity(authentication, JWT.decode(accessToken)));
 
-                authorizationResourceKeyspace.initKeyspace(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER));
+                ApplicationDetail applicationDetail = applicationDetailService.get(requestContext.getHeaderString(FeatureConfiguration.APP_HEADER));
+
+                if (!applicationDetail.getClientIds().contains(authentication.getOAuth2Request().getClientId())) {
+                    throw new InvalidTokenException(authentication.getOAuth2Request().getClientId() + " is forbidden");
+                }
+
+                authorizationResourceKeyspace.initKeyspace(applicationDetail.getKeyspace());
 
             } catch (InvalidTokenException e) {
 

@@ -50,7 +50,7 @@ public class DataEventListener {
 
         Message<JsonNode> message = MessageBuilder.withPayload(data)
                 .setHeader(KafkaHeaders.TIMESTAMP, OffsetDateTime.parse(event.getDate()).toInstant().toEpochMilli()).setHeader(X_RESOURCE, resource)
-                .setHeader(X_EVENT_TYPE, event.getEventType()).setHeader(X_ORIGIN, event.getOrigin())
+                .setHeader(X_EVENT_TYPE, event.getEventType().toString()).setHeader(X_ORIGIN, event.getOrigin())
                 .setHeader(X_ORIGIN_VERSION, event.getOriginVersion()).build();
 
         try {

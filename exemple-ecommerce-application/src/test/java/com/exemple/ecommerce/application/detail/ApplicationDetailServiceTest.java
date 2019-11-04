@@ -1,6 +1,7 @@
 package com.exemple.ecommerce.application.detail;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
 
 import java.util.UUID;
@@ -14,6 +15,7 @@ import org.testng.annotations.Test;
 import com.exemple.ecommerce.application.common.exception.NotFoundApplicationException;
 import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.core.ApplicationTestConfiguration;
+import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = { ApplicationTestConfiguration.class })
 public class ApplicationDetailServiceTest extends AbstractTestNGSpringContextTests {
@@ -28,6 +30,7 @@ public class ApplicationDetailServiceTest extends AbstractTestNGSpringContextTes
         detail.setKeyspace("keyspace1");
         detail.setCompany("company1");
         detail.setExpiryTimePassword(100L);
+        detail.setClientIds(Sets.newHashSet("clientId1"));
 
         service.put("app", detail);
 
@@ -41,6 +44,7 @@ public class ApplicationDetailServiceTest extends AbstractTestNGSpringContextTes
         assertThat(detail.getKeyspace(), is("keyspace1"));
         assertThat(detail.getCompany(), is("company1"));
         assertThat(detail.getExpiryTimePassword(), is(100L));
+        assertThat(detail.getClientIds(), contains("clientId1"));
 
     }
 

@@ -13,7 +13,7 @@ import com.exemple.ecommerce.schema.common.SchemaBuilder;
 
 @Configuration
 @EnableAspectJAutoProxy
-@ComponentScan(basePackages = { "com.exemple.ecommerce.schema" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.schema")
 public class SchemaConfiguration {
     @Bean
     public Schema patchSchema() throws IOException {

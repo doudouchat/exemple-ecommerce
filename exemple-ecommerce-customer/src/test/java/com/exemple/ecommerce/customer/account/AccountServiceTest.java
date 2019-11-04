@@ -5,9 +5,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.mockito.Mockito;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -25,6 +28,7 @@ import com.exemple.ecommerce.customer.account.model.Account;
 import com.exemple.ecommerce.customer.core.CustomerTestConfiguration;
 import com.exemple.ecommerce.resource.account.AccountResource;
 import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.schema.SchemaResource;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -40,9 +44,21 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private SchemaFilter schemaFilter;
 
+    @Autowired
+    private SchemaResource schemaResource;
+
     private static final String APP = "default";
 
     private static final String VERSION = "default";
+
+    @BeforeClass
+    private void beforeClass() {
+
+        Map<String, Set<String>> transform = Collections.singletonMap("date_time", Collections.emptySet());
+        Mockito.when(schemaResource.getTransform(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class)))
+                .thenReturn(transform);
+
+    }
 
     @BeforeMethod
     private void before() {
@@ -55,6 +71,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     private void afterClass() {
 
         AccountContext.destroy();
+        Mockito.reset(schemaResource);
 
     }
 
@@ -136,14 +153,14 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    public void getMultiple() {
+    public void getMultiple() throws AccountServiceException {
 
         UUID id = UUID.randomUUID();
 
         Mockito.when(resource.get(Mockito.eq(id))).thenReturn(Optional.of(JsonNodeUtils.init()));
 
-        resource.get(id);
-        resource.get(id);
+        service.get(id, APP, VERSION);
+        service.get(id, APP, VERSION);
 
     }
 

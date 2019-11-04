@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 @Configuration
 @Profile("!noEvent")
-@ComponentScan(basePackages = { "com.exemple.ecommerce.event" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.event")
 public class EventConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventConfiguration.class);

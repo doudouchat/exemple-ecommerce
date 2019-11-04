@@ -2,15 +2,21 @@ package com.exemple.ecommerce.authorization.core;
 
 import java.io.IOException;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.mockito.Mockito;
+import org.osjava.sj.SimpleJndi;
+import org.osjava.sj.loader.JndiLoader;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jndi.JndiObjectFactoryBean;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
 
 import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
@@ -24,6 +30,7 @@ import com.exemple.ecommerce.authorization.core.swagger.SwaggerConfiguration;
 import com.exemple.ecommerce.authorization.core.token.AuthorizationTokenConfiguration;
 import com.exemple.ecommerce.resource.account.AccountResource;
 import com.exemple.ecommerce.resource.login.LoginResource;
+import com.google.common.collect.Sets;
 
 @Configuration
 @Import({ AuthorizationConfiguration.class, AuthenticationConfiguration.class, AuthorizationTokenConfiguration.class,
@@ -50,6 +57,7 @@ public class AuthorizationTestConfiguration extends AuthorizationPropertyConfigu
 
         ApplicationDetail detail = new ApplicationDetail();
         detail.setKeyspace("test");
+        detail.setClientIds(Sets.newHashSet("clientId1"));
 
         Mockito.when(service.get(Mockito.anyString())).thenReturn(detail);
 
@@ -57,18 +65,24 @@ public class AuthorizationTestConfiguration extends AuthorizationPropertyConfigu
     }
 
     @Bean
+    public InitialContext initialContext() throws NamingException, IOException {
+
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY, "org.osjava.sj.SimpleContextFactory");
+        System.setProperty(SimpleJndi.ENC, "java:comp");
+        System.setProperty(JndiLoader.COLON_REPLACE, "--");
+        System.setProperty(JndiLoader.DELIMITER, "/");
+        System.setProperty(SimpleJndi.SHARED, "true");
+        System.setProperty(SimpleJndi.ROOT, new ClassPathResource("java--comp").getURL().getFile());
+
+        return new InitialContext();
+
+    }
+
+    @Bean
+    @DependsOn("initialContext")
     @Override
     public JndiObjectFactoryBean jndiObjectFactoryBean() {
 
-        JndiObjectFactoryBean jndiObjectFactoryBean = super.jndiObjectFactoryBean();
-
-        try {
-            jndiObjectFactoryBean.setJndiTemplate(
-                    new ExpectedLookupTemplate(JNDI_NAME, new ClassPathResource("exemple-ecommerce-authorization-test.yml").getURL().toString()));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        return jndiObjectFactoryBean;
+        return super.jndiObjectFactoryBean();
     }
 }

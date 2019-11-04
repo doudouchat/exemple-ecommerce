@@ -21,7 +21,7 @@ import com.datastax.driver.extras.codecs.json.JacksonJsonCodec;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Configuration
-@ComponentScan(basePackages = { "com.exemple.ecommerce.resource.core.statement" })
+@ComponentScan(basePackages = "com.exemple.ecommerce.resource.core.statement")
 public class ResourceCassandraConfiguration {
 
     @Value("${resource.cassandra.addresses}")

@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
@@ -51,13 +51,11 @@ public class DataEventListenerTest extends KafkaTestEvent {
 
         assertThat(received, is(notNullValue()));
         assertThat(received.value(), is(resource));
-        try (JsonDeserializer<JsonNode> deserializer = new JsonDeserializer<>(JsonNode.class, false)) {
-            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_ORIGIN_VERSION).value()).textValue(),
-                    is(originVersion));
-            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_ORIGIN).value()).textValue(), is(origin));
-            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_RESOURCE).value()).textValue(),
-                    is("account"));
-            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_EVENT_TYPE).value()).textValue(),
+        try (StringDeserializer deserializer = new StringDeserializer()) {
+            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_ORIGIN_VERSION).value()), is(originVersion));
+            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_ORIGIN).value()), is(origin));
+            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_RESOURCE).value()), is("account"));
+            assertThat(deserializer.deserialize(null, received.headers().lastHeader(DataEventListener.X_EVENT_TYPE).value()),
                     is(EventType.CREATE.toString()));
             assertThat(received.timestamp(), is(date.toInstant().toEpochMilli()));
         }

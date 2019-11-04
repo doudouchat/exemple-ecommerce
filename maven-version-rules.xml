@@ -16,7 +16,27 @@
 		</rule>
 		<rule groupId="org.codehaus.groovy" comparisonMethod="maven">
 			<ignoreVersions>
+				<ignoreVersion type="regex">(?i).*(alpha|beta|-rc)(?:-?\d+)?</ignoreVersion>
+			</ignoreVersions>
+		</rule>
+		<rule groupId="com.fasterxml.jackson.core" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">(?i).*(pr)(?:-?\d+)?</ignoreVersion>
+			</ignoreVersions>
+		</rule>
+		<rule groupId="com.fasterxml.jackson.jaxrs" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">(?i).*(pr)(?:-?\d+)?</ignoreVersion>
+			</ignoreVersions>
+		</rule>
+		<rule groupId="org.eclipse.jetty" comparisonMethod="maven">
+			<ignoreVersions>
 				<ignoreVersion type="regex">(?i).*(alpha|beta)(?:-?\d+)?</ignoreVersion>
+			</ignoreVersions>
+		</rule>
+		<rule groupId="org.apache.cassandra" artifactId="cassandra-all" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">4.0-(alpha|beta)(?:-?\d+)?</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 		<rule groupId="javax.servlet" artifactId="javax.servlet-api" comparisonMethod="maven">
@@ -24,34 +44,14 @@
 				<ignoreVersion type="regex">^4.*$</ignoreVersion>
 			</ignoreVersions>
 		</rule>	
-		<rule groupId="org.hibernate.validator" artifactId="hibernate-validator" comparisonMethod="maven">
+		<rule groupId="org.springframework.cloud" artifactId="spring-cloud-starter-netflix-zuul" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">(?i).*Alpha(?:-?\d+)?</ignoreVersion>
+				<ignoreVersion type="regex">2.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
 			</ignoreVersions>
 		</rule>
-		<rule groupId="org.springframework" comparisonMethod="maven">
+		<rule groupId="org.springframework.cloud" artifactId="spring-cloud-starter-oauth2" comparisonMethod="maven">
 			<ignoreVersions>
-				<ignoreVersion type="regex">5.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="org.springframework.kafka" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">2.3.0.M(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="org.springframework.security" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">5.2.0.M(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="org.springframework.boot" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.M(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="org.springframework.session" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.M(?:-?\d+)</ignoreVersion>
+				<ignoreVersion type="regex">2.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
 			</ignoreVersions>
 		</rule>
 	</rules>

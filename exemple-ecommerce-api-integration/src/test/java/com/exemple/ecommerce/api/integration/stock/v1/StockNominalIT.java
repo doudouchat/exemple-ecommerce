@@ -1,7 +1,6 @@
 package com.exemple.ecommerce.api.integration.stock.v1;
 
 import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.APP_HEADER;
-import static com.exemple.ecommerce.api.integration.account.v1.AccountNominalIT.APP_HEADER_VALUE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -25,6 +24,8 @@ import io.restassured.response.Response;
 
 @ContextConfiguration(classes = { IntegrationTestConfiguration.class })
 public class StockNominalIT extends AbstractTestNGSpringContextTests {
+
+    public static final String APP_HEADER_VALUE = "back";
 
     private static final String STOCK_URL = "/ws/v1/stocks/{store}/{product}";
 

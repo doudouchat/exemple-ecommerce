@@ -2,7 +2,6 @@ package com.exemple.ecommerce.authorization.password;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -97,7 +96,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
 
                 .and()
 
-                .withClient("test_user").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
+                .withClient("clientId1").secret(password).authorizedGrantTypes("password", "authorization_code", "refresh_token").redirectUris("xxx")
                 .scopes("account:read", "account:update").autoApprove("account:read", "account:update").authorities("ROLE_APP").resourceIds("app1")
 
                 .and()
@@ -121,7 +120,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
     public void password() {
 
         String accessToken = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_APP" }).withAudience("app")
-                .withClaim("client_id", "test").sign(algorithm);
+                .withClaim("client_id", "clientId1").sign(algorithm);
 
         String login = "jean.dupond@gmail.com";
         UUID id = UUID.randomUUID();
@@ -141,7 +140,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
 
         assertThat(response.getStatusCode(), is(HttpStatus.NO_CONTENT.value()));
 
-        assertThat(testFilter.context.getUserPrincipal().getName(), is("test"));
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("clientId1"));
         assertThat(testFilter.context.isUserInRole("ROLE_APP"), is(true));
         assertThat(testFilter.context.isSecure(), is(true));
         assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
@@ -156,7 +155,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
     public void passwordTrustedClient() {
 
         String accessToken = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_TRUSTED_CLIENT" }).withAudience("app1", "app2")
-                .withClaim("client_id", "test").sign(algorithm);
+                .withClaim("client_id", "clientId1").sign(algorithm);
 
         login = "jean.dupond@gmail.com";
         UUID id = UUID.randomUUID();
@@ -180,7 +179,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
 
         token = response.jsonPath().getString("token");
 
-        assertThat(testFilter.context.getUserPrincipal().getName(), is("test"));
+        assertThat(testFilter.context.getUserPrincipal().getName(), is("clientId1"));
         assertThat(testFilter.context.isUserInRole("ROLE_TRUSTED_CLIENT"), is(true));
         assertThat(testFilter.context.isSecure(), is(true));
         assertThat(testFilter.context.getAuthenticationScheme(), is(SecurityContext.BASIC_AUTH));
@@ -201,10 +200,9 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
         JWTPartsParser parser = new JWTParser();
         Payload payload = parser.parsePayload(response.getBody().print());
 
-        assertThat(payload.getClaim("user_name").asString(), is(this.login));
+        assertThat(payload.getSubject(), is(this.login));
         assertThat(payload.getClaim("aud").asArray(String.class), arrayContainingInAnyOrder("app1", "app2"));
         assertThat(payload.getClaim("authorities").asArray(String.class), arrayContainingInAnyOrder("ROLE_TRUSTED_CLIENT"));
-        assertThat(payload.getClaim("scope").asArray(String.class), arrayWithSize(2));
         assertThat(payload.getClaim("scope").asArray(String.class), arrayContainingInAnyOrder("login:read", "login:update"));
         assertThat(payload.getExpiresAt(), is(Date.from(Instant.now(clock).plusSeconds(expiryTime))));
         assertThat(payload.getClaim("singleUse").asBoolean(), is(true));
@@ -215,13 +213,16 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "passwordFailureForbidden")
     private Object[][] passwordFailureForbidden() {
 
-        String accessToken1 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" }).withAudience("app").sign(algorithm);
-        String accessToken2 = JWT.create().withExpiresAt(new Date(Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli()))
+        String accessToken1 = JWT.create().withClaim("client_id", "clientId1").withArrayClaim("authorities", new String[] { "ROLE_ACCOUNT" })
+                .withAudience("app").sign(algorithm);
+        String accessToken2 = JWT.create().withClaim("client_id", "clientId1")
+                .withExpiresAt(new Date(Instant.now().minus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .withArrayClaim("authorities", new String[] { "ROLE_APP" }).sign(algorithm);
-        String accessToken3 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_APP" }).sign(algorithm);
-        String accessToken4 = JWT.create().withAudience("app").sign(algorithm);
-        String accessToken5 = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_APP" }).withAudience("app1")
-                .withClaim("client_id", "test").sign(algorithm);
+        String accessToken3 = JWT.create().withClaim("client_id", "clientId1").withArrayClaim("authorities", new String[] { "ROLE_APP" })
+                .sign(algorithm);
+        String accessToken4 = JWT.create().withClaim("client_id", "clientId1").withAudience("app").sign(algorithm);
+        String accessToken5 = JWT.create().withClaim("client_id", "other").withArrayClaim("authorities", new String[] { "ROLE_TRUSTED_CLIENT" })
+                .withAudience("app1", "app2").sign(algorithm);
 
         return new Object[][] {
                 // not authorities to access
@@ -236,8 +237,8 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
                 { "Authorization", "Bearer " + accessToken4 },
                 // token no recognized
                 { "Authorization", "Bearer toto" },
-                // not audience to access
-                { "Authorization", "Bearer " + accessToken5 },
+                // bad client id
+                { "Authorization", "Bearer " + accessToken5 }
 
         };
     }
@@ -266,7 +267,7 @@ public class NewPasswordApiTest extends AbstractTestNGSpringContextTests {
     public void passwordFailureBadRequest() {
 
         String accessToken = JWT.create().withArrayClaim("authorities", new String[] { "ROLE_APP" }).withAudience("app")
-                .withClaim("client_id", "test").sign(algorithm);
+                .withClaim("client_id", "clientId1").sign(algorithm);
 
         Map<String, Object> newPassword = new HashMap<>();
         newPassword.put("login", "");
