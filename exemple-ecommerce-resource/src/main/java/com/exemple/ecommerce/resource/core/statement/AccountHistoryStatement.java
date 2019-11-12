@@ -9,19 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.mapping.Mapper;
-import com.datastax.driver.mapping.MappingManager;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.BoundStatement;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.exemple.ecommerce.resource.account.model.AccountHistory;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
+import com.exemple.ecommerce.resource.core.dao.AccountHistoryDao;
+import com.exemple.ecommerce.resource.core.mapper.AccountHistoryMapper;
 
 @Component
-public class AccountHistoryStatement extends StatementResource {
+public class AccountHistoryStatement {
 
     public static final String TABLE = "account_history";
 
@@ -29,26 +26,21 @@ public class AccountHistoryStatement extends StatementResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountHistoryStatement.class);
 
-    private final Session session;
+    private final CqlSession session;
 
-    public AccountHistoryStatement(Cluster cluster, Session session) {
-        super(cluster, TABLE);
+    public AccountHistoryStatement(CqlSession session) {
         this.session = session;
     }
 
     public List<AccountHistory> findById(UUID id) {
 
-        String keyspace = ResourceExecutionContext.get().keyspace();
-        MappingManager manager = new MappingManager(session);
-        Mapper<AccountHistory> mapper = manager.mapper(AccountHistory.class, keyspace);
+        AccountHistoryMapper mapper = AccountHistoryMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
+        AccountHistoryDao accountHistoryDao = mapper.accountHistoryDao();
 
-        Select select = QueryBuilder.select().from(keyspace, TABLE);
-        select.where().and(QueryBuilder.eq(ID, id));
-
-        return mapper.map(session.execute(select)).all();
+        return accountHistoryDao.findById(id).all();
     }
 
-    public Collection<Statement> insert(Collection<AccountHistory> accountHistories) {
+    public Collection<BoundStatement> insert(Collection<AccountHistory> accountHistories) {
 
         PreparedStatement prepared = session
                 .prepare("INSERT INTO " + ResourceExecutionContext.get().keyspace() + ".account_history (id,date,field,value) VALUES (?,?,?,?)");

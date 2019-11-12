@@ -45,7 +45,7 @@ appender("archive", RollingFileAppender) {
 
 logger("org.apache.cassandra", WARN)
 
-logger("com.datastax.driver.core.QueryLogger.NORMAL", DEBUG)
+logger("com.datastax.oss.driver", INFO)
 logger("com.hazelcast", INFO)
 logger("org.apache.zookeeper", INFO)
 logger("org.springframework.boot", INFO)

@@ -3,13 +3,14 @@ package com.exemple.ecommerce.resource.account.model;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.datastax.driver.mapping.annotations.ClusteringColumn;
-import com.datastax.driver.mapping.annotations.Column;
-import com.datastax.driver.mapping.annotations.PartitionKey;
-import com.datastax.driver.mapping.annotations.Table;
+import com.datastax.oss.driver.api.mapper.annotations.ClusteringColumn;
+import com.datastax.oss.driver.api.mapper.annotations.CqlName;
+import com.datastax.oss.driver.api.mapper.annotations.Entity;
+import com.datastax.oss.driver.api.mapper.annotations.PartitionKey;
 import com.fasterxml.jackson.databind.JsonNode;
 
-@Table(name = "account_history")
+@Entity
+@CqlName("account_history")
 public class AccountHistory {
 
     @PartitionKey
@@ -18,10 +19,8 @@ public class AccountHistory {
     @ClusteringColumn
     private String field;
 
-    @Column
     private Instant date;
 
-    @Column
     private JsonNode value;
 
     public UUID getId() {

@@ -34,7 +34,7 @@ import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;
 import com.exemple.ecommerce.application.common.model.ApplicationDetail;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.statement.LoginStatement;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.fasterxml.jackson.databind.JsonNode;

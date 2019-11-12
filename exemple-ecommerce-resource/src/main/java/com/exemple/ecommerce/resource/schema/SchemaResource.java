@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import com.exemple.ecommerce.resource.common.model.ResourceSchema;
+import com.exemple.ecommerce.resource.schema.model.ResourceSchema;
 
 public interface SchemaResource {
 
@@ -17,10 +17,10 @@ public interface SchemaResource {
 
     Set<String> getFilter(@NotBlank String app, @NotBlank String version, @NotBlank String resource);
 
-    Map<String, Set<String>> getTransform(@NotBlank String app, @NotBlank String version, @NotBlank String resource);
-
     Map<String, Set<String>> getRule(@NotBlank String app, @NotBlank String version, @NotBlank String resource);
 
     void save(@NotNull ResourceSchema resourceSchema);
+
+    void update(@NotNull ResourceSchema resourceSchema);
 
 }

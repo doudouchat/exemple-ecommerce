@@ -24,9 +24,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.resource.common.model.ResourceSchema;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.SchemaStatement;
+import com.exemple.ecommerce.resource.schema.model.ResourceSchema;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,7 +51,6 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
         resourceSchema.setResource("account");
         resourceSchema.setContent(schemaResource);
         resourceSchema.setFilters(Collections.singleton("filter"));
-        resourceSchema.setTransforms(Collections.singletonMap("date_time", Collections.singleton("date")));
         resourceSchema.setRules(Collections.singletonMap("login", Collections.singleton("email")));
 
         resource.save(resourceSchema);
@@ -64,9 +63,32 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
         byte[] schemaResource = resource.get("app1", "v1", "account");
 
         assertThat(schemaResource, not(nullValue()));
-        assertThat(Arrays.equals(schemaResource, this.schemaResource), is(Boolean.TRUE));
 
         LOG.debug(IOUtils.toString(schemaResource, "utf-8"));
+
+        assertThat(Arrays.equals(schemaResource, this.schemaResource), is(Boolean.TRUE));
+
+    }
+
+    @Test(dependsOnMethods = "get")
+    public void update() throws IOException {
+
+        ResourceSchema resourceSchema = new ResourceSchema();
+        resourceSchema.setApplication("app1");
+        resourceSchema.setVersion("v1");
+        resourceSchema.setResource("account");
+        resourceSchema.setFilters(Collections.singleton("filter"));
+        resourceSchema.setRules(Collections.singletonMap("login", Collections.singleton("email")));
+
+        resource.update(resourceSchema);
+
+        byte[] schemaResource = resource.get("app1", "v1", "account");
+
+        assertThat(schemaResource, not(nullValue()));
+
+        LOG.debug(IOUtils.toString(schemaResource, "utf-8"));
+
+        assertThat(Arrays.equals(schemaResource, SchemaStatement.SCHEMA_DEFAULT.getBytes()), is(Boolean.TRUE));
 
     }
 
@@ -96,7 +118,7 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    public void getFailure() throws IOException {
+    public void getEmptySchema() throws IOException {
         String version = UUID.randomUUID().toString();
 
         ResourceSchema resourceSchema = new ResourceSchema();
@@ -135,15 +157,6 @@ public class SchemaResourceTest extends AbstractTestNGSpringContextTests {
         Set<String> filter = resource.getFilter("app1", UUID.randomUUID().toString(), "account");
 
         assertThat(filter, empty());
-
-    }
-
-    @Test(dependsOnMethods = "save")
-    public void getTransform() {
-
-        Map<String, Set<String>> filter = resource.getTransform("app1", "v1", "account");
-
-        assertThat(filter.get("date_time"), hasItem("date"));
 
     }
 

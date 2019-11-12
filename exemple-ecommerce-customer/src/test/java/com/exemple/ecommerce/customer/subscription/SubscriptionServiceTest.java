@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.exemple.ecommerce.customer.core.CustomerTestConfiguration;
 import com.exemple.ecommerce.customer.subcription.SubscriptionService;
 import com.exemple.ecommerce.customer.subcription.exception.SubscriptionServiceNotFoundException;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.subscription.SubscriptionResource;
 import com.exemple.ecommerce.schema.filter.SchemaFilter;
 import com.fasterxml.jackson.databind.JsonNode;

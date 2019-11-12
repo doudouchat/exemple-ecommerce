@@ -1,4 +1,4 @@
-package com.exemple.ecommerce.resource.core.validator;
+package com.exemple.ecommerce.resource.common.validator;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
 import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.exemple.ecommerce.schema.common.exception.ValidationExceptionBuilder;

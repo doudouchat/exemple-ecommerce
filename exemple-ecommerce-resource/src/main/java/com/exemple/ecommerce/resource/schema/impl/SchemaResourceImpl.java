@@ -9,15 +9,15 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import com.exemple.ecommerce.resource.common.model.ResourceSchema;
 import com.exemple.ecommerce.resource.core.statement.SchemaStatement;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
+import com.exemple.ecommerce.resource.schema.model.ResourceSchema;
 
 @Service
 @Validated
 public class SchemaResourceImpl implements SchemaResource {
 
-    private SchemaStatement schemaStatement;
+    private final SchemaStatement schemaStatement;
 
     public SchemaResourceImpl(SchemaStatement schemaStatement) {
         this.schemaStatement = schemaStatement;
@@ -36,12 +36,6 @@ public class SchemaResourceImpl implements SchemaResource {
     }
 
     @Override
-    public Map<String, Set<String>> getTransform(String app, String version, String resource) {
-
-        return schemaStatement.get(app, version, resource).getTransforms();
-    }
-
-    @Override
     public Map<String, Set<String>> getRule(String app, String version, String resource) {
 
         return schemaStatement.get(app, version, resource).getRules();
@@ -51,6 +45,13 @@ public class SchemaResourceImpl implements SchemaResource {
     public void save(ResourceSchema resourceSchema) {
 
         schemaStatement.insert(resourceSchema);
+
+    }
+
+    @Override
+    public void update(ResourceSchema resourceSchema) {
+
+        schemaStatement.update(resourceSchema);
 
     }
 

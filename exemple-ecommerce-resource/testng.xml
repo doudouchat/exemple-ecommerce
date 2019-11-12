@@ -3,7 +3,6 @@
 <suite name="resource" parallel="false">
 	<test name="ut">
 		<packages>
-			<package name="com.exemple.ecommerce.resource.common" />
 			<package name="com.exemple.ecommerce.resource.account" />
 			<package name="com.exemple.ecommerce.resource.login" />
 			<package name="com.exemple.ecommerce.resource.schema" />

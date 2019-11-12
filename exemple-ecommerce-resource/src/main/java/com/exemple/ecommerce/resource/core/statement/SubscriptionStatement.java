@@ -2,34 +2,32 @@ package com.exemple.ecommerce.resource.core.statement;
 
 import org.springframework.stereotype.Component;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
-public class SubscriptionStatement extends StatementResource {
+public class SubscriptionStatement {
 
     public static final String EMAIL = "email";
 
     public static final String SUBSCRIPTION = "subscription";
 
-    private final Session session;
+    private final CqlSession session;
 
-    public SubscriptionStatement(Cluster cluster, Session session) {
-        super(cluster, SUBSCRIPTION);
+    public SubscriptionStatement(CqlSession session) {
         this.session = session;
     }
 
     public JsonNode get(String email) {
 
-        Select select = QueryBuilder.select().json().from(ResourceExecutionContext.get().keyspace(), SUBSCRIPTION);
-        select.where().and(QueryBuilder.eq(EMAIL, email));
+        Select select = QueryBuilder.selectFrom(ResourceExecutionContext.get().keyspace(), SUBSCRIPTION).json().all().whereColumn(EMAIL)
+                .isEqualTo(QueryBuilder.literal(email));
 
-        Row row = session.execute(select).one();
+        Row row = session.execute(select.build()).one();
 
         return row != null ? row.get(0, JsonNode.class) : null;
     }

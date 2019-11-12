@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,21 +25,24 @@ import java.util.stream.StreamSupport;
 
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.datastax.oss.driver.api.core.data.ByteUtils;
 import com.exemple.ecommerce.resource.account.model.Account;
 import com.exemple.ecommerce.resource.account.model.AccountHistory;
 import com.exemple.ecommerce.resource.account.model.Address;
 import com.exemple.ecommerce.resource.account.model.Cgu;
 import com.exemple.ecommerce.resource.account.model.Child;
-import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeFilterUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.ResourceTestConfiguration;
 import com.exemple.ecommerce.resource.core.statement.AccountHistoryStatement;
@@ -60,6 +64,8 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
 
     private JsonNode account;
 
+    private byte[] schemaResource;
+
     @Autowired
     private AccountHistoryStatement accountHistoryStatement;
 
@@ -72,7 +78,9 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    public void save() {
+    public void save() throws IOException {
+
+        schemaResource = IOUtils.toByteArray(new ClassPathResource("test.json").getInputStream());
 
         Account model = new Account();
         model.setEmail("jean.dupont@gmail.com");
@@ -112,6 +120,8 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         model.getPreferences().add(Arrays.asList("pref2", "value2", 500, "2002-01-01 00:00:00.000Z"));
         model.getPreferences().add(null);
 
+        model.setContent(ByteUtils.toHexString(schemaResource));
+
         JsonNode account = JsonNodeUtils.create(model);
 
         this.id = UUID.randomUUID();
@@ -132,6 +142,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(this.account.get("subscription_1"), is(account.get("subscription_1")));
         assertThat(this.account.get("creation_date"), is(account.get("creation_date")));
         assertThat(this.account.get("preferences"), is(account.get("preferences")));
+        assertThat(account.get("content"), is(this.account.get("content")));
 
         List<AccountHistory> histories = accountHistoryStatement.findById(id);
 
@@ -159,6 +170,7 @@ public class AccountResourceTest extends AbstractTestNGSpringContextTests {
         assertThat(account.get("subscription_1"), is(this.account.get("subscription_1")));
         assertThat(account.get("creation_date"), is(this.account.get("creation_date")));
         assertThat(account.get("preferences"), is(this.account.get("preferences")));
+        assertThat(account.get("content"), is(this.account.get("content")));
     }
 
     @Test

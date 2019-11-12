@@ -14,7 +14,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.exemple.ecommerce.schema.core.SchemaTestConfiguration;
 import com.exemple.ecommerce.schema.validation.SchemaValidationContext;

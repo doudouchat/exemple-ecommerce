@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.exemple.ecommerce.schema.common.exception.ValidationException.ValidationExceptionModel;
 import com.exemple.ecommerce.schema.core.validator.ValidatorService;
