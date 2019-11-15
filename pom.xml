@@ -35,11 +35,12 @@
 
 		<java-version>1.8</java-version>
 		<org.springframework-version>5.2.1.RELEASE</org.springframework-version>
-		<org.springframework.security-version>5.2.0.RELEASE</org.springframework.security-version>
+		<org.springframework.security-version>5.2.1.RELEASE</org.springframework.security-version>
 		<org.springframework.batch-version>4.0.1.RELEASE</org.springframework.batch-version>
-		<org.springframework.kafka-version>2.3.1.RELEASE</org.springframework.kafka-version>
+		<org.springframework.kafka-version>2.3.3.RELEASE</org.springframework.kafka-version>
 		<org.slf4j-version>1.7.29</org.slf4j-version>
-		<com.fasterxml.jackson-version>2.10.0</com.fasterxml.jackson-version>
+		<datastax-version>4.3.0</datastax-version>
+		<com.fasterxml.jackson-version>2.10.1</com.fasterxml.jackson-version>
 		<groovy-version>2.5.8</groovy-version>
 		<zookeeper-version>3.5.6</zookeeper-version>
 		<!-- SONAR -->
@@ -106,7 +107,7 @@
 			<dependency>
 				<groupId>org.springframework.security.oauth</groupId>
 				<artifactId>spring-security-oauth2</artifactId>
-				<version>2.3.7.RELEASE</version>
+				<version>2.3.8.RELEASE</version>
 			</dependency>
 
 			<!-- SPRING JWT -->
@@ -114,7 +115,7 @@
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-jwt</artifactId>
-				<version>1.0.11.RELEASE</version>
+				<version>1.1.0.RELEASE</version>
 			</dependency>
 
 			<!-- SPRING KAFKA -->
@@ -207,27 +208,21 @@
 			<!-- DATASTAX -->
 
 			<dependency>
-				<groupId>com.datastax.cassandra</groupId>
-				<artifactId>cassandra-driver-core</artifactId>
-				<version>3.8.0</version>
-				<exclusions>
-					<exclusion>
-						<groupId>io.netty</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-core</artifactId>
+				<version>${datastax-version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>com.datastax.cassandra</groupId>
-				<artifactId>cassandra-driver-extras</artifactId>
-				<version>3.8.0</version>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-query-builder</artifactId>
+				<version>${datastax-version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>com.datastax.cassandra</groupId>
-				<artifactId>cassandra-driver-mapping</artifactId>
-				<version>3.8.0</version>
+				<groupId>com.datastax.oss</groupId>
+				<artifactId>java-driver-mapper-runtime</artifactId>
+				<version>${datastax-version}</version>
 			</dependency>
 
 			<!-- HAZELCAST -->
@@ -667,7 +662,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.2.0</version>
 					<configuration>
 						<archive>
 							<manifest>
@@ -744,7 +739,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>3.1.1</version>
+					<version>3.2.0</version>
 				</plugin>
 
 				<!-- RELEASE -->

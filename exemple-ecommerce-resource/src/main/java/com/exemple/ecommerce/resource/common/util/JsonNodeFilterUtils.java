@@ -1,4 +1,4 @@
-package com.exemple.ecommerce.resource.common;
+package com.exemple.ecommerce.resource.common.util;
 
 import java.util.Map.Entry;
 import java.util.function.Consumer;

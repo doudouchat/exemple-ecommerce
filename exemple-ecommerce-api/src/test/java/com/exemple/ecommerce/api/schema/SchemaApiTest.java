@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.application.common.exception.NotFoundApplicationException;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.schema.description.SchemaDescription;
 
 public class SchemaApiTest extends JerseySpringSupport {

@@ -33,7 +33,7 @@ import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.account.exception.AccountServiceNotFoundException;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

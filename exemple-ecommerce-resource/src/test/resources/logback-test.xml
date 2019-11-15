@@ -15,8 +15,8 @@
 		<level value="DEBUG" />
 	</logger>
 
-	<logger name="com.datastax.driver.core.QueryLogger.NORMAL">
-		<level value="DEBUG" />
+	<logger name="com.datastax.oss.driver">
+		<level value="INFO" />
 	</logger>
 
 	<logger name="com.hazelcast">

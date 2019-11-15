@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-import com.exemple.ecommerce.resource.common.JsonNodeFilterUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeFilterUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Aspect

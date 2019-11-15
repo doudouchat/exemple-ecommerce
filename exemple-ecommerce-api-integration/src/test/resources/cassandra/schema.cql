@@ -69,7 +69,6 @@ CREATE TABLE IF NOT EXISTS resource_schema (
 	resource text,
 	content blob,
 	filter set<text>,
-	transform map<text, frozen<set<text>>>,
 	rule map<text, frozen<set<text>>>,
 	PRIMARY KEY ((app), resource, version)
 );

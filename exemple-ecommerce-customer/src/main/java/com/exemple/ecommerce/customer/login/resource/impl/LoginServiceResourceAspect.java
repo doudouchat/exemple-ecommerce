@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 import com.exemple.ecommerce.customer.login.resource.LoginServiceResource;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

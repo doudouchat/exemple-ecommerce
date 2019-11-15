@@ -14,7 +14,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import com.datastax.driver.core.Cluster;
+import com.datastax.oss.driver.api.core.CqlSession;
 import com.exemple.ecommerce.resource.core.cassandra.ResourceCassandraConfiguration;
 
 import info.archinnov.achilles.embedded.CassandraEmbeddedServerBuilder;
@@ -55,9 +55,9 @@ public class ResourceTestConfiguration extends ResourceCassandraConfiguration {
 
     @Bean
     @DependsOn("embeddedServer")
-    public Cluster cluster() {
+    public CqlSession session() {
 
-        return super.cluster();
+        return super.session();
     }
 
     @PostConstruct

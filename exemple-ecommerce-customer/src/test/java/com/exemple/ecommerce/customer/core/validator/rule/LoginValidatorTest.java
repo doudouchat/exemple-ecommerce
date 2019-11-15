@@ -16,7 +16,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.exemple.ecommerce.customer.core.CustomerTestConfiguration;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.exemple.ecommerce.schema.common.exception.ValidationException;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -8,7 +8,7 @@ import com.exemple.ecommerce.customer.subcription.exception.SubscriptionServiceN
 import com.exemple.ecommerce.customer.subcription.validation.SubscriptionValidation;
 import com.exemple.ecommerce.event.model.EventData;
 import com.exemple.ecommerce.event.model.EventType;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.core.statement.SubscriptionStatement;
 import com.exemple.ecommerce.resource.subscription.SubscriptionResource;

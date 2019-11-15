@@ -6,62 +6,49 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.datastax.driver.core.Cluster;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.Session;
-import com.datastax.driver.core.querybuilder.Delete;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.core.querybuilder.Update;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.Row;
+import com.datastax.oss.driver.api.querybuilder.QueryBuilder;
+import com.datastax.oss.driver.api.querybuilder.select.Select;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
-public class LoginStatement extends StatementResource {
+public class LoginStatement {
 
     public static final String ID = "id";
 
     public static final String LOGIN = "login";
 
-    private final Session session;
+    private final CqlSession session;
 
-    public LoginStatement(Cluster cluster, Session session) {
-        super(cluster, LOGIN);
+    public LoginStatement(CqlSession session) {
         this.session = session;
     }
 
     public JsonNode get(String email) {
 
-        Select select = QueryBuilder.select().json().from(ResourceExecutionContext.get().keyspace(), LOGIN);
-        select.where().and(QueryBuilder.eq(LOGIN, email));
+        Select select = QueryBuilder.selectFrom(ResourceExecutionContext.get().keyspace(), LOGIN).json().all().whereColumn(LOGIN)
+                .isEqualTo(QueryBuilder.literal(email));
 
-        Row row = session.execute(select).one();
+        Row row = session.execute(select.build()).one();
 
         return row != null ? row.get(0, JsonNode.class) : null;
     }
 
-    public Delete delete(String login) {
+    public void delete(String login) {
 
-        Delete delete = QueryBuilder.delete().from(ResourceExecutionContext.get().keyspace(), LOGIN);
-        delete.where().and(QueryBuilder.eq(LOGIN, login));
+        session.execute(QueryBuilder.deleteFrom(ResourceExecutionContext.get().keyspace(), LOGIN).whereColumn(LOGIN)
+                .isEqualTo(QueryBuilder.literal(login)).build());
 
-        return delete;
-    }
-
-    public Update update(String login, JsonNode source) {
-
-        Update update = update(source);
-        update.where().and(QueryBuilder.eq(LOGIN, login));
-
-        return update;
     }
 
     public List<JsonNode> findById(UUID id) {
 
-        Select select = QueryBuilder.select().json().from(ResourceExecutionContext.get().keyspace(), LOGIN);
-        select.where().and(QueryBuilder.eq(ID, id));
+        Select select = QueryBuilder.selectFrom(ResourceExecutionContext.get().keyspace(), LOGIN).json().all().whereColumn(ID)
+                .isEqualTo(QueryBuilder.literal(id));
 
-        return session.execute(select).all().stream().map((Row row) -> row.get(0, JsonNode.class)).collect(Collectors.toList());
+        return session.execute(select.build()).all().stream().map((Row row) -> row.get(0, JsonNode.class)).collect(Collectors.toList());
     }
 
 }

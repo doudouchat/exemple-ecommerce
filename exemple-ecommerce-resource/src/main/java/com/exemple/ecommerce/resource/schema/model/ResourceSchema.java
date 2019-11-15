@@ -1,4 +1,4 @@
-package com.exemple.ecommerce.resource.common.model;
+package com.exemple.ecommerce.resource.schema.model;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -8,18 +8,19 @@ import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
 
-import com.datastax.driver.mapping.annotations.ClusteringColumn;
-import com.datastax.driver.mapping.annotations.Column;
-import com.datastax.driver.mapping.annotations.PartitionKey;
-import com.datastax.driver.mapping.annotations.Table;
+import com.datastax.oss.driver.api.mapper.annotations.ClusteringColumn;
+import com.datastax.oss.driver.api.mapper.annotations.CqlName;
+import com.datastax.oss.driver.api.mapper.annotations.Entity;
+import com.datastax.oss.driver.api.mapper.annotations.PartitionKey;
 
-@Table(name = "resource_schema")
+@Entity
+@CqlName("resource_schema")
 public class ResourceSchema implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @PartitionKey
-    @Column(name = "app")
+    @CqlName("app")
     private String application;
 
     @ClusteringColumn
@@ -28,16 +29,12 @@ public class ResourceSchema implements Serializable {
     @ClusteringColumn(1)
     private String version;
 
-    @Column
     private byte[] content;
 
-    @Column(name = "filter")
+    @CqlName("filter")
     private Set<String> filters = Collections.emptySet();
 
-    @Column(name = "transform")
-    private Map<String, Set<String>> transforms = Collections.emptyMap();
-
-    @Column(name = "rule")
+    @CqlName("rule")
     private Map<String, Set<String>> rules = Collections.emptyMap();
 
     public String getApplication() {
@@ -78,14 +75,6 @@ public class ResourceSchema implements Serializable {
 
     public void setFilters(Set<String> filters) {
         this.filters = new HashSet<>(filters);
-    }
-
-    public Map<String, Set<String>> getTransforms() {
-        return transforms;
-    }
-
-    public void setTransforms(Map<String, Set<String>> transforms) {
-        this.transforms = transforms;
     }
 
     public Map<String, Set<String>> getRules() {

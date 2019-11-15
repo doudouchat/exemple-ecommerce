@@ -1,4 +1,4 @@
-package com.exemple.ecommerce.resource.common;
+package com.exemple.ecommerce.resource.common.util;
 
 import org.apache.commons.lang3.StringUtils;
 

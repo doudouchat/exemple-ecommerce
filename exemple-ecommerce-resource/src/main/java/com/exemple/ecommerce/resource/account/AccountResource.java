@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
+import com.exemple.ecommerce.resource.common.validator.Json;
 import com.exemple.ecommerce.resource.core.statement.AccountStatement;
-import com.exemple.ecommerce.resource.core.validator.Json;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface AccountResource {

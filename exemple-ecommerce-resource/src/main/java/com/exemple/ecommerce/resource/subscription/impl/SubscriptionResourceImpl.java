@@ -5,8 +5,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import com.datastax.driver.core.Session;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.exemple.ecommerce.resource.common.JsonQueryBuilder;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.core.statement.SubscriptionStatement;
 import com.exemple.ecommerce.resource.subscription.SubscriptionResource;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,13 +16,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Validated
 public class SubscriptionResourceImpl implements SubscriptionResource {
 
-    private Session session;
+    private final CqlSession session;
 
-    private SubscriptionStatement subscriptionStatement;
+    private final SubscriptionStatement subscriptionStatement;
 
-    public SubscriptionResourceImpl(SubscriptionStatement subscriptionStatement, Session session) {
+    private final JsonQueryBuilder jsonQueryBuilder;
+
+    public SubscriptionResourceImpl(SubscriptionStatement subscriptionStatement, CqlSession session) {
         this.subscriptionStatement = subscriptionStatement;
         this.session = session;
+        this.jsonQueryBuilder = new JsonQueryBuilder(session, SubscriptionStatement.SUBSCRIPTION);
     }
 
     @Override
@@ -38,7 +42,7 @@ public class SubscriptionResourceImpl implements SubscriptionResource {
         JsonNode subscription = JsonNodeUtils.clone(source);
         JsonNodeUtils.set(subscription, email, SubscriptionStatement.EMAIL);
 
-        session.execute(subscriptionStatement.insert(subscription));
+        session.execute(jsonQueryBuilder.insert(subscription).build());
 
     }
 

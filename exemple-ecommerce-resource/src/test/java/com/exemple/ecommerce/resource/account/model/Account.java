@@ -40,6 +40,8 @@ public class Account {
 
     private List<Object> preferences;
 
+    private Object content;
+
     public Object getLastname() {
         return lastname;
     }
@@ -173,4 +175,13 @@ public class Account {
     public void setPreferences(List<Object> preferences) {
         this.preferences = preferences;
     }
+
+    public Object getContent() {
+        return content;
+    }
+
+    public void setContent(Object content) {
+        this.content = content;
+    }
+
 }

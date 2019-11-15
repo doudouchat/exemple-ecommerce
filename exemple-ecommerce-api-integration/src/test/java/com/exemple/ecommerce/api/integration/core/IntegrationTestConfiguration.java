@@ -27,10 +27,10 @@ import com.exemple.ecommerce.application.core.ApplicationConfiguration;
 import com.exemple.ecommerce.application.detail.ApplicationDetailService;
 import com.exemple.ecommerce.authorization.core.client.AuthorizationClientBuilder;
 import com.exemple.ecommerce.authorization.core.client.AuthorizationClientConfiguration;
-import com.exemple.ecommerce.resource.common.model.ResourceSchema;
 import com.exemple.ecommerce.resource.core.ResourceConfiguration;
 import com.exemple.ecommerce.resource.core.ResourceExecutionContext;
 import com.exemple.ecommerce.resource.schema.SchemaResource;
+import com.exemple.ecommerce.resource.schema.model.ResourceSchema;
 import com.google.common.collect.Sets;
 
 @Configuration
@@ -80,7 +80,6 @@ public class IntegrationTestConfiguration {
         accountFilter.add("birthday");
         accountFilter.add("addresses[*[city,street]]");
         accountFilter.add("cgus[code,version]");
-        Map<String, Set<String>> dateTime = Collections.singletonMap("date_time", Collections.singleton("creation_date"));
         Map<String, Set<String>> accountRules = new HashMap<>();
         accountRules.put("login", Collections.singleton("/email"));
         accountRules.put("maxProperties", Collections.singleton("/addresses,2"));
@@ -94,7 +93,6 @@ public class IntegrationTestConfiguration {
         accountSchema.setResource("account");
         accountSchema.setContent(IOUtils.toByteArray(new ClassPathResource("account.json").getInputStream()));
         accountSchema.setFilters(accountFilter);
-        accountSchema.setTransforms(dateTime);
         accountSchema.setRules(accountRules);
 
         schemaResource.save(accountSchema);
@@ -113,7 +111,6 @@ public class IntegrationTestConfiguration {
         loginSchema.setResource("login");
         loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
         loginSchema.setFilters(loginFilter);
-        loginSchema.setTransforms(Collections.emptyMap());
         loginSchema.setRules(loginRules);
 
         schemaResource.save(loginSchema);
@@ -130,7 +127,6 @@ public class IntegrationTestConfiguration {
         subscriptionSchema.setResource("subscription");
         subscriptionSchema.setContent(IOUtils.toByteArray(new ClassPathResource("subscription.json").getInputStream()));
         subscriptionSchema.setFilters(subscriptionFilter);
-        subscriptionSchema.setTransforms(Collections.emptyMap());
         subscriptionSchema.setRules(subscriptionRules);
 
         schemaResource.save(subscriptionSchema);
@@ -154,7 +150,6 @@ public class IntegrationTestConfiguration {
         loginSchema.setResource("login");
         loginSchema.setContent(IOUtils.toByteArray(new ClassPathResource("login.json").getInputStream()));
         loginSchema.setFilters(loginFilter);
-        loginSchema.setTransforms(Collections.emptyMap());
         loginSchema.setRules(loginRules);
 
         schemaResource.save(loginSchema);

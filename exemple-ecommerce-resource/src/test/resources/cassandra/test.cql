@@ -38,7 +38,8 @@ CREATE TABLE account (
 	creation_date timestamp,
 	preferences list<frozen<tuple<text, text, int, timestamp>>>,
 	phones2 map<text, text>,
-	cgus2 set<text>
+	cgus2 set<text>,
+	content blob
 );
 
 CREATE TABLE login (
@@ -78,7 +79,6 @@ CREATE TABLE resource_schema (
 	resource text,
 	content blob,
 	filter set<text>,
-	transform map<text, frozen<set<text>>>,
 	rule map<text, frozen<set<text>>>,
 	PRIMARY KEY ((app), resource, version)
 );

@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.api.stock.model.Stock;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.store.common.InsufficientStockException;
 import com.exemple.ecommerce.store.common.NoFoundStockException;
 import com.exemple.ecommerce.store.stock.StockService;

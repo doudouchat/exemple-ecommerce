@@ -43,7 +43,7 @@ import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.api.login.LoginApiTest;
 import com.exemple.ecommerce.customer.account.AccountService;
 import com.exemple.ecommerce.customer.login.LoginService;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.login.LoginResource;
 import com.fasterxml.jackson.databind.JsonNode;
 

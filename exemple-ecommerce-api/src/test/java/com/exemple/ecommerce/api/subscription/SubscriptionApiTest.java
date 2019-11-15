@@ -20,7 +20,7 @@ import com.exemple.ecommerce.api.core.JerseySpringSupport;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.customer.subcription.SubscriptionService;
 import com.exemple.ecommerce.customer.subcription.exception.SubscriptionServiceNotFoundException;
-import com.exemple.ecommerce.resource.common.JsonNodeUtils;
+import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class SubscriptionApiTest extends JerseySpringSupport {

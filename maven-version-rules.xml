@@ -54,5 +54,10 @@
 				<ignoreVersion type="regex">2.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
 			</ignoreVersions>
 		</rule>
+		<rule groupId="com.hazelcast" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">4.0-(BETA)(?:-?\d+)</ignoreVersion>
+			</ignoreVersions>
+		</rule>
 	</rules>
 </ruleset>
