@@ -59,5 +59,10 @@
 				<ignoreVersion type="regex">4.0-(BETA)(?:-?\d+)</ignoreVersion>
 			</ignoreVersions>
 		</rule>
+		<rule groupId="org.springframework.security.oauth" artifactId="spring-security-oauth2" comparisonMethod="maven">
+			<ignoreVersions>
+				<ignoreVersion type="regex">2.4.0.RELEASE</ignoreVersion>
+			</ignoreVersions>
+		</rule>
 	</rules>
 </ruleset>
