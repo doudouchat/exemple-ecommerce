@@ -215,7 +215,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M4</version>
 					<executions>
 						<execution>
 							<goals>
@@ -260,6 +260,23 @@
 			<properties>
 
 				<cassandra.host>172.17.0.1</cassandra.host>
+
+			</properties>
+
+		</profile>
+
+		<profile>
+			<id>windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+
+			<properties>
+
+				<cassandra-version>3.11.4</cassandra-version>
+
 
 			</properties>
 
@@ -328,7 +345,8 @@
 						<configuration>
 							<script>${project.basedir}/src/test/resources/cassandra/schema.cql</script>
 							<cqlScript>${project.basedir}/src/test/resources/cassandra/exec.cql</cqlScript>
-							<logLevel>ERROR</logLevel>
+							<logLevel>INFO</logLevel>
+							<cqlVersion>3.4.5</cqlVersion>
 							<startNativeTransport>true</startNativeTransport>
 							<addTestClasspath>true</addTestClasspath>
 							<systemPropertyVariables>
