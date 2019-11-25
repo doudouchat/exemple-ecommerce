@@ -4,6 +4,6 @@ import javax.ws.rs.core.Response;
 
 public interface AuthorizationService {
 
-    Response tokenKey(String username, String password);
+    Response tokenKey(String path, String username, String password);
 
 }

@@ -28,7 +28,6 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Payload;
 import com.exemple.ecommerce.api.common.model.ApplicationBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
-import com.exemple.ecommerce.api.core.authorization.AuthorizationAlgorithmFactory;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationConfiguration;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationContextService;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;

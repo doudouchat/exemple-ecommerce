@@ -1,6 +1,7 @@
 api:
    resourceId: exemple
-   authorization: 
+   authorization:
+      path: localhost
       hazelcast:
          port: ${hazelcast.port}
          addresses: 127.0.0.1:${hazelcast.port}

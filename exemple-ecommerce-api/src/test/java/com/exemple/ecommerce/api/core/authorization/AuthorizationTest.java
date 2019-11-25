@@ -39,6 +39,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.exemple.ecommerce.api.account.AccountApiTest;
 import com.exemple.ecommerce.api.common.model.SchemaBeanParam;
 import com.exemple.ecommerce.api.core.JerseySpringSupport;
+import com.exemple.ecommerce.api.core.authorization.impl.AuthorizationAlgorithmFactory;
 import com.exemple.ecommerce.api.core.feature.FeatureConfiguration;
 import com.exemple.ecommerce.api.login.LoginApiTest;
 import com.exemple.ecommerce.customer.account.AccountService;
@@ -148,13 +149,13 @@ public class AuthorizationTest extends JerseySpringSupport {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", id))));
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
                 .header(SchemaBeanParam.APP_HEADER, "test").header(SchemaBeanParam.VERSION_HEADER, "v1").header("Authorization", token).get();
 
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
 
@@ -182,7 +183,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.when(accountService.get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
@@ -190,7 +191,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.verify(accountService).get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"));
         Mockito.verify(loginResource).get(Mockito.eq("john_doe"));
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
 
@@ -213,7 +214,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.when(accountService.save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1")))
                 .thenReturn(JsonNodeUtils.create(Collections.singletonMap("id", UUID.randomUUID())));
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(AccountApiTest.URL).request(MediaType.APPLICATION_JSON)
 
@@ -221,7 +222,7 @@ public class AuthorizationTest extends JerseySpringSupport {
                 .post(Entity.json(JsonNodeUtils.init("email").toString()));
 
         Mockito.verify(accountService).save(Mockito.any(JsonNode.class), Mockito.eq("test"), Mockito.eq("v1"));
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.CREATED.getStatusCode()));
 
@@ -244,7 +245,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.when(accountService.get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.init("email"));
         Mockito.when(loginResource.get(Mockito.eq("john_doe"))).thenReturn(Optional.of(JsonNodeUtils.create(Collections.singletonMap("id", ID))));
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(AccountApiTest.URL + "/" + ID).request(MediaType.APPLICATION_JSON)
 
@@ -252,7 +253,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         Mockito.verify(accountService).get(Mockito.eq(ID), Mockito.eq("test"), Mockito.eq("v1"));
         Mockito.verify(loginResource).get(Mockito.eq("john_doe"));
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
 
@@ -278,7 +279,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         model.put("id", UUID.randomUUID());
 
         Mockito.when(loginService.get(Mockito.eq("john_doe"), Mockito.eq("test"), Mockito.eq("v1"))).thenReturn(JsonNodeUtils.create(model));
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(LoginApiTest.URL + "/" + "john_doe").request(MediaType.APPLICATION_JSON)
 
@@ -287,7 +288,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
 
         Mockito.verify(loginService).get(Mockito.eq("john_doe"), Mockito.eq("test"), Mockito.eq("v1"));
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
         assertThat(testFilter.context.isSecure(), is(true));
@@ -306,7 +307,7 @@ public class AuthorizationTest extends JerseySpringSupport {
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         Response response = target(LoginApiTest.URL + "/" + "other").request(MediaType.APPLICATION_JSON)
 
@@ -314,7 +315,7 @@ public class AuthorizationTest extends JerseySpringSupport {
 
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
 
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(testFilter.context.getUserPrincipal().getName(), is("john_doe"));
         assertThat(testFilter.context.isSecure(), is(true));

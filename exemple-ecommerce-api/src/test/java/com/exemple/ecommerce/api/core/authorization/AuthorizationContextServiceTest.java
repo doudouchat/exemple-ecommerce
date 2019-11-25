@@ -38,6 +38,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.exemple.ecommerce.api.common.model.ApplicationBeanParam;
 import com.exemple.ecommerce.api.common.security.ApiSecurityContext;
 import com.exemple.ecommerce.api.core.ApiTestConfiguration;
+import com.exemple.ecommerce.api.core.authorization.impl.AuthorizationAlgorithmFactory;
 import com.hazelcast.core.HazelcastInstance;
 
 @ContextConfiguration(classes = { AuthorizationTestConfiguration.class, ApiTestConfiguration.class })
@@ -132,7 +133,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(tokenKey);
 
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.putSingle("Authorization", "Bearer " + token);
@@ -153,7 +154,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.putSingle("Authorization", "Bearer " + token);
@@ -161,7 +162,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
 
         ApiSecurityContext securityContext = service.buildContext(headers);
 
-        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString());
+        Mockito.verify(authorizationService, Mockito.atMost(1)).tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
 
         assertThat(securityContext.getUserPrincipal().getName(), is("john_doe"));
         assertThat(securityContext.isSecure(), is(true));
@@ -181,7 +182,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.putSingle("Authorization", "Bearer " + token);
@@ -205,7 +206,7 @@ public class AuthorizationContextServiceTest extends AbstractTestNGSpringContext
         Mockito.when(responseMock.readEntity(new GenericType<Map<String, String>>() {
         })).thenReturn(TOKEN_KEY_RESPONSE);
 
-        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
+        Mockito.when(authorizationService.tokenKey(Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(responseMock);
 
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.putSingle("Authorization", "Bearer " + token);
