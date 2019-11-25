@@ -3,6 +3,8 @@ package com.exemple.ecommerce.resource.core.statement;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -28,16 +30,16 @@ public class AccountHistoryStatement {
 
     private final CqlSession session;
 
+    private final ConcurrentMap<String, AccountHistoryMapper> mappers;
+
     public AccountHistoryStatement(CqlSession session) {
         this.session = session;
+        this.mappers = new ConcurrentHashMap<>();
     }
 
     public List<AccountHistory> findById(UUID id) {
 
-        AccountHistoryMapper mapper = AccountHistoryMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
-        AccountHistoryDao accountHistoryDao = mapper.accountHistoryDao();
-
-        return accountHistoryDao.findById(id).all();
+        return get().findById(id).all();
     }
 
     public Collection<BoundStatement> insert(Collection<AccountHistory> accountHistories) {
@@ -52,6 +54,16 @@ public class AccountHistoryStatement {
                     return prepared.bind(history.getId(), history.getDate(), history.getField(), history.getValue());
                 }).collect(Collectors.toList());
 
+    }
+
+    private AccountHistoryDao get() {
+
+        return mappers.computeIfAbsent(ResourceExecutionContext.get().keyspace(), this::build).accountHistoryDao();
+    }
+
+    private AccountHistoryMapper build(String keyspace) {
+
+        return AccountHistoryMapper.builder(session).withDefaultKeyspace(keyspace).build();
     }
 
 }

@@ -2,6 +2,8 @@ package com.exemple.ecommerce.resource.core.statement;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,17 +22,17 @@ public class SchemaStatement {
 
     private final CqlSession session;
 
+    private final ConcurrentMap<String, ResourceSchemaMapper> mappers;
+
     public SchemaStatement(CqlSession session) {
         this.session = session;
+        this.mappers = new ConcurrentHashMap<>();
     }
 
     @Cacheable("schema_resource")
     public ResourceSchema get(String app, String version, String resource) {
 
-        ResourceSchemaMapper mapper = ResourceSchemaMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
-        ResourceSchemaDao resourceSchemaDao = mapper.resourceSchemaDao();
-
-        ResourceSchema resourceSchema = resourceSchemaDao.findByApplicationAndResourceAndVersion(app, resource, version);
+        ResourceSchema resourceSchema = get().findByApplicationAndResourceAndVersion(app, resource, version);
 
         if (resourceSchema == null) {
             resourceSchema = new ResourceSchema();
@@ -43,30 +45,31 @@ public class SchemaStatement {
         return resourceSchema;
     }
 
+    private ResourceSchemaDao get() {
+
+        return mappers.computeIfAbsent(ResourceExecutionContext.get().keyspace(), this::build).resourceSchemaDao();
+    }
+
+    private ResourceSchemaMapper build(String keyspace) {
+
+        return ResourceSchemaMapper.builder(session).withDefaultKeyspace(keyspace).build();
+    }
+
     @Cacheable("schema_resources")
     public List<ResourceSchema> findByApp(String app) {
 
-        ResourceSchemaMapper mapper = ResourceSchemaMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
-        ResourceSchemaDao resourceSchemaDao = mapper.resourceSchemaDao();
-
-        return resourceSchemaDao.findByApplication(app).all();
+        return get().findByApplication(app).all();
     }
 
     public void insert(ResourceSchema resourceSchema) {
 
-        ResourceSchemaMapper mapper = ResourceSchemaMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
-        ResourceSchemaDao resourceSchemaDao = mapper.resourceSchemaDao();
-
-        resourceSchemaDao.create(resourceSchema);
+        get().create(resourceSchema);
     }
 
     @CacheEvict(cacheNames = { "schema_resource", "schema_resources" }, allEntries = true)
     public void update(ResourceSchema resourceSchema) {
 
-        ResourceSchemaMapper mapper = ResourceSchemaMapper.builder(session).withDefaultKeyspace(ResourceExecutionContext.get().keyspace()).build();
-        ResourceSchemaDao resourceSchemaDao = mapper.resourceSchemaDao();
-
-        resourceSchemaDao.update(resourceSchema);
+        get().update(resourceSchema);
     }
 
 }
