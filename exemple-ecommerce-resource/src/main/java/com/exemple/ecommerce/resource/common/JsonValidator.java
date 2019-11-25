@@ -1,9 +1,7 @@
 package com.exemple.ecommerce.resource.common;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -22,6 +20,7 @@ import com.datastax.oss.driver.api.core.type.codec.TypeCodec;
 import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.pivovarit.function.ThrowingConsumer;
 
 @Component
 public class JsonValidator {
@@ -73,26 +72,14 @@ public class JsonValidator {
 
         validNodeType(value, JsonNodeType.OBJECT, key);
 
-        List<JsonValidatorException> exceptions = new ArrayList<>(1);
-
-        JsonNodeUtils.stream(value.fields()).allMatch((Entry<String, JsonNode> node) -> {
+        JsonNodeUtils.stream(value.fields()).forEach(ThrowingConsumer.sneaky((Entry<String, JsonNode> node) -> {
             DataType keyType = dataType.getKeyType();
             DataType valueType = dataType.getValueType();
 
-            try {
-                valid(keyType, JsonNodeType.STRING, node.getKey(), node.getKey());
-                valid(valueType, node.getKey(), node.getValue());
-            } catch (JsonValidatorException e) {
-                exceptions.add(e);
-                return false;
-            }
+            valid(keyType, JsonNodeType.STRING, node.getKey(), node.getKey());
+            valid(valueType, node.getKey(), node.getValue());
 
-            return true;
-        });
-
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
-        }
+        }));
     }
 
     private void valid(DataType dataType, JsonNodeType type, Object value, String node) throws JsonValidatorException {
@@ -133,29 +120,21 @@ public class JsonValidator {
 
     }
 
-    private void valid(UserDefinedType dataType, JsonNode value) throws JsonValidatorException {
+    private void valid(UserDefinedType dataType, JsonNode value) {
 
-        List<JsonValidatorException> exceptions = new ArrayList<>(1);
+        JsonNodeUtils.stream(value.fields()).forEach(ThrowingConsumer.sneaky((Entry<String, JsonNode> node) -> valid(dataType, node)));
 
-        JsonNodeUtils.stream(value.fields()).allMatch((Entry<String, JsonNode> node) -> {
+    }
 
-            if (!dataType.contains(node.getKey())) {
-                exceptions.add(new JsonValidatorException(UNKNOWN, node.getKey()));
-                return false;
-            }
-            DataType type = dataType.getFieldTypes().get(dataType.firstIndexOf(node.getKey()));
-            try {
-                valid(type, node.getKey(), node.getValue());
-            } catch (JsonValidatorException e) {
-                exceptions.add(e);
-                return false;
-            }
-            return true;
-        });
+    private void valid(UserDefinedType dataType, Entry<String, JsonNode> node) throws JsonValidatorException {
 
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
+        if (!dataType.contains(node.getKey())) {
+            throw new JsonValidatorException(UNKNOWN, node.getKey());
         }
+
+        DataType type = dataType.getFieldTypes().get(dataType.firstIndexOf(node.getKey()));
+        valid(type, node.getKey(), node.getValue());
+
     }
 
     private void valid(TupleType dataType, String key, JsonNode value) throws JsonValidatorException {
@@ -163,29 +142,20 @@ public class JsonValidator {
         Iterator<JsonNode> fields = value.elements();
         Stream<DataType> types = dataType.getComponentTypes().stream();
 
-        List<JsonValidatorException> exceptions = new ArrayList<>(1);
-
-        types.allMatch((DataType type) -> {
-            if (fields.hasNext()) {
-                JsonNode node = fields.next();
-                try {
-                    valid(type, key, node);
-                } catch (JsonValidatorException e) {
-                    exceptions.add(e);
-                    return false;
-                }
-                return true;
-            }
-            exceptions.add(new JsonValidatorException("MSSING", key));
-            return false;
-        });
-
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
-        }
+        types.forEach(ThrowingConsumer.sneaky((DataType type) -> valid(type, key, fields)));
 
         if (fields.hasNext()) {
             throw new JsonValidatorException(UNKNOWN, fields.next().asText());
+        }
+    }
+
+    private void valid(DataType dataType, String key, Iterator<JsonNode> fields) throws JsonValidatorException {
+
+        if (fields.hasNext()) {
+            JsonNode node = fields.next();
+            valid(dataType, key, node);
+        } else {
+            throw new JsonValidatorException("MSSING", key);
         }
     }
 
@@ -193,22 +163,7 @@ public class JsonValidator {
 
         validNodeType(value, JsonNodeType.ARRAY, key);
 
-        List<JsonValidatorException> exceptions = new ArrayList<>(1);
-
-        StreamSupport.stream(value.spliterator(), false).allMatch((JsonNode node) -> {
-            try {
-                valid(type, key, node);
-            } catch (JsonValidatorException e) {
-                exceptions.add(e);
-                return false;
-            }
-
-            return true;
-        });
-
-        if (!exceptions.isEmpty()) {
-            throw exceptions.get(0);
-        }
+        StreamSupport.stream(value.spliterator(), false).forEach(ThrowingConsumer.sneaky((JsonNode node) -> valid(type, key, node)));
     }
 
     private static void validNodeType(JsonNode value, JsonNodeType nodeType, String node) throws JsonValidatorException {

@@ -1,7 +1,5 @@
 package com.exemple.ecommerce.resource.common.validator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,6 +18,7 @@ import com.exemple.ecommerce.resource.common.JsonValidatorException;
 import com.exemple.ecommerce.resource.common.util.JsonNodeUtils;
 import com.exemple.ecommerce.resource.common.util.MetadataSchemaUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.pivovarit.function.ThrowingConsumer;
 
 public class JsonConstraintValidator implements ConstraintValidator<Json, JsonNode> {
 
@@ -47,49 +46,47 @@ public class JsonConstraintValidator implements ConstraintValidator<Json, JsonNo
 
         if (source != null) {
 
-            List<JsonValidatorException> exceptions = new ArrayList<>(1);
+            try {
 
-            JsonNodeUtils.stream(source.fields()).allMatch((Map.Entry<String, JsonNode> node) -> {
+                valid(source);
 
-                String key = node.getKey();
-
-                TableMetadata tableMetadata = MetadataSchemaUtils.getTableMetadata(session, table);
-                Optional<ColumnMetadata> column = tableMetadata.getColumn(key);
-
-                if (!column.isPresent()) {
-                    exceptions.add(new JsonValidatorException(UNKNOWN, key));
-                    return false;
-                }
-
-                DataType type = tableMetadata.getColumn(key).get().getType();
-                try {
-                    LOG.trace("field {} type {} value {} column type {}", key, node.getValue().getNodeType(), node.getValue(),
-                            type.asCql(false, true));
-                    this.jsonValidator.valid(type, key, node.getValue());
-                } catch (JsonValidatorException e) {
-                    exceptions.add(e);
-                    return false;
-                }
-
-                return true;
-            });
-
-            if (!exceptions.isEmpty()) {
-
-                JsonValidatorException exception = exceptions.get(0);
+            } catch (JsonValidatorException e) {
 
                 valid = false;
 
-                LOG.trace(exception.getMessage(messageTemplate), exception);
+                LOG.trace(e.getMessage(messageTemplate), e);
 
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(exception.getMessage(this.messageTemplate)).addPropertyNode(exception.getNode())
+                context.buildConstraintViolationWithTemplate(e.getMessage(this.messageTemplate)).addPropertyNode(e.getNode())
                         .addConstraintViolation();
             }
 
         }
 
         return valid;
+    }
+
+    private void valid(JsonNode source) throws JsonValidatorException {
+
+        JsonNodeUtils.stream(source.fields()).forEach(ThrowingConsumer.sneaky(this::valid));
+
+    }
+
+    private void valid(Map.Entry<String, JsonNode> node) throws JsonValidatorException {
+
+        String key = node.getKey();
+
+        TableMetadata tableMetadata = MetadataSchemaUtils.getTableMetadata(session, table);
+        Optional<ColumnMetadata> column = tableMetadata.getColumn(key);
+
+        if (!column.isPresent()) {
+            throw new JsonValidatorException(UNKNOWN, key);
+        }
+
+        DataType type = column.get().getType();
+
+        this.jsonValidator.valid(type, key, node.getValue());
+
     }
 
     @Override
