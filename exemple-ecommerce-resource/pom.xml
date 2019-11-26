@@ -8,7 +8,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>exemple-ecommerce-resource</artifactId>
-	
+
 	<properties>
 
 		<!-- SONAR -->
@@ -137,6 +137,13 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>25.1-jre</version>
+		</dependency>
+
+		<!-- EXCEPTION LAMBDA -->
+
+		<dependency>
+			<groupId>com.pivovarit</groupId>
+			<artifactId>throwing-function</artifactId>
 		</dependency>
 
 		<!-- ACHILLE -->

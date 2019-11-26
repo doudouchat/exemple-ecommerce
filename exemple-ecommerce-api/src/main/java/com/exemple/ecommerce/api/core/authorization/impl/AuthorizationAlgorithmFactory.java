@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationException;
 import com.exemple.ecommerce.api.core.authorization.AuthorizationService;
+import com.pivovarit.function.ThrowingFunction;
 
 @Component
 @Profile("!noSecurity")
@@ -92,19 +93,9 @@ public class AuthorizationAlgorithmFactory {
         return Algorithm.RSA256((RSAPublicKey) publicKey, null);
     }
 
-    public Algorithm getAlgorithm() throws AuthorizationException {
+    public Algorithm getAlgorithm() {
 
-        try {
-            return algorithms.computeIfAbsent(defaultPath, (String path) -> {
-                try {
-                    return this.buildAlgorithm(path);
-                } catch (AuthorizationException e) {
-                    throw new IllegalStateException(e);
-                }
-            });
-        } catch (IllegalStateException e) {
-            throw new AuthorizationException(e);
-        }
+        return algorithms.computeIfAbsent(defaultPath, ThrowingFunction.sneaky(this::buildAlgorithm));
     }
 
     public void resetAlgorithm() {

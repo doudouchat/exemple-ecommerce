@@ -22,8 +22,6 @@ import com.exemple.ecommerce.resource.core.mapper.AccountHistoryMapper;
 @Component
 public class AccountHistoryStatement {
 
-    public static final String TABLE = "account_history";
-
     public static final String ID = "id";
 
     private static final Logger LOG = LoggerFactory.getLogger(AccountHistoryStatement.class);
