@@ -19,16 +19,6 @@
 				<ignoreVersion type="regex">(?i).*(alpha|beta|-rc)(?:-?\d+)?</ignoreVersion>
 			</ignoreVersions>
 		</rule>
-		<rule groupId="com.fasterxml.jackson.core" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">(?i).*(pr)(?:-?\d+)?</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="com.fasterxml.jackson.jaxrs" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">(?i).*(pr)(?:-?\d+)?</ignoreVersion>
-			</ignoreVersions>
-		</rule>
 		<rule groupId="org.eclipse.jetty" comparisonMethod="maven">
 			<ignoreVersions>
 				<ignoreVersion type="regex">(?i).*(alpha|beta)(?:-?\d+)?</ignoreVersion>
@@ -44,16 +34,6 @@
 				<ignoreVersion type="regex">^4.*$</ignoreVersion>
 			</ignoreVersions>
 		</rule>	
-		<rule groupId="org.springframework.cloud" artifactId="spring-cloud-starter-netflix-zuul" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
-		<rule groupId="org.springframework.cloud" artifactId="spring-cloud-starter-oauth2" comparisonMethod="maven">
-			<ignoreVersions>
-				<ignoreVersion type="regex">2.2.0.(M|RC)(?:-?\d+)</ignoreVersion>
-			</ignoreVersions>
-		</rule>
 		<rule groupId="com.hazelcast" comparisonMethod="maven">
 			<ignoreVersions>
 				<ignoreVersion type="regex">4.0-(BETA)(?:-?\d+)</ignoreVersion>
