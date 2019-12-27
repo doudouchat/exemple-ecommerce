@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>exemple</groupId>
 	<artifactId>exemple-ecommerce</artifactId>
@@ -24,8 +26,15 @@
 		<connection>scm:git:git://github.com/doudouchat/exemple-ecommerce.git</connection>
 		<developerConnection>scm:git:https://github.com/doudouchat/exemple-ecommerce.git</developerConnection>
 		<url>https://github.com/doudouchat/exemple-ecommerce</url>
-	  <tag>HEAD</tag>
-  </scm>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub doudouchat Packages</name>
+			<url>https://maven.pkg.github.com/doudouchat/exemple-ecommerce</url>
+		</repository>
+	</distributionManagement>
 
 	<properties>
 
@@ -686,6 +695,14 @@
 							</manifestEntries>
 						</archive>
 					</configuration>
+				</plugin>
+
+				<!-- DEPLOY -->
+				<!-- https://maven.apache.org/plugins/maven-deploy-plugin/index.html -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.0.0-M1</version>
 				</plugin>
 
 				<!-- TEST UNITAIRE -->
